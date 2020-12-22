@@ -12,7 +12,7 @@ import org.h2.util.MathUtils;
 /**
  * A free space bit set.
  */
-public class FreeSpaceBitSet {
+public class FreeSpaceBitSet {//TIGER 记录空间使用状况
 
     private static final boolean DETAILED_INFO = false;
 
@@ -47,7 +47,7 @@ public class FreeSpaceBitSet {
      * @param firstFreeBlock the first free block
      * @param blockSize the block size
      */
-    public FreeSpaceBitSet(int firstFreeBlock, int blockSize) {
+    public FreeSpaceBitSet(int firstFreeBlock, int blockSize) {//构造函数，创建一个bitset记录空间使用状况
         this.firstFreeBlock = firstFreeBlock;
         this.blockSize = blockSize;
         clear();
@@ -156,7 +156,7 @@ public class FreeSpaceBitSet {
                 assert set.nextSetBit(start) == -1 || set.nextSetBit(start) >= start + blocks :
                         "Double alloc: " + Integer.toHexString(start) + "/" + Integer.toHexString(blocks) + " " + this;
                 if (allocate) {
-                    set.set(start, start + blocks);
+                    set.set(start, start + blocks);//连续设置
                 } else {
                     failureFlags <<= 1;
                     if (end < 0 && freeBlocksTotal > 4 * blocks) {

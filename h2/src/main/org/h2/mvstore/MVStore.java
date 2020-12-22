@@ -371,7 +371,7 @@ public class MVStore implements AutoCloseable {
      *             occurred while opening
      * @throws IllegalArgumentException if the directory does not exist
      */
-    MVStore(Map<String, Object> config) {//构造函数  tiger
+    MVStore(Map<String, Object> config) {//tiger 构造函数  创建一个store
         recoveryMode = config.containsKey("recoveryMode");
         compressionLevel = DataUtils.getConfigParam(config, "compress", 0);
         String fileName = (String) config.get("fileName");//文件名

@@ -32,7 +32,7 @@ import org.h2.util.MemoryEstimator;
  * @param <K> the key class
  * @param <V> the value class
  */
-public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V> {
+public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V> {//tiger 为了多线程操作
 
     /**
      * The store.
@@ -73,7 +73,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
     static final long INITIAL_VERSION = -1;
 
 
-    protected MVMap(Map<String, Object> config, DataType<K> keyType, DataType<V> valueType) {
+    protected MVMap(Map<String, Object> config, DataType<K> keyType, DataType<V> valueType) {//从配置里面取对应项来初始化
         this((MVStore) config.get("store"), keyType, valueType,
                 DataUtils.readHexInt(config, "id", 0),
                 DataUtils.readHexLong(config, "createVersion", 0),
@@ -81,7 +81,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
                 ((MVStore) config.get("store")).getKeysPerPage(),
                 config.containsKey("singleWriter") && (Boolean) config.get("singleWriter")
         );
-        setInitialRoot(createEmptyLeaf(), store.getCurrentVersion());
+        setInitialRoot(createEmptyLeaf(), store.getCurrentVersion());//设置RootReference
     }
 
     // constructor for cloneIt()
@@ -92,13 +92,13 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
     }
 
     // meta map constructor
-    MVMap(MVStore store, int id, DataType<K> keyType, DataType<V> valueType) {
+    MVMap(MVStore store, int id, DataType<K> keyType, DataType<V> valueType) {//构造
         this(store, keyType, valueType, id, 0, new AtomicReference<>(), store.getKeysPerPage(), false);
         setInitialRoot(createEmptyLeaf(), store.getCurrentVersion());
     }
 
     private MVMap(MVStore store, DataType<K> keyType, DataType<V> valueType, int id, long createVersion,
-            AtomicReference<RootReference<K,V>> root, int keysPerPage, boolean singleWriter) {
+            AtomicReference<RootReference<K,V>> root, int keysPerPage, boolean singleWriter) {//逐个参数
         this.store = store;
         this.id = id;
         this.createVersion = createVersion;
@@ -220,7 +220,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
      * @return the key list
      */
     public final List<K> keyList() {
-        return new AbstractList<K>() {
+        return new AbstractList<K>() {//tiger 这个写法没用过
 
             @Override
             public K get(int index) {
@@ -1727,7 +1727,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
      * @param decisionMaker command object to make choices during transaction.
      * @return previous value, if mapping for that key existed, or null otherwise
      */
-    public V operate(K key, V value, DecisionMaker<? super V> decisionMaker) {
+    public V operate(K key, V value, DecisionMaker<? super V> decisionMaker) {//TIGER 这里实现锁的并发访问
         IntValueHolder unsavedMemoryHolder = new IntValueHolder();
         int attempt = 0;
         while(true) {

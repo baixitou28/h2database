@@ -13,7 +13,7 @@ package org.h2.mvstore;
  *
  * @author <a href='mailto:andrei.tokar@gmail.com'>Andrei Tokar</a>
  */
-public final class RootReference<K,V> {
+public final class RootReference<K,V> {//看注释
 
     /**
      * The root page.
@@ -52,7 +52,7 @@ public final class RootReference<K,V> {
 
 
     // This one is used to set root initially and for r/o snapshots
-    RootReference(Page<K,V> root, long version) {
+    RootReference(Page<K,V> root, long version) {//TIGER 看注释immutable structure to represent state of the MVMap as a whole
         this.root = root;
         this.version = version;
         this.previous = null;

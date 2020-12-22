@@ -32,7 +32,7 @@ import org.h2.util.Utils;
 /**
  * Utility methods used in combination with the MVStore.
  */
-public class MVStoreTool {
+public class MVStoreTool {//TIGER 维护工具
 
     /**
      * Runs this tool.
@@ -52,10 +52,10 @@ public class MVStoreTool {
      */
     public static void main(String... args) {
         for (int i = 0; i < args.length; i++) {
-            if ("-dump".equals(args[i])) {
+            if ("-dump".equals(args[i])) {//导出信息
                 String fileName = args[++i];
                 dump(fileName, new PrintWriter(System.out), true);
-            } else if ("-info".equals(args[i])) {
+            } else if ("-info".equals(args[i])) {//信息
                 String fileName = args[++i];
                 info(fileName, new PrintWriter(System.out));
             } else if ("-compact".equals(args[i])) {
@@ -64,11 +64,11 @@ public class MVStoreTool {
             } else if ("-compress".equals(args[i])) {
                 String fileName = args[++i];
                 compact(fileName, true);
-            } else if ("-rollback".equals(args[i])) {
+            } else if ("-rollback".equals(args[i])) {//回滚
                 String fileName = args[++i];
                 long targetVersion = Long.decode(args[++i]);
                 rollback(fileName, targetVersion, new PrintWriter(System.out));
-            } else if ("-repair".equals(args[i])) {
+            } else if ("-repair".equals(args[i])) {//修复
                 String fileName = args[++i];
                 repair(fileName);
             }
@@ -343,7 +343,7 @@ public class MVStoreTool {
      * @return null if successful (if there was no error), otherwise the error
      *         message
      */
-    public static String info(String fileName, Writer writer) {
+    public static String info(String fileName, Writer writer) {//读取相关信息，从这里可以看到文件大致的形状，文件头+多个trunk
         PrintWriter pw = new PrintWriter(writer, true);
         if (!FilePath.get(fileName).exists()) {
             pw.println("File not found: " + fileName);
@@ -352,9 +352,9 @@ public class MVStoreTool {
         long fileLength = FileUtils.size(fileName);
         try (MVStore store = new MVStore.Builder().
                 fileName(fileName).recoveryMode().
-                readOnly().open()) {
-            MVMap<String, String> layout = store.getLayoutMap();
-            Map<String, Object> header = store.getStoreHeader();
+                readOnly().open()) {//以只读模式打开，避免破坏文件
+            MVMap<String, String> layout = store.getLayoutMap();//获取layout
+            Map<String, Object> header = store.getStoreHeader();//获取文件头
             long fileCreated = DataUtils.readHexLong(header, "created", 0L);
             TreeMap<Integer, Chunk> chunks = new TreeMap<>();
             long chunkLength = 0;
@@ -374,20 +374,20 @@ public class MVStoreTool {
                     }
                 }
             }
-            pw.printf("Created: %s\n", formatTimestamp(fileCreated, fileCreated));
+            pw.printf("Created: %s\n", formatTimestamp(fileCreated, fileCreated));//先打印总体信息
             pw.printf("Last modified: %s\n",
                     formatTimestamp(FileUtils.lastModified(fileName), fileCreated));
             pw.printf("File length: %d\n", fileLength);
             pw.printf("The last chunk is not listed\n");
             pw.printf("Chunk length: %d\n", chunkLength);
             pw.printf("Chunk count: %d\n", chunks.size());
-            pw.printf("Used space: %d%%\n", getPercent(chunkLength, fileLength));
+            pw.printf("Used space: %d%%\n", getPercent(chunkLength, fileLength));//chunk内部可能有空闲
             pw.printf("Chunk fill rate: %d%%\n", maxLength == 0 ? 100 :
                 getPercent(maxLengthLive, maxLength));
             pw.printf("Chunk fill rate excluding empty chunks: %d%%\n",
                 maxLengthNotEmpty == 0 ? 100 :
                 getPercent(maxLengthLive, maxLengthNotEmpty));
-            for (Entry<Integer, Chunk> e : chunks.entrySet()) {
+            for (Entry<Integer, Chunk> e : chunks.entrySet()) {//再打印trunk信息
                 Chunk c = e.getValue();
                 long created = fileCreated + c.time;
                 pw.printf("  Chunk %d: %s, %d%% used, %d blocks",

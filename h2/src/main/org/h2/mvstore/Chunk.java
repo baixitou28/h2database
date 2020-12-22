@@ -20,12 +20,12 @@ import org.h2.util.StringUtils;
  * There are at most 67 million (2^26) chunks,
  * each chunk is at most 2 GB large.
  */
-public final class Chunk {
+public final class Chunk {//tiger trunk即块，多个4K页的集合，最多2^26个，每trunk 2G，存放在文件里
 
     /**
      * The maximum chunk id.
      */
-    public static final int MAX_ID = (1 << 26) - 1;
+    public static final int MAX_ID = (1 << 26) - 1;//定义了个数
 
     /**
      * The maximum length of a chunk header, in bytes.
@@ -39,7 +39,7 @@ public final class Chunk {
      */
     static final int FOOTER_LENGTH = 128;
 
-    private static final String ATTR_CHUNK = "chunk";
+    private static final String ATTR_CHUNK = "chunk";//trunk头文件信息
     private static final String ATTR_BLOCK = "block";
     private static final String ATTR_LEN = "len";
     private static final String ATTR_MAP = "map";
@@ -160,17 +160,17 @@ public final class Chunk {
 
     private Chunk(String s) {
         this(DataUtils.parseMap(s), true);
-    }
+    }//用字符串构造
 
     Chunk(Map<String, String> map) {
         this(map, false);
     }
 
-    private Chunk(Map<String, String> map, boolean full) {
-        this(DataUtils.readHexInt(map, ATTR_CHUNK, 0));
+    private Chunk(Map<String, String> map, boolean full) {//用map构造，map里为trunk信息
+        this(DataUtils.readHexInt(map, ATTR_CHUNK, 0));//读取简单信息
         block = DataUtils.readHexLong(map, ATTR_BLOCK, 0);
         version = DataUtils.readHexLong(map, ATTR_VERSION, id);
-        if (full) {
+        if (full) {//读取全部信息
             len = DataUtils.readHexInt(map, ATTR_LEN, 0);
             pageCount = DataUtils.readHexInt(map, ATTR_PAGES, 0);
             pageCountLive = DataUtils.readHexInt(map, ATTR_LIVE_PAGES, pageCount);
@@ -215,15 +215,15 @@ public final class Chunk {
      */
     static Chunk readChunkHeader(ByteBuffer buff, long start) {
         int pos = buff.position();
-        byte[] data = new byte[Math.min(buff.remaining(), MAX_HEADER_LENGTH)];
+        byte[] data = new byte[Math.min(buff.remaining(), MAX_HEADER_LENGTH)];//读最大可能的头文件
         buff.get(data);
         try {
-            for (int i = 0; i < data.length; i++) {
-                if (data[i] == '\n') {
+            for (int i = 0; i < data.length; i++) {//最大尝试长度
+                if (data[i] == '\n') {//判断行结尾
                     // set the position to the start of the first page
                     buff.position(pos + i + 1);
                     String s = new String(data, 0, i, StandardCharsets.ISO_8859_1).trim();
-                    return fromString(s);
+                    return fromString(s);//返回字符串
                 }
             }
         } catch (Exception e) {
@@ -245,16 +245,16 @@ public final class Chunk {
      */
     void writeChunkHeader(WriteBuffer buff, int minLength) {
         long delimiterPosition = buff.position() + minLength - 1;
-        buff.put(asString().getBytes(StandardCharsets.ISO_8859_1));
+        buff.put(asString().getBytes(StandardCharsets.ISO_8859_1));//转换成string
         while (buff.position() < delimiterPosition) {
-            buff.put((byte) ' ');
+            buff.put((byte) ' ');//强行填空
         }
         if (minLength != 0 && buff.position() > delimiterPosition) {
             throw DataUtils.newMVStoreException(
                     DataUtils.ERROR_INTERNAL,
                     "Chunk metadata too long");
         }
-        buff.put((byte) '\n');
+        buff.put((byte) '\n');//这个是结束标识符
     }
 
     /**

@@ -228,8 +228,8 @@ public class FileStore {//MVStore的默认存储，是一个基类
         while (true) {
             try {
                 writeCount.incrementAndGet();
-                file.truncate(size);
-                fileSize = Math.min(fileSize, size);
+                file.truncate(size);//有时候也是放大？
+                fileSize = Math.min(fileSize, size);//取最小的
                 return;
             } catch (IOException e) {
                 if (++attemptCount == 10) {
