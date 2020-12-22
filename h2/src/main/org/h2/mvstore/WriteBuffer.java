@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 /**
  * An auto-resize buffer to write data into a ByteBuffer.
  */
-public class WriteBuffer {
+public class WriteBuffer {//数据写入buffer
 
     /**
      * The maximum size of the buffer in order to be re-used after a clear
@@ -308,22 +308,22 @@ public class WriteBuffer {
         ByteBuffer temp = buff;
         int needed = additional - temp.remaining();
         // grow at least MIN_GROW
-        long grow = Math.max(needed, MIN_GROW);
+        long grow = Math.max(needed, MIN_GROW);//每次至少1M，256个4k页面
         // grow at least 50% of the current size
-        grow = Math.max(temp.capacity() / 2, grow);
+        grow = Math.max(temp.capacity() / 2, grow);//或者更大，原先的一半
         // the new capacity is at most Integer.MAX_VALUE
-        int newCapacity = (int) Math.min(Integer.MAX_VALUE, temp.capacity() + grow);
-        if (newCapacity < needed) {
+        int newCapacity = (int) Math.min(Integer.MAX_VALUE, temp.capacity() + grow);//不超过极限MAX_VALUE //tiger 小技巧：这样写少一个判断逻辑
+        if (newCapacity < needed) {//内存不够
             throw new OutOfMemoryError("Capacity: " + newCapacity + " needed: " + needed);
         }
         try {
-            buff = ByteBuffer.allocate(newCapacity);
+            buff = ByteBuffer.allocate(newCapacity);//分配
         } catch (OutOfMemoryError e) {
             throw new OutOfMemoryError("Capacity: " + newCapacity);
         }
         temp.flip();
         buff.put(temp);
-        if (newCapacity <= MAX_REUSE_CAPACITY) {
+        if (newCapacity <= MAX_REUSE_CAPACITY) {//如果小于4M
             reuse = buff;
         }
     }

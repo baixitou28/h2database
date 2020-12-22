@@ -62,7 +62,7 @@ public class Console extends Tool implements ShutdownHandler {
      *
      * @param args the command line arguments
      */
-    public static void main(String... args) throws SQLException {
+    public static void main(String... args) throws SQLException {//tiger 命令行入口
         Console console;
         try {
             console = (Console) Utils.newInstance("org.h2.tools.GUIConsole");
@@ -80,7 +80,7 @@ public class Console extends Tool implements ShutdownHandler {
      * @param args the command line arguments
      */
     @Override
-    public void runTool(String... args) throws SQLException {
+    public void runTool(String... args) throws SQLException {//TIGER 入口主函数， 看注释
         isWindows = Utils.getProperty("os.name", "").startsWith("Windows");
         boolean tcpStart = false, pgStart = false, webStart = false, toolStart = false;
         boolean browserStart = false;
@@ -91,7 +91,7 @@ public class Console extends Tool implements ShutdownHandler {
         String tcpPassword = "";
         String tcpShutdownServer = "";
         boolean ifExists = false, webAllowOthers = false;
-        for (int i = 0; args != null && i < args.length; i++) {
+        for (int i = 0; args != null && i < args.length; i++) {//处理各种参数
             String arg = args[i];
             if (arg == null) {
             } else if ("-?".equals(arg) || "-help".equals(arg)) {
@@ -179,14 +179,14 @@ public class Console extends Tool implements ShutdownHandler {
                 showUsageAndThrowUnsupportedOption(arg);
             }
         }
-        if (startDefaultServers) {
+        if (startDefaultServers) {//默认启动，开启最大化模式
             webStart = true;
             toolStart = true;
             browserStart = true;
             tcpStart = true;
             pgStart = true;
         }
-        if (tcpShutdown) {
+        if (tcpShutdown) {//关闭模式
             out.println("Shutting down TCP Server at " + tcpShutdownServer);
             Server.shutdownTcpServer(tcpShutdownServer,
                     tcpPassword, tcpShutdownForce, false);
@@ -196,14 +196,14 @@ public class Console extends Tool implements ShutdownHandler {
 
         if (url != null) {
             Connection conn = JdbcUtils.getConnection(driver, url, user, password);
-            Server.startWebServer(conn);
+            Server.startWebServer(conn);//创建侦听的url
         }
 
         if (webStart) {
             try {
                 String webKey = webAllowOthers ? null
                         : StringUtils.convertBytesToHex(MathUtils.secureRandomBytes(32));
-                web = Server.createWebServer(args, webKey, !ifExists);
+                web = Server.createWebServer(args, webKey, !ifExists);//创建web server
                 web.setShutdownHandler(this);
                 web.start();
                 if (printStatus) {
@@ -224,12 +224,12 @@ public class Console extends Tool implements ShutdownHandler {
         // because some people don't look at the output,
         // but are wondering why nothing happens
         if (browserStart && web != null) {
-            openBrowser(web.getURL());
+            openBrowser(web.getURL());//打开浏览器
         }
 
         if (tcpStart) {
             try {
-                tcp = Server.createTcpServer(args);
+                tcp = Server.createTcpServer(args);//创建TcpServer，处理jdbc链接等。
                 tcp.start();
                 if (printStatus) {
                     out.println(tcp.getStatus());
@@ -244,7 +244,7 @@ public class Console extends Tool implements ShutdownHandler {
         }
         if (pgStart) {
             try {
-                pg = Server.createPgServer(args);
+                pg = Server.createPgServer(args);//打开pg模式，pg是啥？
                 pg.start();
                 if (printStatus) {
                     out.println(pg.getStatus());

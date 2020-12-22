@@ -672,7 +672,7 @@ public class Select extends Query {
         }
         long rowNumber = 0;
         setCurrentRowNumber(0);
-        Index index = topTableFilter.getIndex();
+        Index index = topTableFilter.getIndex();//索引
         SearchRow first = null;
         int columnIndex = index.getColumns()[0].getColumnId();
         if (!quickOffset) {
@@ -684,25 +684,25 @@ public class Select extends Query {
             if (!cursor.next()) {
                 break;
             }
-            SearchRow found = cursor.getSearchRow();
-            Value value = found.getValue(columnIndex);
+            SearchRow found = cursor.getSearchRow();//查找
+            Value value = found.getValue(columnIndex);//
             if (first == null) {
-                first = index.getRowFactory().createRow();
+                first = index.getRowFactory().createRow();//创建
             }
             first.setValue(columnIndex, value);
             if (offset > 0) {
                 offset--;
                 continue;
             }
-            result.addRow(value);
+            result.addRow(value);//加入
             if ((sort == null || sortUsingIndex) && limitRows > 0 && rowNumber >= limitRows && !withTies) {
-                break;
+                break;//是否够了？
             }
         }
     }
 
     private LazyResult queryFlat(int columnCount, ResultTarget result, long offset, long limitRows, boolean withTies,
-            boolean quickOffset) {
+            boolean quickOffset) {//TIGER 简单查询就可以了
         if (limitRows > 0 && offset > 0 && !quickOffset) {
             limitRows += offset;
             if (limitRows < 0) {
@@ -711,7 +711,7 @@ public class Select extends Query {
             }
         }
         LazyResultQueryFlat lazyResult = new LazyResultQueryFlat(expressionArray, columnCount, isForUpdateMvcc);
-        skipOffset(lazyResult, offset, quickOffset);
+        skipOffset(lazyResult, offset, quickOffset);//跳过offset
         if (result == null) {
             return lazyResult;
         }
@@ -757,8 +757,8 @@ public class Select extends Query {
     }
 
     @Override
-    protected ResultInterface queryWithoutCache(long maxRows, ResultTarget target) {
-        disableLazyForJoinSubqueries(topTableFilter);
+    protected ResultInterface queryWithoutCache(long maxRows, ResultTarget target) {//TIGER  核心实现
+        disableLazyForJoinSubqueries(topTableFilter);//如果lazy模式....
         OffsetFetch offsetFetch = getOffsetFetch(maxRows);
         long offset = offsetFetch.offset;
         long fetch = offsetFetch.fetch;
@@ -770,7 +770,7 @@ public class Select extends Query {
         LocalResult result = null;
         if (!lazy && (target == null ||
                 !session.getDatabase().getSettings().optimizeInsertFromSelect)) {
-            result = createLocalResult(result);
+            result = createLocalResult(result);//tiger
         }
         // Do not add rows before OFFSET to result if possible
         boolean quickOffset = !fetchPercent;
@@ -781,7 +781,7 @@ public class Select extends Query {
                 quickOffset = false;
             }
         }
-        if (distinct) {
+        if (distinct) {//实现distinct逻辑
             if (!isDistinctQuery) {
                 quickOffset = false;
                 result = createLocalResult(result);
@@ -795,10 +795,10 @@ public class Select extends Query {
         if (isWindowQuery || isGroupQuery && !isGroupSortedQuery) {
             result = createLocalResult(result);
         }
-        if (!lazy && (fetch >= 0 || offset > 0)) {
+        if (!lazy && (fetch >= 0 || offset > 0)) {//如果没有设置lazy，创建本地数据集
             result = createLocalResult(result);
         }
-        topTableFilter.startQuery(session);
+        topTableFilter.startQuery(session);//开始用join查询
         topTableFilter.reset();
         boolean exclusive = isForUpdate && !isForUpdateMvcc;
         topTableFilter.lock(session, exclusive, exclusive);
@@ -808,7 +808,7 @@ public class Select extends Query {
         if (fetch != 0) {
             // Cannot apply limit now if percent is specified
             long limit = fetchPercent ? -1 : fetch;
-            if (isQuickAggregateQuery) {
+            if (isQuickAggregateQuery) {//如果是汇总
                 queryQuick(columnCount, to, quickOffset && offset > 0);
             } else if (isWindowQuery) {
                 if (isGroupQuery) {
@@ -822,7 +822,7 @@ public class Select extends Query {
                 } else {
                     queryGroup(columnCount, result, offset, quickOffset);
                 }
-            } else if (isDistinctQuery) {
+            } else if (isDistinctQuery) {//是否要唯一
                 queryDistinct(to, offset, limit, withTies, quickOffset);
             } else {
                 lazyResult = queryFlat(columnCount, to, offset, limit, withTies, quickOffset);

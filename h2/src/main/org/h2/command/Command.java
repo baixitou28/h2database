@@ -173,22 +173,22 @@ public abstract class Command implements CommandInterface {
      * @return the result set
      */
     @Override
-    public ResultInterface executeQuery(long maxrows, boolean scrollable) {
+    public ResultInterface executeQuery(long maxrows, boolean scrollable) {//TIGER 执行查询
         startTimeNanos = 0L;
         long start = 0L;
         Database database = session.getDatabase();
         Object sync = database.isMVStore() ? session : database;
-        session.waitIfExclusiveModeEnabled();
+        session.waitIfExclusiveModeEnabled();//等待
         boolean callStop = true;
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
-        synchronized (sync) {
-            session.startStatementWithinTransaction(this);
+        synchronized (sync) {//同步
+            session.startStatementWithinTransaction(this);//开始Statement
             try {
                 while (true) {
-                    database.checkPowerOff();
+                    database.checkPowerOff();//检查是否断电
                     try {
-                        ResultInterface result = query(maxrows);
-                        callStop = !result.isLazy();
+                        ResultInterface result = query(maxrows);//query 是一个派生类
+                        callStop = !result.isLazy();//如果是lazy模式，callStop 为false//但好像这个是无用语句？ ==>最后finally肯定会执行的，所以callStop会用到
                         if (database.getMode().charPadding == CharPadding.IN_RESULT_SETS) {
                             return ResultWithPaddedStrings.get(result);
                         }
@@ -224,7 +224,7 @@ public abstract class Command implements CommandInterface {
                 throw e;
             } finally {
                 session.endStatement();
-                if (callStop) {
+                if (callStop) {//这里肯定会用到，如果是lazy模式，不会stop，这样数据量大的时候，不会撑死？
                     stop();
                 }
             }

@@ -768,7 +768,7 @@ public class Schema extends DbObject {
      * @param data the create table information
      * @return the created {@link Table} object
      */
-    public Table createTable(CreateTableData data) {
+    public Table createTable(CreateTableData data) {//tiger 创建一个系统表
         synchronized (database) {
             if (!data.temporary || data.globalTemporary) {
                 database.lockMeta(data.session);
@@ -780,9 +780,9 @@ public class Schema extends DbObject {
                 tableEngine = s.defaultTableEngine;
                 if (tableEngine == null) {
                     if (s.mvStore) {
-                        return database.getStore().createTable(data);
+                        return database.getStore().createTable(data);//获取对应的存储模式创建表，在mvstore/db目录中，如MVTable
                     } else {
-                        return new PageStoreTable(data);
+                        return new PageStoreTable(data);//简单的内存的页存储
                     }
                 }
                 data.tableEngine = tableEngine;

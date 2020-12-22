@@ -16,23 +16,23 @@ import org.h2.store.fs.FilePathWrapper;
 /**
  * A file with a read cache.
  */
-public class FilePathCache extends FilePathWrapper {
+public class FilePathCache extends FilePathWrapper {//带每页4k，最多256页的文件处理类
 
     /**
      * The instance.
      */
-    public static final FilePathCache INSTANCE = new FilePathCache();
+    public static final FilePathCache INSTANCE = new FilePathCache();//静态类
 
     /**
      * Register the file system.
      */
     static {
-        FilePath.register(INSTANCE);
+        FilePath.register(INSTANCE);//注册文件系统
     }
 
     public static FileChannel wrap(FileChannel f) {
         return new FileCache(f);
-    }
+    }//每个文件对饮一个cache
 
     @Override
     public FileChannel open(String mode) throws IOException {
@@ -47,9 +47,9 @@ public class FilePathCache extends FilePathWrapper {
     /**
      * A file with a read cache.
      */
-    public static class FileCache extends FileBase {
+    public static class FileCache extends FileBase {//1M的cache，即256块内存，这个是静态类
 
-        private static final int CACHE_BLOCK_SIZE = 4 * 1024;
+        private static final int CACHE_BLOCK_SIZE = 4 * 1024;//按照4k长度来读取
         private final FileChannel base;
 
         private final CacheLongKeyLIRS<ByteBuffer> cache;
@@ -85,30 +85,30 @@ public class FilePathCache extends FilePathWrapper {
         public int read(ByteBuffer dst) throws IOException {
             return base.read(dst);
         }
-
+//按照cache 4k长度来读，每次读不超过4k
         @Override
-        public synchronized int read(ByteBuffer dst, long position) throws IOException {
-            long cachePos = getCachePos(position);
-            int off = (int) (position - cachePos);
-            int len = CACHE_BLOCK_SIZE - off;
-            len = Math.min(len, dst.remaining());
-            ByteBuffer buff = cache.get(cachePos);
-            if (buff == null) {
-                buff = ByteBuffer.allocate(CACHE_BLOCK_SIZE);
+        public synchronized int read(ByteBuffer dst, long position) throws IOException {//对于某个位置的数据读取 ByteBuffer的长度，不超过4K
+            long cachePos = getCachePos(position);//换算cache位置
+            int off = (int) (position - cachePos);//从某个cache块开始的位置
+            int len = CACHE_BLOCK_SIZE - off;//
+            len = Math.min(len, dst.remaining());//每次读入不超过cache块大小，
+            ByteBuffer buff = cache.get(cachePos);//先从cache 取 4K
+            if (buff == null) {//如果cache 未载入
+                buff = ByteBuffer.allocate(CACHE_BLOCK_SIZE);//分配4K
                 long pos = cachePos;
-                while (true) {
-                    int read = base.read(buff, pos);
+                while (true) {//不停读，直到满
+                    int read = base.read(buff, pos);//从pos开始顺序读入，知道buff满为止
                     if (read <= 0) {
                         break;
                     }
-                    if (buff.remaining() == 0) {
+                    if (buff.remaining() == 0) {//4k buff满了
                         break;
                     }
-                    pos += read;
+                    pos += read;//累加
                 }
-                int read = buff.position();
+                int read = buff.position();//查看buff的位置
                 if (read == CACHE_BLOCK_SIZE) {
-                    cache.put(cachePos, buff, CACHE_BLOCK_SIZE);
+                    cache.put(cachePos, buff, CACHE_BLOCK_SIZE);//4k数据放入cache
                 } else {
                     if (read <= 0) {
                         return -1;
@@ -116,11 +116,11 @@ public class FilePathCache extends FilePathWrapper {
                     len = Math.min(len, read - off);
                 }
             }
-            dst.put(buff.array(), off, len);
+            dst.put(buff.array(), off, len);//放入用户的dst
             return len == 0 ? -1 : len;
         }
 
-        private static long getCachePos(long pos) {
+        private static long getCachePos(long pos) {//折算
             return (pos / CACHE_BLOCK_SIZE) * CACHE_BLOCK_SIZE;
         }
 
@@ -131,24 +131,24 @@ public class FilePathCache extends FilePathWrapper {
 
         @Override
         public synchronized FileChannel truncate(long newSize) throws IOException {
-            cache.clear();
-            base.truncate(newSize);
+            cache.clear();//删除cache
+            base.truncate(newSize);//调整长度
             return this;
         }
 
         @Override
         public synchronized int write(ByteBuffer src, long position) throws IOException {
-            clearCache(src, position);
-            return base.write(src, position);
+            clearCache(src, position);//废弃position部分
+            return base.write(src, position);//写
         }
 
         @Override
-        public synchronized int write(ByteBuffer src) throws IOException {
+        public synchronized int write(ByteBuffer src) throws IOException {//写入是删除对应cache内容，可以n个4k
             clearCache(src, position());
-            return base.write(src);
+            return base.write(src);//写
         }
 
-        private void clearCache(ByteBuffer src, long position) {
+        private void clearCache(ByteBuffer src, long position) {//删除对应的cache，可能有n个4k
             if (cache.size() > 0) {
                 int len = src.remaining();
                 long p = getCachePos(position);

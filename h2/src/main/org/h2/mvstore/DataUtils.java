@@ -451,13 +451,13 @@ public final class DataUtils {
     public static void readFully(FileChannel file, long pos, ByteBuffer dst) {
         try {
             do {
-                int len = file.read(dst, pos);
+                int len = file.read(dst, pos);//读一次
                 if (len < 0) {
                     throw new EOFException();
                 }
                 pos += len;
-            } while (dst.remaining() > 0);
-            dst.rewind();
+            } while (dst.remaining() > 0);//一次读不全
+            dst.rewind();//
         } catch (IOException e) {
             long size;
             try {
@@ -484,9 +484,9 @@ public final class DataUtils {
         try {
             int off = 0;
             do {
-                int len = file.write(src, pos + off);
+                int len = file.write(src, pos + off);//写
                 off += len;
-            } while (src.remaining() > 0);
+            } while (src.remaining() > 0);//没写全
         } catch (IOException e) {
             throw newMVStoreException(
                     ERROR_WRITING_FAILED,

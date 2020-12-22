@@ -36,7 +36,7 @@ import org.h2.util.Tool;
  * and at the same time start a TCP server to allow clients to connect to
  * the same database over the network.
  */
-public class TcpServer implements Service {
+public class TcpServer implements Service {//tiger jdbc等接口
 
     private static final int SHUTDOWN_NORMAL = 0;
     private static final int SHUTDOWN_FORCE = 1;
@@ -88,7 +88,7 @@ public class TcpServer implements Service {
         // avoid using the driver manager
         JdbcConnection conn = new JdbcConnection("jdbc:h2:" + getManagementDbName(port), null, "", managementPassword);
         managementDb = conn;
-
+        //TIGER 插入一条session记录，便于管理
         try (Statement stat = conn.createStatement()) {
             stat.execute("CREATE ALIAS IF NOT EXISTS STOP_SERVER FOR '" + TcpServer.class.getName() + ".stopServer'");
             stat.execute("CREATE TABLE IF NOT EXISTS SESSIONS" +
@@ -159,7 +159,7 @@ public class TcpServer implements Service {
     }
 
     @Override
-    public void init(String... args) {
+    public void init(String... args) {//TIGER 初始化
         port = Constants.DEFAULT_TCP_PORT;
         for (int i = 0; args != null && i < args.length; i++) {
             String a = args[i];
@@ -253,7 +253,7 @@ public class TcpServer implements Service {
                 Socket s = serverSocket.accept();
                 NetUtils2.setTcpQuickack(s, true);
                 int id = nextThreadId++;
-                TcpServerThread c = new TcpServerThread(s, this, id);
+                TcpServerThread c = new TcpServerThread(s, this, id);//TIGER 侦听，创建并处理一个客户端的链接
                 running.add(c);
                 Thread thread = new Thread(c, threadName + " thread-" + id);
                 thread.setDaemon(isDaemon);

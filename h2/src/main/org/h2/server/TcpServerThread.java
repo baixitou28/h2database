@@ -90,10 +90,10 @@ public class TcpServerThread implements Runnable {
                     // the transfer is already closed, prevent NPE in TcpServer#allow(Socket)
                     return;
                 }
-                if (!server.allow(transfer.getSocket())) {
+                if (!server.allow(transfer.getSocket())) {//允许连接吗？
                     throw DbException.get(ErrorCode.REMOTE_CONNECTION_NOT_ALLOWED);
                 }
-                int minClientVersion = transfer.readInt();
+                int minClientVersion = transfer.readInt();//读取版本
                 if (minClientVersion < 6) {
                     throw DbException.get(ErrorCode.DRIVER_VERSION_ERROR_2,
                             Integer.toString(minClientVersion), "" + Constants.TCP_PROTOCOL_VERSION_MIN_SUPPORTED);
@@ -112,15 +112,15 @@ public class TcpServerThread implements Runnable {
                     clientVersion = maxClientVersion;
                 }
                 transfer.setVersion(clientVersion);
-                String db = transfer.readString();
-                String originalURL = transfer.readString();
-                if (db == null && originalURL == null) {
+                String db = transfer.readString();//
+                String originalURL = transfer.readString();//读取url
+                if (db == null && originalURL == null) {//没有db 或url 停止处理，设置stop为true
                     String targetSessionId = transfer.readString();
-                    int command = transfer.readInt();
+                    int command = transfer.readInt();//命令
                     stop = true;
                     if (command == SessionRemote.SESSION_CANCEL_STATEMENT) {
                         // cancel a running statement
-                        int statementId = transfer.readInt();
+                        int statementId = transfer.readInt();//取消命令
                         server.cancelStatement(targetSessionId, statementId);
                     } else if (command == SessionRemote.SESSION_CHECK_KEY) {
                         // check if this is the correct server
@@ -137,7 +137,7 @@ public class TcpServerThread implements Runnable {
                     baseDir = SysProperties.getBaseDir();
                 }
                 db = server.checkKeyAndGetDatabaseName(db);
-                ConnectionInfo ci = new ConnectionInfo(db);
+                ConnectionInfo ci = new ConnectionInfo(db);//客户端信息
                 ci.setOriginalURL(originalURL);
                 ci.setUserName(transfer.readString());
                 ci.setUserPasswordHash(transfer.readBytes());
@@ -159,7 +159,7 @@ public class TcpServerThread implements Runnable {
                 if (ci.getFilePasswordHash() != null) {
                     ci.setFileEncryptionKey(transfer.readBytes());
                 }
-                ci.setNetworkConnectionInfo(new NetworkConnectionInfo(
+                ci.setNetworkConnectionInfo(new NetworkConnectionInfo(//设置网络连接信息
                         NetUtils.ipToShortForm(new StringBuilder(server.getSSL() ? "ssl://" : "tcp://"),
                                 socket.getLocalAddress().getAddress(), true) //
                                 .append(':').append(socket.getLocalPort()).toString(), //
@@ -171,23 +171,23 @@ public class TcpServerThread implements Runnable {
                     // For H2 Console
                     ci.setProperty("NON_KEYWORDS", "VALUE");
                 }
-                session = Engine.createSession(ci);
-                transfer.setSession(session);
-                server.addConnection(threadId, originalURL, ci.getUserName());
+                session = Engine.createSession(ci);//tiger 创建一个session
+                transfer.setSession(session);//绑定session
+                server.addConnection(threadId, originalURL, ci.getUserName());//增加线程
                 trace("Connected");
             } catch (OutOfMemoryError e) {
                 // catch this separately otherwise such errors will never hit the console
                 server.traceError(e);
                 sendError(e, true);
-                stop = true;
+                stop = true;//异常则停止线程
             } catch (Throwable e) {
                 sendError(e,true);
                 stop = true;
             }
             lastRemoteSettingsId = session.getDatabase().getRemoteSettingsId();
-            while (!stop) {
+            while (!stop) {//stop谁来设置？ ==>SESSION_CLOSE 或者异常情况才会设置true, 普通的COMMAND_EXECUTE_QUERY等执行并不会关闭
                 try {
-                    process();
+                    process();//循环处理不同的命令
                 } catch (Throwable e) {
                     sendError(e, true);
                 }
@@ -278,14 +278,14 @@ public class TcpServerThread implements Runnable {
 
     private void process() throws IOException {
         int operation = transfer.readInt();
-        switch (operation) {
+        switch (operation) {//不同的命令
         case SessionRemote.SESSION_PREPARE_READ_PARAMS:
         case SessionRemote.SESSION_PREPARE_READ_PARAMS2:
-        case SessionRemote.SESSION_PREPARE: {
+        case SessionRemote.SESSION_PREPARE: {//TIGER JDBC 的准备
             int id = transfer.readInt();
-            String sql = transfer.readString();
+            String sql = transfer.readString();//读取sql
             int old = session.getModificationId();
-            Command command = session.prepareLocal(sql);
+            Command command = session.prepareLocal(sql);//tiger prepare
             boolean readonly = command.isReadOnly();
             cache.addObject(id, command);
             boolean isQuery = command.isQuery();
@@ -297,7 +297,7 @@ public class TcpServerThread implements Runnable {
                 transfer.writeInt(command.getCommandType());
             }
 
-            ArrayList<? extends ParameterInterface> params = command.getParameters();
+            ArrayList<? extends ParameterInterface> params = command.getParameters();//所有的参数
 
             transfer.writeInt(params.size());
 
@@ -306,7 +306,7 @@ public class TcpServerThread implements Runnable {
                     ParameterRemote.writeMetaData(transfer, p);
                 }
             }
-            transfer.flush();
+            transfer.flush();//这里应该还没有处理，需要在COMMAND_EXECUTE_QUERY或UPDATE处理
             break;
         }
         case SessionRemote.SESSION_CLOSE: {
@@ -350,18 +350,18 @@ public class TcpServerThread implements Runnable {
             int old = session.getModificationId();
             ResultInterface result;
             synchronized (session) {
-                result = command.executeQuery(maxRows, false);
+                result = command.executeQuery(maxRows, false);//tiger 处理命令，关键部分
             }
             cache.addObject(objectId, result);
             int columnCount = result.getVisibleColumnCount();
             int state = getState(old);
             transfer.writeInt(state).writeInt(columnCount);
-            long rowCount = result.isLazy() ? -1L : result.getRowCount();
+            long rowCount = result.isLazy() ? -1L : result.getRowCount();//行数
             transfer.writeRowCount(rowCount);
             for (int i = 0; i < columnCount; i++) {
-                ResultColumn.writeColumn(transfer, result, i);
+                ResultColumn.writeColumn(transfer, result, i);//结果集
             }
-            sendRows(result, rowCount >= 0L ? Math.min(rowCount, fetchSize) : fetchSize);
+            sendRows(result, rowCount >= 0L ? Math.min(rowCount, fetchSize) : fetchSize);//发送结果
             transfer.flush();
             break;
         }
@@ -410,7 +410,7 @@ public class TcpServerThread implements Runnable {
             int old = session.getModificationId();
             ResultWithGeneratedKeys result;
             synchronized (session) {
-                result = command.executeUpdate(generatedKeysRequest);
+                result = command.executeUpdate(generatedKeysRequest);//TIGER tiger 关键部分
             }
             int status;
             if (session.isClosed()) {
@@ -526,7 +526,7 @@ public class TcpServerThread implements Runnable {
             transfer.flush();
             break;
         }
-        case SessionRemote.GET_JDBC_META: {
+        case SessionRemote.GET_JDBC_META: {//获取JDBC 的信息
             int code = transfer.readInt();
             int length = transfer.readInt();
             Value[] args = new Value[length];

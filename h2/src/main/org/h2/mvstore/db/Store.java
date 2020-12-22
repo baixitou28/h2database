@@ -37,7 +37,7 @@ import org.h2.util.Utils;
 /**
  * A store with open tables.
  */
-public final class Store {
+public final class Store {//TIGER 看注释，是已打开表的集合
 
     /**
      * Convert password from byte[] to char[].
@@ -82,13 +82,13 @@ public final class Store {
      *
      * @param db the database
      */
-    public Store(Database db) {
+    public Store(Database db) {//构造函数
         byte[] key = db.getFileEncryptionKey();
-        String dbPath = db.getDatabasePath();
+        String dbPath = db.getDatabasePath();//db路径
         MVStore.Builder builder = new MVStore.Builder();
         boolean encrypted = false;
-        if (dbPath != null) {
-            String fileName = dbPath + Constants.SUFFIX_MV_FILE;
+        if (dbPath != null) {//有路径说明保持在文件中
+            String fileName = dbPath + Constants.SUFFIX_MV_FILE;//MV文件是啥？
             MVStoreTool.compactCleanUp(fileName);
             builder.fileName(fileName);
             builder.pageSplitSize(db.getPageSize());
@@ -126,14 +126,14 @@ public final class Store {
         }
         this.encrypted = encrypted;
         try {
-            this.mvStore = builder.open();
-            FileStore fs = mvStore.getFileStore();
+            this.mvStore = builder.open();//打开
+            FileStore fs = mvStore.getFileStore();//FileStore是基类
             fileName = fs != null ? fs.getFileName() : null;
             if (!db.getSettings().reuseSpace) {
                 mvStore.setReuseSpace(false);
             }
             mvStore.setVersionsToKeep(0);
-            this.transactionStore = new TransactionStore(mvStore,
+            this.transactionStore = new TransactionStore(mvStore,//事务也需要一个store
                     new MetaType<>(db, mvStore.backgroundExceptionHandler), new ValueDataType(db, null),
                     db.getLockTimeout());
         } catch (MVStoreException e) {
@@ -194,7 +194,7 @@ public final class Store {
     public MVTable createTable(CreateTableData data) {
         try {
             MVTable table = new MVTable(data, this);
-            tableMap.put(table.getMapName(), table);
+            tableMap.put(table.getMapName(), table);//放入列表
             return table;
         } catch (MVStoreException e) {
             throw convertMVStoreException(e);
@@ -223,7 +223,7 @@ public final class Store {
             return;
         }
         if (!mvStore.compact(50, 4 * 1024 * 1024)) {
-            mvStore.commit();
+            mvStore.commit();//提交
         }
     }
 

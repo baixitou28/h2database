@@ -34,7 +34,7 @@ import org.h2.util.Utils;
 /**
  * A table stored in a MVStore.
  */
-public class MVTable extends RegularTable {
+public class MVTable extends RegularTable {//TIGER 实际的表
     /**
      * The table name this thread is waiting to lock.
      */

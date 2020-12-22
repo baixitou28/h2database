@@ -21,12 +21,12 @@ import org.h2.store.fs.encrypt.FilePathEncrypt;
  * data to a file. The file store is responsible to persist data and for free
  * space management.
  */
-public class FileStore {
+public class FileStore {//MVStore的默认存储，是一个基类
 
     /**
      * The number of read operations.
      */
-    protected final AtomicLong readCount = new AtomicLong();
+    protected final AtomicLong readCount = new AtomicLong();//统计值
 
     /**
      * The number of read bytes.
@@ -48,12 +48,12 @@ public class FileStore {
      * (the first two blocks are the store header).
      */
     protected final FreeSpaceBitSet freeSpace =
-            new FreeSpaceBitSet(2, MVStore.BLOCK_SIZE);
+            new FreeSpaceBitSet(2, MVStore.BLOCK_SIZE);//
 
     /**
      * The file name.
      */
-    private String fileName;
+    private String fileName;//保存的文件名
 
     /**
      * Whether this store is read-only.
@@ -68,7 +68,7 @@ public class FileStore {
     /**
      * The file.
      */
-    private FileChannel file;
+    private FileChannel file;//作用？
 
     /**
      * The encrypted file (if encryption is used).
@@ -93,9 +93,9 @@ public class FileStore {
      * @return the byte buffer
      */
     public ByteBuffer readFully(long pos, int len) {
-        ByteBuffer dst = ByteBuffer.allocate(len);
-        DataUtils.readFully(file, pos, dst);
-        readCount.incrementAndGet();
+        ByteBuffer dst = ByteBuffer.allocate(len);//分配一个buffer
+        DataUtils.readFully(file, pos, dst);//读，只到全部读完，否则抛出异常
+        readCount.incrementAndGet();//统计
         readBytes.addAndGet(len);
         return dst;
     }
@@ -109,7 +109,7 @@ public class FileStore {
     public void writeFully(long pos, ByteBuffer src) {
         int len = src.remaining();
         fileSize = Math.max(fileSize, pos + len);
-        DataUtils.writeFully(file, pos, src);
+        DataUtils.writeFully(file, pos, src);//写，只到全部写完，否则抛出异常
         writeCount.incrementAndGet();
         writeBytes.addAndGet(len);
     }
@@ -132,29 +132,29 @@ public class FileStore {
         this.fileName = fileName;
         FilePath f = FilePath.get(fileName);
         FilePath parent = f.getParent();
-        if (parent != null && !parent.exists()) {
+        if (parent != null && !parent.exists()) {//目录判断
             throw DataUtils.newIllegalArgumentException(
                     "Directory does not exist: {0}", parent);
         }
-        if (f.exists() && !f.canWrite()) {
+        if (f.exists() && !f.canWrite()) {//文件只读判断
             readOnly = true;
         }
         this.readOnly = readOnly;
         try {
-            file = f.open(readOnly ? "r" : "rw");
-            if (encryptionKey != null) {
+            file = f.open(readOnly ? "r" : "rw");//打开
+            if (encryptionKey != null) {//是否加密
                 byte[] key = FilePathEncrypt.getPasswordBytes(encryptionKey);
                 encryptedFile = file;
                 file = new FileEncrypt(fileName, key, file);
             }
             try {
                 if (readOnly) {
-                    fileLock = file.tryLock(0, Long.MAX_VALUE, true);
+                    fileLock = file.tryLock(0, Long.MAX_VALUE, true);//锁住前面部分
                 } else {
-                    fileLock = file.tryLock();
+                    fileLock = file.tryLock();//只锁文件
                 }
             } catch (OverlappingFileLockException e) {
-                throw DataUtils.newMVStoreException(
+                throw DataUtils.newMVStoreException(//锁失败
                         DataUtils.ERROR_FILE_LOCKED,
                         "The file is locked: {0}", fileName, e);
             }
@@ -164,7 +164,7 @@ public class FileStore {
                         DataUtils.ERROR_FILE_LOCKED,
                         "The file is locked: {0}", fileName);
             }
-            fileSize = file.size();
+            fileSize = file.size();//文件大小
         } catch (IOException e) {
             try { close(); } catch (Exception ignore) {}
             throw DataUtils.newMVStoreException(
@@ -197,7 +197,7 @@ public class FileStore {
     /**
      * Flush all changes.
      */
-    public void sync() {
+    public void sync() {//手工刷新
         if (file != null) {
             try {
                 file.force(true);
@@ -239,7 +239,7 @@ public class FileStore {
                             fileName, size, e);
                 }
                 System.gc();
-                Thread.yield();
+                Thread.yield();//避免卡住
             }
         }
     }

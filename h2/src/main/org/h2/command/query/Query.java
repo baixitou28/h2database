@@ -193,9 +193,9 @@ public abstract class Query extends Prepared {
             session.setLazyQueryExecution(false);
         }
         try {
-            return queryWithoutCache(limit, target);
+            return queryWithoutCache(limit, target);//tiger 重要继承 子类来实现，比如select
         } finally {
-            if (disableLazy) {
+            if (disableLazy) {//从代码看，是完全不同的查询
                 session.setLazyQueryExecution(true);
             }
         }
@@ -463,24 +463,24 @@ public abstract class Query extends Prepared {
      * @param target the target result (null will return the result)
      * @return the result set (if the target is not set).
      */
-    public final ResultInterface query(long limit, ResultTarget target) {
+    public final ResultInterface query(long limit, ResultTarget target) {//tiger 主要接口
         if (isUnion()) {
             // union doesn't always know the parameter list of the left and
             // right queries
             return queryWithoutCacheLazyCheck(limit, target);
         }
         fireBeforeSelectTriggers();
-        if (noCache || !session.getDatabase().getOptimizeReuseResults() ||
+        if (noCache || !session.getDatabase().getOptimizeReuseResults() ||//是否有cache，没有就重新查
                 (session.isLazyQueryExecution() && !neverLazy)) {
-            return queryWithoutCacheLazyCheck(limit, target);
+            return queryWithoutCacheLazyCheck(limit, target);//新的查询
         }
         Value[] params = getParameterValues();
         long now = session.getDatabase().getModificationDataId();
         if (isEverything(ExpressionVisitor.DETERMINISTIC_VISITOR)) {
             if (lastResult != null && !lastResult.isClosed() &&
                     limit == lastLimit) {
-                if (sameResultAsLast(params, lastParameters, lastEvaluated)) {
-                    lastResult = lastResult.createShallowCopy(session);
+                if (sameResultAsLast(params, lastParameters, lastEvaluated)) {//如果相同?==>什么时候？
+                    lastResult = lastResult.createShallowCopy(session);//复制
                     if (lastResult != null) {
                         lastResult.reset();
                         return lastResult;
@@ -490,7 +490,7 @@ public abstract class Query extends Prepared {
         }
         lastParameters = params;
         closeLastResult();
-        ResultInterface r = queryWithoutCacheLazyCheck(limit, target);
+        ResultInterface r = queryWithoutCacheLazyCheck(limit, target);//新的查询
         lastResult = r;
         this.lastEvaluated = now;
         lastLimit = limit;

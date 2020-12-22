@@ -80,7 +80,7 @@ MVStore:
     for default serialization
 - MVStoreTool.dump should dump the data if possible;
     possibly using a callback for serialization
-- implement a sharded map (in one store, multiple stores)
+- implement a sharded map (in one store, multiple stores)  tiger 这也是提高
     to support concurrent updates and writes, and very large maps
 - to save space when persisting very small transactions,
     use a transaction log where only the deltas are stored
@@ -371,11 +371,11 @@ public class MVStore implements AutoCloseable {
      *             occurred while opening
      * @throws IllegalArgumentException if the directory does not exist
      */
-    MVStore(Map<String, Object> config) {
+    MVStore(Map<String, Object> config) {//构造函数  tiger
         recoveryMode = config.containsKey("recoveryMode");
         compressionLevel = DataUtils.getConfigParam(config, "compress", 0);
-        String fileName = (String) config.get("fileName");
-        FileStore fileStore = (FileStore) config.get("fileStore");
+        String fileName = (String) config.get("fileName");//文件名
+        FileStore fileStore = (FileStore) config.get("fileStore");//filestore模式
         if (fileStore == null) {
             fileStoreIsProvided = false;
             if (fileName != null) {
@@ -439,11 +439,11 @@ public class MVStore implements AutoCloseable {
                 try {
                     if (!fileStoreIsProvided) {
                         boolean readOnly = config.containsKey("readOnly");
-                        this.fileStore.open(fileName, readOnly, encryptionKey);
+                        this.fileStore.open(fileName, readOnly, encryptionKey);//自定义fileStore
                     }
                     if (this.fileStore.size() == 0) {
-                        creationTime = getTimeAbsolute();
-                        storeHeader.put(HDR_H, 2);
+                        creationTime = getTimeAbsolute();//没有就创建
+                        storeHeader.put(HDR_H, 2);//文件头
                         storeHeader.put(HDR_BLOCK_SIZE, BLOCK_SIZE);
                         storeHeader.put(HDR_FORMAT, FORMAT_WRITE);
                         storeHeader.put(HDR_CREATED, creationTime);

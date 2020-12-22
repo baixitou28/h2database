@@ -28,7 +28,7 @@ import org.h2.value.CompareMode;
 /**
  * A table store in a PageStore.
  */
-public class PageStoreTable extends RegularTable {
+public class PageStoreTable extends RegularTable {//简单的页存储数据，其他的RegularTable在mvstore/db目录中，如MVTable
 
     private Index scanIndex;
     private long rowCount;
@@ -76,12 +76,12 @@ public class PageStoreTable extends RegularTable {
     }
 
     @Override
-    public void addRow(SessionLocal session, Row row) {
-        lastModificationId = database.getNextModificationDataId();
+    public void addRow(SessionLocal session, Row row) {//TIGER 核心函数
+        lastModificationId = database.getNextModificationDataId();//最后一次id
         int i = 0;
         try {
             for (int size = indexes.size(); i < size; i++) {
-                Index index = indexes.get(i);
+                Index index = indexes.get(i);//每个索引都加入列
                 index.add(session, row);
                 checkRowCount(session, index, 1);
             }
@@ -90,7 +90,7 @@ public class PageStoreTable extends RegularTable {
             try {
                 while (--i >= 0) {
                     Index index = indexes.get(i);
-                    index.remove(session, row);
+                    index.remove(session, row);//异常则从索引中删除
                     checkRowCount(session, index, 0);
                 }
             } catch (DbException e2) {
@@ -273,9 +273,9 @@ public class PageStoreTable extends RegularTable {
 
     @Override
     public long truncate(SessionLocal session) {
-        lastModificationId = database.getNextModificationDataId();
+        lastModificationId = database.getNextModificationDataId();//还是从这个点开始
         long result = rowCount;
-        for (int i = indexes.size() - 1; i >= 0; i--) {
+        for (int i = indexes.size() - 1; i >= 0; i--) {//删除所有的index
             Index index = indexes.get(i);
             index.truncate(session);
         }

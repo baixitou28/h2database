@@ -159,9 +159,9 @@ public final class Insert extends CommandWithValues implements ResultTarget {
     }
 
     private long insertRows() {
-        session.getUser().checkTableRight(table, Right.INSERT);
+        session.getUser().checkTableRight(table, Right.INSERT);//是否有权限
         setCurrentRowNumber(0);
-        table.fire(session, Trigger.INSERT, true);
+        table.fire(session, Trigger.INSERT, true);//生成插入事件
         rowNumber = 0;
         int listSize = valuesExpressionList.size();
         if (listSize > 0) {
@@ -174,38 +174,38 @@ public final class Insert extends CommandWithValues implements ResultTarget {
                     Column c = columns[i];
                     int index = c.getColumnId();
                     Expression e = expr[i];
-                    if (e != ValueExpression.DEFAULT) {
+                    if (e != ValueExpression.DEFAULT) {//如果不是默认值
                         try {
-                            newRow.setValue(index, e.getValue(session));
+                            newRow.setValue(index, e.getValue(session));//
                         } catch (DbException ex) {
                             throw setRow(ex, x, getSimpleSQL(expr));
                         }
                     }
                 }
                 rowNumber++;
-                table.convertInsertRow(session, newRow, overridingSystem);
+                table.convertInsertRow(session, newRow, overridingSystem);//比如生成id，看注释Prepares the specified row for INSERT operation.
                 if (deltaChangeCollectionMode == ResultOption.NEW) {
                     deltaChangeCollector.addRow(newRow.getValueList().clone());
                 }
-                if (!table.fireBeforeRow(session, null, newRow)) {
+                if (!table.fireBeforeRow(session, null, newRow)) {//行插入前的事件
                     table.lock(session, true, false);
                     try {
-                        table.addRow(session, newRow);
+                        table.addRow(session, newRow);//tiger 实际加入一行， 是在子类实现，如：PageStoreTable extends RegularTable
                     } catch (DbException de) {
-                        if (handleOnDuplicate(de, null)) {
+                        if (handleOnDuplicate(de, null)) {//处理唯一性约束
                             // MySQL returns 2 for updated row
                             // TODO: detect no-op change
-                            rowNumber++;
+                            rowNumber++;//算加入成功
                         } else {
                             // INSERT IGNORE case
-                            rowNumber--;
+                            rowNumber--;//没有加入
                         }
                         continue;
                     }
-                    DataChangeDeltaTable.collectInsertedFinalRow(session, table, deltaChangeCollector,
+                    DataChangeDeltaTable.collectInsertedFinalRow(session, table, deltaChangeCollector,//
                             deltaChangeCollectionMode, newRow);
-                    session.log(table, UndoLogRecord.INSERT, newRow);
-                    table.fireAfterRow(session, null, newRow, false);
+                    session.log(table, UndoLogRecord.INSERT, newRow);//写日志
+                    table.fireAfterRow(session, null, newRow, false);//行插入后的事件
                 } else {
                     DataChangeDeltaTable.collectInsertedFinalRow(session, table, deltaChangeCollector,
                             deltaChangeCollectionMode, newRow);
