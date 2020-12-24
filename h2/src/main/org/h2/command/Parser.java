@@ -385,7 +385,7 @@ import org.h2.value.ValueVarchar;
  * @author Noel Grandin
  * @author Nicolas Fortin, Atelier SIG, IRSTV FR CNRS 24888
  */
-public class Parser {
+public class Parser {//TODO: tiger 理解如何解析 ，看注释将sql 转换为command
 
     private static final String WITH_STATEMENT_SUPPORTS_LIMITED_SUB_STATEMENTS =
             "WITH statement supports only SELECT, TABLE, VALUES, " +
@@ -1053,13 +1053,13 @@ public class Parser {
         createView = null;
         recompileAlways = false;
         read();
-        return parsePrepared();
+        return parsePrepared();//解析prepare语句
     }
 
     private Prepared parsePrepared() {
         int start = lastParseIndex;
         Prepared c = null;
-        switch (currentTokenType) {
+        switch (currentTokenType) {//tiger 不同的标识
         case END_OF_INPUT:
         case SEMICOLON:
             c = new NoOperation(session);
@@ -1078,17 +1078,17 @@ public class Parser {
         case SELECT:
         case TABLE:
         case VALUES:
-            c = parseQuery();
+            c = parseQuery();//查询
             break;
         case WITH:
             read();
-            c = parseWithStatementOrQuery(start);
+            c = parseWithStatementOrQuery(start);//
             break;
         case SET:
             read();
             c = parseSet();
             break;
-        case IDENTIFIER:
+        case IDENTIFIER://解析命令
             if (currentTokenQuoted) {
                 break;
             }
@@ -1168,12 +1168,12 @@ public class Parser {
                 break;
             case 'I':
                 if (readIf("INSERT")) {
-                    c = parseInsert(start);
+                    c = parseInsert(start);//tiger 插入解析
                 }
                 break;
             case 'M':
                 if (readIf("MERGE")) {
-                    c = parseMerge(start);
+                    c = parseMerge(start);//tiger merge解析
                 }
                 break;
             case 'P':
@@ -1227,7 +1227,7 @@ public class Parser {
         if (c == null) {
             throw getSyntaxError();
         }
-        if (indexedParameterList != null) {
+        if (indexedParameterList != null) {//索引
             for (int i = 0, size = indexedParameterList.size();
                     i < size; i++) {
                 if (indexedParameterList.get(i) == null) {
@@ -1236,7 +1236,7 @@ public class Parser {
             }
             parameters = indexedParameterList;
         }
-        boolean withParamValues = readIf(OPEN_BRACE);
+        boolean withParamValues = readIf(OPEN_BRACE);//with 参数
         if (withParamValues) {
             do {
                 int index = (int) readLong() - 1;
@@ -1889,18 +1889,18 @@ public class Parser {
         command.addWhen(when);
     }
 
-    private Insert parseInsert(int start) {
+    private Insert parseInsert(int start) {//tiger 解析插入
         Insert command = new Insert(session);
         currentPrepared = command;
         Mode mode = database.getMode();
-        if (mode.onDuplicateKeyUpdate && readIf("IGNORE")) {
+        if (mode.onDuplicateKeyUpdate && readIf("IGNORE")) {//是否ignore错误
             command.setIgnore(true);
         }
-        read("INTO");
-        Table table = readTableOrView();
+        read("INTO");//继续读入into
+        Table table = readTableOrView();//读入表名
         command.setTable(table);
         Column[] columns = null;
-        if (readIf(OPEN_PAREN)) {
+        if (readIf(OPEN_PAREN)) {//后面嵌套query语句呢？
             if (isQuery()) {
                 command.setQuery(parseQuery());
                 read(CLOSE_PAREN);
@@ -1912,20 +1912,20 @@ public class Parser {
         Boolean overridingSystem = readIfOverriding();
         command.setOverridingSystem(overridingSystem);
         boolean requireQuery = false;
-        if (readIf("DIRECT")) {
+        if (readIf("DIRECT")) {//没用过的命令
             requireQuery = true;
             command.setInsertFromSelect(true);
         }
-        if (readIf("SORTED")) {
+        if (readIf("SORTED")) {//这个没有用过
             requireQuery = true;
             command.setSortedInsertMode(true);
         }
         readValues: {
             if (!requireQuery) {
                 if (overridingSystem == null && readIf(DEFAULT)) {
-                    read(VALUES);
-                    command.addRow(new Expression[0]);
-                    break readValues;
+                    read(VALUES);//读入具体的值
+                    command.addRow(new Expression[0]);//加入列
+                    break readValues;//停止
                 }
                 if (readIf(VALUES)) {
                     parseValuesForCommand(command);
@@ -1941,7 +1941,7 @@ public class Parser {
         if (mode.onDuplicateKeyUpdate || mode.insertOnConflict || mode.isolationLevelInSelectOrInsertStatement) {
             parseInsertCompatibility(command, table, mode);
         }
-        setSQL(command, start);
+        setSQL(command, start);//将读入的sql的一部分，设置到这个命令中，start可能包含好几个命令。
         return command;
     }
 

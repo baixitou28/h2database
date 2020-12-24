@@ -1331,7 +1331,7 @@ public class WebApp {
                 session.executingStatement = stat;
                 boolean isResultSet;
                 if (generatedKeys == null) {
-                    isResultSet = stat.execute(sql);
+                    isResultSet = stat.execute(sql);//执行sql，获取记录
                 } else if (generatedKeys instanceof Boolean) {
                     isResultSet = stat.execute(sql,
                             ((Boolean) generatedKeys) ? Statement.RETURN_GENERATED_KEYS : Statement.NO_GENERATED_KEYS);

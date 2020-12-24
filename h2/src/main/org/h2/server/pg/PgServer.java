@@ -32,7 +32,7 @@ import org.h2.value.Value;
  * @author Thomas Mueller
  * @author Sergi Vladykin 2009-07-03 (convertType)
  */
-public class PgServer implements Service {
+public class PgServer implements Service {//tiger PostgreSQL的接口
 
     /**
      * The default port to use for the PG server.

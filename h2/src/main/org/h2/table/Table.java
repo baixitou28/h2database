@@ -826,7 +826,7 @@ public abstract class Table extends SchemaObject {
      * @param allColumnsSet the set of all columns
      * @return the plan item
      */
-    public PlanItem getBestPlanItem(SessionLocal session, int[] masks,
+    public PlanItem getBestPlanItem(SessionLocal session, int[] masks,//tiger 执行计划之核心函数getBestPlanItem
             TableFilter[] filters, int filter, SortOrder sortOrder,
             AllColumnsForPlan allColumnsSet) {
         PlanItem item = new PlanItem();
@@ -840,7 +840,7 @@ public abstract class Table extends SchemaObject {
         ArrayList<Index> indexes = getIndexes();
         IndexHints indexHints = getIndexHints(filters, filter);
 
-        if (indexes != null && masks != null) {
+        if (indexes != null && masks != null) {//如果是单个表，只选最优索引即可
             for (int i = 1, size = indexes.size(); i < size; i++) {
                 Index index = indexes.get(i);
 
@@ -848,13 +848,13 @@ public abstract class Table extends SchemaObject {
                     continue;
                 }
 
-                double cost = index.getCost(session, masks, filters, filter,
+                double cost = index.getCost(session, masks, filters, filter,//计算索引的成本
                         sortOrder, allColumnsSet);
-                if (t.isDebugEnabled()) {
+                if (t.isDebugEnabled()) {//debug日志可现实所有的index 成本
                     t.debug("Table      :     potential plan item cost {0} index {1}",
                             cost, index.getPlanSQL());
                 }
-                if (cost < item.cost) {
+                if (cost < item.cost) {//选择最小成本的元素
                     item.cost = cost;
                     item.setIndex(index);
                 }

@@ -29,7 +29,7 @@ import org.h2.value.ValueVarchar;
  * This class represents the statement
  * EXPLAIN
  */
-public class Explain extends Prepared {
+public class Explain extends Prepared {//todo: TIGER 执行计划的实现 ,参看多个command 如Select，Delete等的getPlanSQL的（Prepared子类）实现
 
     private Prepared command;
     private LocalResult result;
@@ -49,7 +49,7 @@ public class Explain extends Prepared {
 
     @Override
     public void prepare() {
-        command.prepare();
+        command.prepare();//tiger 不同的命令执行不同的prepare
     }
 
     public void setExecuteCommand(boolean executeCommand) {

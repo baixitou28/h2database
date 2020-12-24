@@ -696,7 +696,7 @@ public class TableFilter implements ColumnResolver {
      * @param sqlFlags formatting flags
      * @return the specified builder
      */
-    public StringBuilder getPlanSQL(StringBuilder builder, boolean isJoin, int sqlFlags) {
+    public StringBuilder getPlanSQL(StringBuilder builder, boolean isJoin, int sqlFlags) {//tiger 执行计划之核心函数getPlanSQL
         if (isJoin) {
             if (joinOuter) {
                 builder.append("LEFT OUTER JOIN ");
@@ -708,7 +708,7 @@ public class TableFilter implements ColumnResolver {
             StringBuilder buffNested = new StringBuilder();
             TableFilter n = nestedJoin;
             do {
-                n.getPlanSQL(buffNested, n != nestedJoin, sqlFlags).append('\n');
+                n.getPlanSQL(buffNested, n != nestedJoin, sqlFlags).append('\n');//递归调用
                 n = n.getJoin();
             } while (n != null);
             String nested = buffNested.toString();
@@ -720,7 +720,7 @@ public class TableFilter implements ColumnResolver {
             if (enclose) {
                 builder.append(')');
             }
-            if (isJoin) {
+            if (isJoin) {//是否是join
                 builder.append(" ON ");
                 if (joinCondition == null) {
                     // need to have a ON expression,
@@ -732,7 +732,7 @@ public class TableFilter implements ColumnResolver {
             }
             return builder;
         }
-        if (table instanceof TableView && ((TableView) table).isRecursive()) {
+        if (table instanceof TableView && ((TableView) table).isRecursive()) {//
             table.getSchema().getSQL(builder, sqlFlags).append('.');
             ParserUtil.quoteIdentifier(builder, table.getName(), sqlFlags);
         } else {
@@ -741,7 +741,7 @@ public class TableFilter implements ColumnResolver {
         if (table instanceof TableView && ((TableView) table).isInvalid()) {
             throw DbException.get(ErrorCode.VIEW_IS_INVALID_2, table.getName(), "not compiled");
         }
-        if (alias != null) {
+        if (alias != null) {//同名
             builder.append(' ');
             ParserUtil.quoteIdentifier(builder, alias, sqlFlags);
             if (derivedColumnMap != null) {
@@ -758,13 +758,13 @@ public class TableFilter implements ColumnResolver {
             }
         }
         if (indexHints != null) {
-            builder.append(" USE INDEX (");
+            builder.append(" USE INDEX (");//强行使用index，避免优化错误
             boolean first = true;
             for (String index : indexHints.getAllowedIndexes()) {
                 if (!first) {
                     builder.append(", ");
                 } else {
-                    first = false;
+                    first = false;//可以使用多个索引
                 }
                 ParserUtil.quoteIdentifier(builder, index, sqlFlags);
             }
@@ -772,7 +772,7 @@ public class TableFilter implements ColumnResolver {
         }
         if (index != null && (sqlFlags & HasSQL.ADD_PLAN_INFORMATION) != 0) {
             builder.append('\n');
-            StringBuilder planBuilder = new StringBuilder().append("/* ").append(index.getPlanSQL());
+            StringBuilder planBuilder = new StringBuilder().append("/* ").append(index.getPlanSQL());//获取类似 PUBLIC."_key_Proxy_proxy" : ID > 37
             if (!indexConditions.isEmpty()) {
                 planBuilder.append(": ");
                 for (int i = 0, size = indexConditions.size(); i < size; i++) {
@@ -793,20 +793,20 @@ public class TableFilter implements ColumnResolver {
             if (joinCondition == null) {
                 // need to have a ON expression, otherwise the nesting is
                 // unclear
-                builder.append("1=1");
+                builder.append("1=1");//补一下条件
             } else {
                 joinCondition.getUnenclosedSQL(builder, sqlFlags);
             }
         }
         if ((sqlFlags & HasSQL.ADD_PLAN_INFORMATION) != 0) {
-            if (filterCondition != null) {
+            if (filterCondition != null) {//如果是执行计划，有条件的地方都要加入使用什么索引...
                 builder.append('\n');
                 String condition = filterCondition.getSQL(HasSQL.TRACE_SQL_FLAGS | HasSQL.ADD_PLAN_INFORMATION,
-                        Expression.WITHOUT_PARENTHESES);
+                        Expression.WITHOUT_PARENTHESES);//取SQL
                 condition = "/* WHERE " + condition + "\n*/";
-                StringUtils.indent(builder, condition, 4, false);
+                StringUtils.indent(builder, condition, 4, false);//设置格式
             }
-            if (scanCount > 0) {
+            if (scanCount > 0) {//还能将扫描行数加上
                 builder.append("\n    /* scanCount: ").append(scanCount).append(" */");
             }
         }

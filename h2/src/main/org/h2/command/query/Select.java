@@ -1359,7 +1359,7 @@ public class Select extends Query {
     }
 
     @Override
-    public String getPlanSQL(int sqlFlags) {
+    public String getPlanSQL(int sqlFlags) {//TIGER 执行计划
         // can not use the field sqlStatement because the parameter
         // indexes may be incorrect: ? may be in fact ?2 for a subquery
         // but indexes may be set manually as well

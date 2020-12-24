@@ -100,21 +100,21 @@ public class Plan {//TODO: TIGER 理解执行计划
      * @param allColumnsSet calculates all columns on-demand
      * @return the cost
      */
-    public double calculateCost(SessionLocal session, AllColumnsForPlan allColumnsSet) {
+    public double calculateCost(SessionLocal session, AllColumnsForPlan allColumnsSet) {//tiger 核心函数，如何计算
         Trace t = session.getTrace();
         if (t.isDebugEnabled()) {
             t.debug("Plan       : calculate cost for plan {0}", Arrays.toString(allFilters));
         }
         double cost = 1;
         boolean invalidPlan = false;
-        for (int i = 0; i < allFilters.length; i++) {
+        for (int i = 0; i < allFilters.length; i++) {//就是在几个过滤条件下计算
             TableFilter tableFilter = allFilters[i];
             if (t.isDebugEnabled()) {
                 t.debug("Plan       :   for table filter {0}", tableFilter);
             }
             PlanItem item = tableFilter.getBestPlanItem(session, allFilters, i, allColumnsSet);
             planItems.put(tableFilter, item);
-            if (t.isDebugEnabled()) {
+            if (t.isDebugEnabled()) {//tiger 调试，增加日志
                 t.debug("Plan       :   best plan item cost {0} index {1}",
                         item.cost, item.getIndex().getPlanSQL());
             }

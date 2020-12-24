@@ -20,7 +20,7 @@ import org.h2.value.ValueBigint;
  * A sequence is created using the statement
  * CREATE SEQUENCE
  */
-public final class Sequence extends SchemaObject {
+public final class Sequence extends SchemaObject {//todo: TIGER 如何避免多进程冲突
 
     /**
      * CYCLE clause and sequence state.
@@ -356,7 +356,7 @@ public final class Sequence extends SchemaObject {
     }
 
     @Override
-    public String getCreateSQL() {
+    public String getCreateSQL() {//tiger 创建sequence 的sql，
         StringBuilder builder = getSQL(new StringBuilder("CREATE SEQUENCE "), DEFAULT_SQL_FLAGS);
         if (dataType.getValueType() != Value.BIGINT) {
             dataType.getSQL(builder.append(" AS "), DEFAULT_SQL_FLAGS);
