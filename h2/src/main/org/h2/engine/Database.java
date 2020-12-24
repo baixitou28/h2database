@@ -101,7 +101,7 @@ import org.h2.value.ValueTimestampTimeZone;
  *
  * @since 2004-04-15 22:49
  */
-public final class Database implements DataHandler, CastDataProvider {
+public final class Database implements DataHandler, CastDataProvider {//TODO: TIGER 理解Database大体机制
 
     private static int initialPowerOffCount;
 

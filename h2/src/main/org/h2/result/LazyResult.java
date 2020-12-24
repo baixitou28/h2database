@@ -16,7 +16,7 @@ import org.h2.value.Value;
  *
  * @author Sergi Vladykin
  */
-public abstract class LazyResult extends FetchedResult {
+public abstract class LazyResult extends FetchedResult {//TODO: TIGER 理解lazy机制
 
     private final SessionLocal session;
     private final Expression[] expressions;

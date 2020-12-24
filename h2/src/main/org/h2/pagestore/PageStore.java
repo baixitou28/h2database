@@ -81,7 +81,7 @@ import org.h2.value.ValueVarchar;
  * Page 3 contains the first free list page.
  * Page 4 contains the meta table root page.
  */
-public class PageStore implements CacheWriter {
+public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体机制
 
     // TODO test running out of disk space (using a special file system)
     // TODO unused pages should be freed once in a while

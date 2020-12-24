@@ -24,7 +24,7 @@ import org.h2.util.Utils;
  * This class can read a file that is similar to BNF (Backus-Naur form).
  * It is made specially to support SQL grammar.
  */
-public class Bnf {
+public class Bnf {//TODO: TIGER 理解这里bnf
 
     /**
      * The rule map. The key is lowercase, and all spaces

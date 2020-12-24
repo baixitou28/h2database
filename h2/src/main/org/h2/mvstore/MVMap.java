@@ -1728,7 +1728,7 @@ public class MVMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V
      * @return previous value, if mapping for that key existed, or null otherwise
      */
     public V operate(K key, V value, DecisionMaker<? super V> decisionMaker) {//TIGER 这里实现锁的并发访问
-        IntValueHolder unsavedMemoryHolder = new IntValueHolder();
+        IntValueHolder unsavedMemoryHolder = new IntValueHolder();//TODO: TIGER 理解存储大体机制
         int attempt = 0;
         while(true) {
             RootReference<K,V> rootReference = flushAndGetRoot();

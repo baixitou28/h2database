@@ -84,7 +84,7 @@ import org.h2.value.ValueLobDatabase;
  * Helps recovering a corrupted database.
  * @h2.resource
  */
-public class Recover extends Tool implements DataHandler {
+public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解恢复机制，如何避免竞争
 
     private String databaseName;
     private int storageId;

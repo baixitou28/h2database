@@ -31,7 +31,7 @@ import org.h2.value.ValueNull;
 /**
  * An index. Indexes are used to speed up searching data.
  */
-public abstract class Index extends SchemaObject {
+public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机制，如何避免竞争，如何高效
 
     /**
      * Check that the index columns are not CLOB or BLOB.

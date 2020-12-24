@@ -18,7 +18,7 @@ import org.h2.index.Index;
  * the query planner to only use specific indexes when determining which index
  * to use for a table
  **/
-public final class IndexHints {
+public final class IndexHints {//TODO: TIGER 理解hint机制
 
     private final LinkedHashSet<String> allowedIndexes;
 

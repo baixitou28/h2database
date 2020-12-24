@@ -40,7 +40,7 @@ import org.h2.util.Utils;
  *
  * @author Thomas Mueller, Sylvain Cuaz
  */
-public class Csv implements SimpleRowSource {
+public class Csv implements SimpleRowSource {//转化为csv
 
     private String[] columnNames;
 

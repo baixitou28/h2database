@@ -30,7 +30,7 @@ import org.h2.util.Utils;
  * It is also responsible for opening and creating new databases.
  * This is a singleton class.
  */
-public final class Engine {
+public final class Engine {//TODO: TIGER 理解Database大体机制
 
     private static final Map<String, Database> DATABASES = new HashMap<>();
 

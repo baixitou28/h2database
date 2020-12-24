@@ -33,7 +33,7 @@ import org.h2.util.Tool;
  *
  * @h2.resource
  */
-public class Backup extends Tool {
+public class Backup extends Tool {//TODO: TIGER 理解备份机制，如何避免竞争
 
     /**
      * Options are case sensitive. Supported options are:

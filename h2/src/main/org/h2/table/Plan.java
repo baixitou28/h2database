@@ -19,7 +19,7 @@ import org.h2.message.Trace;
  * A possible query execution plan. The time required to execute a query depends
  * on the order the tables are accessed.
  */
-public class Plan {
+public class Plan {//TODO: TIGER 理解执行计划
 
     private final TableFilter[] filters;
     private final HashMap<TableFilter, PlanItem> planItems = new HashMap<>();

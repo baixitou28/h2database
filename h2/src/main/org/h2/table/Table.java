@@ -215,7 +215,7 @@ public abstract class Table extends SchemaObject {
      * @param row the row
      * @throws DbException if a constraint was violated
      */
-    public abstract void addRow(SessionLocal session, Row row);
+    public abstract void addRow(SessionLocal session, Row row);//TODO: TIGER 理解插入机制，如何避免低效
 
     /**
      * Update a row to the table and all indexes.
