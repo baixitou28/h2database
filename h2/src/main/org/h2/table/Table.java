@@ -840,7 +840,7 @@ public abstract class Table extends SchemaObject {
         ArrayList<Index> indexes = getIndexes();
         IndexHints indexHints = getIndexHints(filters, filter);
 
-        if (indexes != null && masks != null) {//如果是单个表，只选最优索引即可
+        if (indexes != null && masks != null) {//标记[堆栈explain SELECT ID]21//如果是单个表，只选最优索引即可
             for (int i = 1, size = indexes.size(); i < size; i++) {
                 Index index = indexes.get(i);
 

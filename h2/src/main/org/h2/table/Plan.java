@@ -112,7 +112,7 @@ public class Plan {//TODO: TIGER 理解执行计划
             if (t.isDebugEnabled()) {
                 t.debug("Plan       :   for table filter {0}", tableFilter);
             }
-            PlanItem item = tableFilter.getBestPlanItem(session, allFilters, i, allColumnsSet);
+            PlanItem item = tableFilter.getBestPlanItem(session, allFilters, i, allColumnsSet);//标记[堆栈explain SELECT ID]19
             planItems.put(tableFilter, item);
             if (t.isDebugEnabled()) {//tiger 调试，增加日志
                 t.debug("Plan       :   best plan item cost {0} index {1}",

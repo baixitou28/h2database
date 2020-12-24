@@ -554,7 +554,7 @@ public class SessionLocal extends Session implements TransactionStore.RollbackLi
     @Override
     public synchronized CommandInterface prepareCommand(String sql,
             int fetchSize) {
-        return prepareLocal(sql);
+        return prepareLocal(sql);//标记[堆栈explain SELECT ID]10
     }
 
     /**
@@ -616,7 +616,7 @@ public class SessionLocal extends Session implements TransactionStore.RollbackLi
         }
         Parser parser = new Parser(this);
         try {
-            command = parser.prepareCommand(sql);
+            command = parser.prepareCommand(sql);//标记[堆栈explain SELECT ID]11
         } finally {
             // we can't reuse sub-query indexes, so just drop the whole cache
             subQueryIndexCache = null;

@@ -91,7 +91,7 @@ class WebThread extends WebApp implements Runnable {
             input = new BufferedInputStream(socket.getInputStream());
             output = new BufferedOutputStream(socket.getOutputStream());
             while (!stop) {
-                if (!process()) {//运行
+                if (!process()) {//标记[堆栈explain SELECT ID]1 运行堆栈select * from test where id >=1
                     break;
                 }
             }
@@ -175,7 +175,7 @@ class WebThread extends WebApp implements Runnable {
                                 trace(message);
                                 output.write(message.getBytes());
                                 while (it.hasNext()) {
-                                    String s = it.next();
+                                    String s = it.next();//标记[堆栈explain SELECT ID]2
                                     s = PageParser.parse(s, session.map);
                                     bytes = s.getBytes(StandardCharsets.UTF_8);
                                     if (bytes.length == 0) {

@@ -203,7 +203,7 @@ public class JdbcStatement extends TraceObject implements Statement, JdbcStateme
     public final boolean execute(String sql) throws SQLException {
         try {
             debugCodeCall("execute", sql);
-            return executeInternal(sql, false);
+            return executeInternal(sql, false);//标记[堆栈explain SELECT ID]7
         } catch (Exception e) {
             throw logAndConvert(e);
         }
@@ -217,7 +217,7 @@ public class JdbcStatement extends TraceObject implements Statement, JdbcStateme
         checkClosed();
         closeOldResultSet();
         sql = JdbcConnection.translateSQL(sql, escapeProcessing);
-        CommandInterface command = conn.prepareCommand(sql, fetchSize);
+        CommandInterface command = conn.prepareCommand(sql, fetchSize);//标记[堆栈explain SELECT ID]8
         boolean lazy = false;
         boolean returnsResultSet;
         synchronized (session) {

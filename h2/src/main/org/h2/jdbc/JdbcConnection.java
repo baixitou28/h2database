@@ -1127,7 +1127,7 @@ public class JdbcConnection extends TraceObject implements Connection, JdbcConne
      * @return the command
      */
     CommandInterface prepareCommand(String sql, int fetchSize) {
-        return session.prepareCommand(sql, fetchSize);
+        return session.prepareCommand(sql, fetchSize);//标记[堆栈explain SELECT ID]9
     }
 
     private CommandInterface prepareCommand(String sql, CommandInterface old) {

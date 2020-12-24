@@ -1196,7 +1196,7 @@ public class Select extends Query {
                 && filters.size() == 1) {
             isQuickAggregateQuery = isEverything(ExpressionVisitor.getOptimizableVisitor(filters.get(0).getTable()));
         }
-        cost = preparePlan(session.isParsingCreateView());
+        cost = preparePlan(session.isParsingCreateView());//标记[堆栈explain SELECT ID]14
         if (distinct && session.getDatabase().getSettings().optimizeDistinct &&
                 !isGroupQuery && filters.size() == 1 &&
                 expressions.size() == 1 && condition == null) {
@@ -1310,7 +1310,7 @@ public class Select extends Query {
         }
 
         Optimizer optimizer = new Optimizer(topArray, condition, session);
-        optimizer.optimize(parse);
+        optimizer.optimize(parse);//标记[堆栈explain SELECT ID]15
         topTableFilter = optimizer.getTopFilter();
         double planCost = optimizer.getCost();
 

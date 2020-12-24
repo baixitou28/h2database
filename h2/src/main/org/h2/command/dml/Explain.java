@@ -49,7 +49,7 @@ public class Explain extends Prepared {//todo: TIGER 执行计划的实现 ,参�
 
     @Override
     public void prepare() {
-        command.prepare();//tiger 不同的命令执行不同的prepare
+        command.prepare();//标记[堆栈explain SELECT ID]13//tiger 不同的命令执行不同的prepare
     }
 
     public void setExecuteCommand(boolean executeCommand) {

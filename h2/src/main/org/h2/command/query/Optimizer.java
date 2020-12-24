@@ -78,7 +78,7 @@ class Optimizer {
     private void calculateBestPlan() {
         cost = -1;
         if (filters.length == 1 || session.isForceJoinOrder()) {
-            testPlan(filters);
+            testPlan(filters);//标记[堆栈explain SELECT ID]17
         } else {
             startNs = System.nanoTime();
             if (filters.length <= MAX_BRUTE_FORCE_FILTERS) {
@@ -179,7 +179,7 @@ class Optimizer {
 
     private boolean testPlan(TableFilter[] list) {
         Plan p = new Plan(list, list.length, condition);
-        double costNow = p.calculateCost(session, allColumnsSet);
+        double costNow = p.calculateCost(session, allColumnsSet);//标记[堆栈explain SELECT ID]18
         if (cost < 0 || costNow < cost) {
             cost = costNow;
             bestPlan = p;
@@ -238,7 +238,7 @@ class Optimizer {
         if (parse) {
             calculateFakePlan();
         } else {
-            calculateBestPlan();
+            calculateBestPlan();//标记[堆栈explain SELECT ID]16
             bestPlan.removeUnusableIndexConditions();
         }
         TableFilter[] f2 = bestPlan.getFilters();

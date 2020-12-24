@@ -959,7 +959,7 @@ public class Parser {//TODO: tiger 理解如何解析 ，看注释将sql 转换�
                 throw getSyntaxError();
             }
             try {
-                p.prepare();
+                p.prepare();//标记[堆栈explain SELECT ID]12
             } catch (Throwable t) {
                 CommandContainer.clearCTE(session, p);
                 throw t;

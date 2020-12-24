@@ -1082,7 +1082,7 @@ public class WebApp {
                 // footer
                 list.add(0, page.substring(0, idx));
                 list.add(page.substring(idx + "${result}".length()));
-                session.put("chunks", new Iterator<String>() {
+                session.put("chunks", new Iterator<String>() {////标记[堆栈explain SELECT ID]3
                     private int i;
                     @Override
                     public boolean hasNext() {
@@ -1095,7 +1095,7 @@ public class WebApp {
                             return s;
                         }
                         StringBuilder b = new StringBuilder();
-                        query(conn, s, i - 1, list.size() - 2, b);
+                        query(conn, s, i - 1, list.size() - 2, b);//标记[堆栈explain SELECT ID]4
                         return b.toString();
                     }
                 });
@@ -1130,7 +1130,7 @@ public class WebApp {
         }
         boolean forceEdit = s.startsWith("@edit");
         buff.append(getResult(conn, i + 1, s, size == 1, forceEdit)).
-            append("<br />");
+            append("<br />");//标记[堆栈explain SELECT ID]5
     }
 
     private String editResult() {
@@ -1331,7 +1331,7 @@ public class WebApp {
                 session.executingStatement = stat;
                 boolean isResultSet;
                 if (generatedKeys == null) {
-                    isResultSet = stat.execute(sql);//执行sql，获取记录
+                    isResultSet = stat.execute(sql);////标记[堆栈explain SELECT ID]6 执行sql，获取记录
                 } else if (generatedKeys instanceof Boolean) {
                     isResultSet = stat.execute(sql,
                             ((Boolean) generatedKeys) ? Statement.RETURN_GENERATED_KEYS : Statement.NO_GENERATED_KEYS);
