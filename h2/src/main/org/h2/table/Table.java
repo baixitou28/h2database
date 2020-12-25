@@ -826,7 +826,7 @@ public abstract class Table extends SchemaObject {
      * @param allColumnsSet the set of all columns
      * @return the plan item
      */
-    public PlanItem getBestPlanItem(SessionLocal session, int[] masks,//tiger 执行计划之核心函数getBestPlanItem
+    public PlanItem getBestPlanItem(SessionLocal session, int[] masks,//标记[堆栈explain SELECT ID]22 //tiger 执行计划之核心函数getBestPlanItem
             TableFilter[] filters, int filter, SortOrder sortOrder,
             AllColumnsForPlan allColumnsSet) {
         PlanItem item = new PlanItem();
@@ -844,7 +844,7 @@ public abstract class Table extends SchemaObject {
             for (int i = 1, size = indexes.size(); i < size; i++) {
                 Index index = indexes.get(i);
 
-                if (isIndexExcludedByHints(indexHints, index)) {
+                if (isIndexExcludedByHints(indexHints, index)) {//hint可以排除某个index
                     continue;
                 }
 

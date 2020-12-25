@@ -107,10 +107,10 @@ public class Plan {//TODO: TIGER 理解执行计划
         }
         double cost = 1;
         boolean invalidPlan = false;
-        for (int i = 0; i < allFilters.length; i++) {//就是在几个过滤条件下计算
+        for (int i = 0; i < allFilters.length; i++) {//计算所有过滤的cost
             TableFilter tableFilter = allFilters[i];
             if (t.isDebugEnabled()) {
-                t.debug("Plan       :   for table filter {0}", tableFilter);
+                t.debug("Plan       :   for table filter {0}", tableFilter);//比如PUBLIC.TEST的select * from test where id >=1
             }
             PlanItem item = tableFilter.getBestPlanItem(session, allFilters, i, allColumnsSet);//标记[堆栈explain SELECT ID]19
             planItems.put(tableFilter, item);

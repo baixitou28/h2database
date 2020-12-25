@@ -244,12 +244,12 @@ class Optimizer {
         TableFilter[] f2 = bestPlan.getFilters();
         topFilter = f2[0];
         for (int i = 0; i < f2.length - 1; i++) {
-            f2[i].addJoin(f2[i + 1], false, null);
+            f2[i].addJoin(f2[i + 1], false, null);//多个过滤器
         }
         if (parse) {
             return;
         }
-        for (TableFilter f : f2) {
+        for (TableFilter f : f2) {//其实就是过滤的where
             PlanItem item = bestPlan.getItem(f);
             f.setPlanItem(item);
         }

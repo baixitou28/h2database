@@ -526,8 +526,8 @@ public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机�
      * @param allColumnsSet the set of all columns
      * @return the estimated cost
      */
-    protected final long getCostRangeIndex(int[] masks, long rowCount, TableFilter[] filters, int filter,
-            SortOrder sortOrder, boolean isScanIndex, AllColumnsForPlan allColumnsSet) {
+    protected final long getCostRangeIndex(int[] masks, long rowCount, TableFilter[] filters, int filter,//标记[堆栈explain SELECT ID]24
+            SortOrder sortOrder, boolean isScanIndex, AllColumnsForPlan allColumnsSet) {//tiger 计算区间索引的成本
         rowCount += Constants.COST_ROW_OFFSET;
         int totalSelectivity = 0;
         long rowsCost = rowCount;
@@ -538,9 +538,9 @@ public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机�
                 Column column = columns[i++];
                 int index = column.getColumnId();
                 int mask = masks[index];
-                if ((mask & IndexCondition.EQUALITY) == IndexCondition.EQUALITY) {
+                if ((mask & IndexCondition.EQUALITY) == IndexCondition.EQUALITY) {//等于
                     if (i == len && getIndexType().isUnique()) {
-                        rowsCost = 3;
+                        rowsCost = 3;//唯一索引优先
                         break;
                     }
                     totalSelectivity = 100 - ((100 - totalSelectivity) *
@@ -550,15 +550,15 @@ public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机�
                         distinctRows = 1;
                     }
                     rowsCost = 2 + Math.max(rowCount / distinctRows, 1);
-                } else if ((mask & IndexCondition.RANGE) == IndexCondition.RANGE) {
+                } else if ((mask & IndexCondition.RANGE) == IndexCondition.RANGE) {//区间
                     rowsCost = 2 + rowsCost / 4;
                     tryAdditional = true;
                     break;
-                } else if ((mask & IndexCondition.START) == IndexCondition.START) {
+                } else if ((mask & IndexCondition.START) == IndexCondition.START) {//大于
                     rowsCost = 2 + rowsCost / 3;
                     tryAdditional = true;
                     break;
-                } else if ((mask & IndexCondition.END) == IndexCondition.END) {
+                } else if ((mask & IndexCondition.END) == IndexCondition.END) {//小于
                     rowsCost = rowsCost / 3;
                     tryAdditional = true;
                     break;
@@ -587,7 +587,7 @@ public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机�
         if (sortOrder != null) {
             sortingCost = 100 + rowCount / 10;
         }
-        if (sortOrder != null && !isScanIndex) {
+        if (sortOrder != null && !isScanIndex) {//看注释，是否排序和索引一致
             boolean sortOrderMatches = true;
             int coveringCount = 0;
             int[] sortTypes = sortOrder.getSortTypesWithNullOrdering();
@@ -628,7 +628,7 @@ public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机�
         // satisfy the query without needing to read from the primary table
         // (scan index), make that one slightly lower cost.
         boolean needsToReadFromScanIndex;
-        if (!isScanIndex && allColumnsSet != null) {
+        if (!isScanIndex && allColumnsSet != null) {//看注释，如果cost一致，但...?
             needsToReadFromScanIndex = false;
             ArrayList<Column> foundCols = allColumnsSet.get(getTable());
             if (foundCols != null) {
@@ -651,7 +651,7 @@ public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机�
             needsToReadFromScanIndex = true;
         }
         long rc;
-        if (isScanIndex) {
+        if (isScanIndex) {//一般有table scan,index scan，这里说的是：如果是索引，则加入排序成本
             rc = rowsCost + sortingCost + 20;
         } else if (needsToReadFromScanIndex) {
             rc = rowsCost + rowsCost + sortingCost + 20;

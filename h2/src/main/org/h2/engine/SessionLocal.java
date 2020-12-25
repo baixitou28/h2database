@@ -618,10 +618,10 @@ public class SessionLocal extends Session implements TransactionStore.RollbackLi
         try {
             command = parser.prepareCommand(sql);//标记[堆栈explain SELECT ID]11
         } finally {
-            // we can't reuse sub-query indexes, so just drop the whole cache
+            // we can't reuse sub-query indexes, so just drop the whole cache//特别注意这点
             subQueryIndexCache = null;
         }
-        if (queryCache != null) {
+        if (queryCache != null) {//放入cache
             if (command.isCacheable()) {
                 queryCache.put(sql, command);
             }

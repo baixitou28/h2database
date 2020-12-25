@@ -110,7 +110,7 @@ public class MVDelegateIndex extends MVIndex<Long, SearchRow> {
     }
 
     @Override
-    public double getCost(SessionLocal session, int[] masks,
+    public double getCost(SessionLocal session, int[] masks,//标记[堆栈explain SELECT ID]23
             TableFilter[] filters, int filter, SortOrder sortOrder,
             AllColumnsForPlan allColumnsSet) {
         return 10 * getCostRangeIndex(masks, mainIndex.getRowCountApproximation(session),
