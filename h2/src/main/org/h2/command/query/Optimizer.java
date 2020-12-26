@@ -77,14 +77,14 @@ class Optimizer {
 
     private void calculateBestPlan() {
         cost = -1;
-        if (filters.length == 1 || session.isForceJoinOrder()) {
+        if (filters.length == 1 || session.isForceJoinOrder()) {//A.如果强制join order(无法调优)，或者B. filter个数为1(可以简单理解为表的个数)？
             testPlan(filters);//标记[堆栈explain SELECT ID]17
         } else {
             startNs = System.nanoTime();
             if (filters.length <= MAX_BRUTE_FORCE_FILTERS) {
-                calculateBruteForceAll();
+                calculateBruteForceAll();//一般情况下个数都是少于7个的，可以直接用暴力方式即将filter采用全排列方式，对比去最小的cost
             } else {
-                calculateBruteForceSome();
+                calculateBruteForceSome();//如果filter个数太大，
                 random = new Random(0);
                 calculateGenetic();
             }
@@ -96,12 +96,12 @@ class Optimizer {
         bestPlan = new Plan(filters, filters.length, condition);
     }
 
-    private boolean canStop(int x) {
-        return (x & 127) == 0
+    private boolean canStop(int x) {//三个条件全满足
+        return (x & 127) == 0//127次
                 // don't calculate for simple queries (no rows or so)
-                && cost >= 0
+                && cost >= 0//已经有cost算出来了
                 // 100 microseconds * cost
-                && System.nanoTime() - startNs > cost * 100_000L;
+                && System.nanoTime() - startNs > cost * 100_000L;//时间已经比较长了
     }
 
     private void calculateBruteForceAll() {
@@ -115,8 +115,8 @@ class Optimizer {
     private void calculateBruteForceSome() {
         int bruteForce = getMaxBruteForceFilters(filters.length);
         TableFilter[] list = new TableFilter[filters.length];
-        Permutations<TableFilter> p = Permutations.create(filters, list, bruteForce);
-        for (int x = 0; !canStop(x) && p.next(); x++) {
+        Permutations<TableFilter> p = Permutations.create(filters, list, bruteForce);//先创建个全排列
+        for (int x = 0; !canStop(x) && p.next(); x++) {//循环，知道时间太长，
             // find out what filters are not used yet
             for (TableFilter f : filters) {
                 f.setUsed(false);
@@ -153,12 +153,12 @@ class Optimizer {
     private void calculateGenetic() {
         TableFilter[] best = new TableFilter[filters.length];
         TableFilter[] list = new TableFilter[filters.length];
-        for (int x = 0; x < MAX_GENETIC; x++) {
+        for (int x = 0; x < MAX_GENETIC; x++) {//用
             if (canStop(x)) {
                 break;
             }
             boolean generateRandom = (x & 127) == 0;
-            if (!generateRandom) {
+            if (!generateRandom) {//如果是第128次，
                 System.arraycopy(best, 0, list, 0, filters.length);
                 if (!shuffleTwo(list)) {
                     generateRandom = true;
@@ -177,7 +177,7 @@ class Optimizer {
         }
     }
 
-    private boolean testPlan(TableFilter[] list) {
+    private boolean testPlan(TableFilter[] list) {//list的都算一遍，看哪个最小
         Plan p = new Plan(list, list.length, condition);
         double costNow = p.calculateCost(session, allColumnsSet);//标记[堆栈explain SELECT ID]18
         if (cost < 0 || costNow < cost) {
@@ -188,21 +188,21 @@ class Optimizer {
         return false;
     }
 
-    private void shuffleAll(TableFilter[] f) {
+    private void shuffleAll(TableFilter[] f) {//
         for (int i = 0; i < f.length - 1; i++) {
-            int j = i + random.nextInt(f.length - i);
+            int j = i + random.nextInt(f.length - i);//随机位置
             if (j != i) {
                 TableFilter temp = f[i];
-                f[i] = f[j];
+                f[i] = f[j];//互换第n个
                 f[j] = temp;
             }
         }
     }
 
-    private boolean shuffleTwo(TableFilter[] f) {
+    private boolean shuffleTwo(TableFilter[] f) {//交换基因
         int a = 0, b = 0, i = 0;
-        for (; i < 20; i++) {
-            a = random.nextInt(f.length);
+        for (; i < 20; i++) {//操作20次
+            a = random.nextInt(f.length);//两个随机数
             b = random.nextInt(f.length);
             if (a == b) {
                 continue;
@@ -212,7 +212,7 @@ class Optimizer {
                 a = b;
                 b = temp;
             }
-            int s = a * f.length + b;
+            int s = a * f.length + b;//互换位置计算
             if (switched.get(s)) {
                 continue;
             }
@@ -239,7 +239,7 @@ class Optimizer {
             calculateFakePlan();
         } else {
             calculateBestPlan();//标记[堆栈explain SELECT ID]16
-            bestPlan.removeUnusableIndexConditions();
+            bestPlan.removeUnusableIndexConditions();//冗余的语句
         }
         TableFilter[] f2 = bestPlan.getFilters();
         topFilter = f2[0];

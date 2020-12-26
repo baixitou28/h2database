@@ -797,7 +797,7 @@ public abstract class Query extends Prepared {
      * @param sqlFlags formatting flags
      * @param expressions the array of expressions
      */
-    void appendEndOfQueryToSQL(StringBuilder builder, int sqlFlags, Expression[] expressions) {
+    void appendEndOfQueryToSQL(StringBuilder builder, int sqlFlags, Expression[] expressions) {//tiger 看注释
         if (sort != null) {
             sort.getSQL(builder.append("\nORDER BY "), expressions, visibleColumnCount, sqlFlags);
         } else if (orderList != null) {

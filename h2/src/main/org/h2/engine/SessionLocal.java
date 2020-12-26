@@ -272,7 +272,7 @@ public class SessionLocal extends Session implements TransactionStore.RollbackLi
         this.forceJoinOrder = forceJoinOrder;
     }
 
-    public boolean isForceJoinOrder() {
+    public boolean isForceJoinOrder() {//tiger 因为forceJoinOrder导致
         return forceJoinOrder;
     }
 

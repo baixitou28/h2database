@@ -98,7 +98,7 @@ public class Explain extends Prepared {//todo: TIGER 执行计划的实现 ,参�
                 }
                 plan = command.getPlanSQL(sqlFlags);
                 Map<String, Integer> statistics = null;
-                if (store != null) {
+                if (store != null) {//取统计值
                     statistics = store.statisticsEnd();
                 } else if (pageStore != null) {
                     statistics = pageStore.statisticsEnd();
@@ -108,7 +108,7 @@ public class Explain extends Prepared {//todo: TIGER 执行计划的实现 ,参�
                     for (Entry<String, Integer> e : statistics.entrySet()) {
                         total += e.getValue();
                     }
-                    if (total > 0) {
+                    if (total > 0) {//如果统计值不为0，分别显示
                         statistics = new TreeMap<>(statistics);
                         StringBuilder buff = new StringBuilder();
                         if (statistics.size() > 1) {

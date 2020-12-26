@@ -1419,7 +1419,7 @@ public class Select extends Query {
                 getFilterSQL(builder, "\nWHERE ", condition, sqlFlags);
             }
             if (groupIndex != null) {
-                builder.append("\nGROUP BY ");
+                builder.append("\nGROUP BY ");//加入group by
                 for (int i = 0, l = groupIndex.length; i < l; i++) {
                     if (i > 0) {
                         builder.append(", ");
@@ -1427,14 +1427,14 @@ public class Select extends Query {
                     exprList[groupIndex[i]].getNonAliasExpression().getUnenclosedSQL(builder, sqlFlags);
                 }
             } else if (group != null) {
-                builder.append("\nGROUP BY ");
+                builder.append("\nGROUP BY ");//加入group by
                 for (int i = 0, l = group.size(); i < l; i++) {
                     if (i > 0) {
                         builder.append(", ");
                     }
                     group.get(i).getUnenclosedSQL(builder, sqlFlags);
                 }
-            } else emptyGroupingSet: if (isGroupQuery && having == null && havingIndex < 0) {
+            } else emptyGroupingSet: if (isGroupQuery && having == null && havingIndex < 0) {//如果是复杂点的having
                 for (int i = 0; i < visibleColumnCount; i++) {
                     if (containsAggregate(exprList[i])) {
                         break emptyGroupingSet;
@@ -1445,23 +1445,23 @@ public class Select extends Query {
             getFilterSQL(builder, "\nHAVING ", exprList, having, havingIndex, sqlFlags);
             getFilterSQL(builder, "\nQUALIFY ", exprList, qualify, qualifyIndex, sqlFlags);
         }
-        appendEndOfQueryToSQL(builder, sqlFlags, exprList);
+        appendEndOfQueryToSQL(builder, sqlFlags, exprList);//tiger 看注释 Appends ORDER BY, OFFSET, and FETCH clauses to the plan.
         if (isForUpdate) {
             builder.append("\nFOR UPDATE");
         }
-        if ((sqlFlags & ADD_PLAN_INFORMATION) != 0) {
+        if ((sqlFlags & ADD_PLAN_INFORMATION) != 0) {//tiger 重要，这几种模式都有不同的处理
             if (isQuickAggregateQuery) {
-                builder.append("\n/* direct lookup */");
+                builder.append("\n/* direct lookup */");//tiger unknown 不知道何时使用
             }
             if (isDistinctQuery) {
-                builder.append("\n/* distinct */");
+                builder.append("\n/* distinct */");//使用了唯一
             }
             if (sortUsingIndex) {
-                builder.append("\n/* index sorted */");
+                builder.append("\n/* index sorted */");//刚好用index 来排序
             }
             if (isGroupQuery) {
                 if (isGroupSortedQuery) {
-                    builder.append("\n/* group sorted */");
+                    builder.append("\n/* group sorted */");//组来排序
                 }
             }
             // builder.append("\n/* cost: " + cost + " */");
@@ -1489,7 +1489,7 @@ public class Select extends Query {
         }
     }
 
-    private static void getFilterSQL(StringBuilder builder, String sql, Expression condition, int sqlFlags) {
+    private static void getFilterSQL(StringBuilder builder, String sql, Expression condition, int sqlFlags) {//tiger 比如生成where id > 1
         condition.getUnenclosedSQL(builder.append(sql), sqlFlags);
     }
 

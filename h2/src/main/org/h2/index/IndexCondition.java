@@ -174,7 +174,7 @@ public class IndexCondition {
      * @param sqlFlags formatting flags
      * @return the SQL snippet
      */
-    public String getSQL(int sqlFlags) {
+    public String getSQL(int sqlFlags) {//TIGER index的子类函数生成SQL， 一般用再执行计划里，用于那些使用了索引为特别标记
         if (compareType == Comparison.FALSE) {
             return "FALSE";
         }
@@ -216,7 +216,7 @@ public class IndexCondition {
         default:
             throw DbException.getInternalError("type=" + compareType);
         }
-        if (expression != null) {
+        if (expression != null) {//比如expression 是 1，就变成诸如 >= 1
             expression.getSQL(builder, sqlFlags, Expression.AUTO_PARENTHESES);
         }
         return builder.toString();

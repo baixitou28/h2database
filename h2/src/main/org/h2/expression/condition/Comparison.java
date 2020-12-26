@@ -125,9 +125,9 @@ public final class Comparison extends Condition {
     }
 
     @Override
-    public StringBuilder getWhenSQL(StringBuilder builder, int sqlFlags) {
-        builder.append(' ').append(COMPARE_TYPES[compareType]).append(' ');
-        return right.getSQL(builder, sqlFlags,
+    public StringBuilder getWhenSQL(StringBuilder builder, int sqlFlags) {//tiger 获取比较SQL
+        builder.append(' ').append(COMPARE_TYPES[compareType]).append(' ');//比如 WHERE "ID" >=
+        return right.getSQL(builder, sqlFlags,//这个right 是1
                 right instanceof Aggregate && ((Aggregate) right).getAggregateType() == AggregateType.ANY
                         ? WITH_PARENTHESES
                         : AUTO_PARENTHESES);

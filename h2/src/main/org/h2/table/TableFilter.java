@@ -772,21 +772,21 @@ public class TableFilter implements ColumnResolver {
         }
         if (index != null && (sqlFlags & HasSQL.ADD_PLAN_INFORMATION) != 0) {
             builder.append('\n');
-            StringBuilder planBuilder = new StringBuilder().append("/* ").append(index.getPlanSQL());//获取类似 PUBLIC."_key_Proxy_proxy" : ID > 37
+            StringBuilder planBuilder = new StringBuilder().append("/* ").append(index.getPlanSQL());//这里是执行计划插入注释开始，//获取类似 PUBLIC."_key_Proxy_proxy" : ID > 37
             if (!indexConditions.isEmpty()) {
                 planBuilder.append(": ");
                 for (int i = 0, size = indexConditions.size(); i < size; i++) {
                     if (i > 0) {
-                        planBuilder.append("\n    AND ");
+                        planBuilder.append("\n    AND ");//第二次加and
                     }
-                    planBuilder.append(indexConditions.get(i).getSQL(
+                    planBuilder.append(indexConditions.get(i).getSQL(//获取
                             HasSQL.TRACE_SQL_FLAGS | HasSQL.ADD_PLAN_INFORMATION));
                 }
             }
             if (planBuilder.indexOf("\n", 3) >= 0) {
                 planBuilder.append('\n');
             }
-            StringUtils.indent(builder, planBuilder.append(" */").toString(), 4, false);
+            StringUtils.indent(builder, planBuilder.append(" */").toString(), 4, false);//这里是执行计划的插入注释结束
         }
         if (isJoin) {
             builder.append("\n    ON ");
@@ -810,7 +810,7 @@ public class TableFilter implements ColumnResolver {
                 builder.append("\n    /* scanCount: ").append(scanCount).append(" */");
             }
         }
-        return builder;
+        return builder;//生成类似：SELECT         "PUBLIC"."TEST"."ID",                "PUBLIC"."TEST"."NAME"        FROM "PUBLIC"."TEST"        /* PUBLIC.PRIMARY_KEY_2: ID >= 1 */        /* scanCount: 2 */
     }
 
     /**

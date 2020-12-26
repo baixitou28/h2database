@@ -388,7 +388,7 @@ public final class Store {//TIGER 看注释，是已打开表的集合
      */
     public Map<String, Integer> statisticsEnd() {
         HashMap<String, Integer> map = new HashMap<>();
-        FileStore fs = mvStore.getFileStore();
+        FileStore fs = mvStore.getFileStore();//windows 下获取的是目录下的test.mv.db
         int reads = fs == null ? 0 : (int) (fs.getReadCount() - statisticsStart);
         map.put("reads", reads);
         return map;

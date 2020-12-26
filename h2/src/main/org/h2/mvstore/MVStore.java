@@ -3060,7 +3060,7 @@ public class MVStore implements AutoCloseable {
      * @return the file store
      */
     public FileStore getFileStore() {
-        return fileStore;
+        return fileStore;//windows 下获取的是目录下的test.mv.db
     }
 
     /**

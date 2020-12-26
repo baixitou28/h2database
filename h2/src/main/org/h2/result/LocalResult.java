@@ -396,7 +396,7 @@ public class LocalResult implements ResultInterface, ResultTarget {
             }
         }
         applyOffsetAndLimit();
-        reset();
+        reset();//reset 不是麻烦吗？
     }
 
     private void applyOffsetAndLimit() {
