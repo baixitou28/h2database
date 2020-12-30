@@ -153,7 +153,7 @@ class Optimizer {//TIGER 执行计划之优化
     private void calculateGenetic() {
         TableFilter[] best = new TableFilter[filters.length];
         TableFilter[] list = new TableFilter[filters.length];
-        for (int x = 0; x < MAX_GENETIC; x++) {//用
+        for (int x = 0; x < MAX_GENETIC; x++) {//用遗传算法
             if (canStop(x)) {
                 break;
             }
