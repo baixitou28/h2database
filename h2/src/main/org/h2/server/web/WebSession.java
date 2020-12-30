@@ -163,7 +163,7 @@ class WebSession {
      *
      * @param sql the SQL statement
      */
-    void addCommand(String sql) {
+    void addCommand(String sql) {//加入命令历史
         if (sql == null) {
             return;
         }

@@ -200,7 +200,7 @@ public class JdbcStatement extends TraceObject implements Statement, JdbcStateme
      * @return true if result is a result set, false otherwise
      */
     @Override
-    public final boolean execute(String sql) throws SQLException {
+    public final boolean execute(String sql) throws SQLException {//TIGER 执行jdbc sql 命令
         try {
             debugCodeCall("execute", sql);
             return executeInternal(sql, false);//标记[堆栈explain SELECT ID]7
@@ -216,20 +216,20 @@ public class JdbcStatement extends TraceObject implements Statement, JdbcStateme
         int id = getNextId(TraceObject.RESULT_SET);
         checkClosed();
         closeOldResultSet();
-        sql = JdbcConnection.translateSQL(sql, escapeProcessing);
-        CommandInterface command = conn.prepareCommand(sql, fetchSize);//标记[堆栈explain SELECT ID]8
+        sql = JdbcConnection.translateSQL(sql, escapeProcessing);//01. sql
+        CommandInterface command = conn.prepareCommand(sql, fetchSize);//02.获取命令接口实例//标记[堆栈explain SELECT ID]8
         boolean lazy = false;
         boolean returnsResultSet;
         synchronized (session) {
             setExecutingStatement(command);
-            try {
+            try {//03.尝试执行
                 if (command.isQuery()) {
                     returnsResultSet = true;
                     boolean scrollable = resultSetType != ResultSet.TYPE_FORWARD_ONLY;
                     boolean updatable = resultSetConcurrency == ResultSet.CONCUR_UPDATABLE;
-                    ResultInterface result = command.executeQuery(maxRows, scrollable);
+                    ResultInterface result = command.executeQuery(maxRows, scrollable); //开始执行
                     lazy = result.isLazy();
-                    resultSet = new JdbcResultSet(conn, this, command, result, id, scrollable, updatable);
+                    resultSet = new JdbcResultSet(conn, this, command, result, id, scrollable, updatable);//生成结果
                 } else {
                     returnsResultSet = false;
                     ResultWithGeneratedKeys result = command.executeUpdate(generatedKeysRequest);
@@ -241,14 +241,14 @@ public class JdbcStatement extends TraceObject implements Statement, JdbcStateme
                 }
             } finally {
                 if (!lazy) {
-                    setExecutingStatement(null);
+                    setExecutingStatement(null);//清空
                 }
             }
         }
         if (!lazy) {
             command.close();
         }
-        return returnsResultSet;
+        return returnsResultSet;//04.返回结果
     }
 
     /**

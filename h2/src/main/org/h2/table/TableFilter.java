@@ -221,20 +221,20 @@ public class TableFilter implements ColumnResolver {
             AllColumnsForPlan allColumnsSet) {
         PlanItem item1 = null;
         SortOrder sortOrder = null;
-        if (select != null) {
+        if (select != null) {//是否排序
             sortOrder = select.getSortOrder();
         }
-        if (indexConditions.isEmpty()) {
+        if (indexConditions.isEmpty()) {//是否没有索引
             item1 = new PlanItem();
-            item1.setIndex(table.getScanIndex(s, null, filters, filter,
+            item1.setIndex(table.getScanIndex(s, null, filters, filter,//获取Get the scan index for this table
                     sortOrder, allColumnsSet));
-            item1.cost = item1.getIndex().getCost(s, null, filters, filter,
+            item1.cost = item1.getIndex().getCost(s, null, filters, filter,//先计算cost
                     sortOrder, allColumnsSet);
         }
         int len = table.getColumns().length;
         int[] masks = new int[len];
         for (IndexCondition condition : indexConditions) {
-            if (condition.isEvaluatable()) {
+            if (condition.isEvaluatable()) {//tiger 不知道用途？
                 if (condition.isAlwaysFalse()) {
                     masks = null;
                     break;
@@ -250,20 +250,20 @@ public class TableFilter implements ColumnResolver {
         // The more index conditions, the earlier the table.
         // This is to ensure joins without indexes run quickly:
         // x (x.a=10); y (x.b=y.b) - see issue 113
-        item.cost -= item.cost * indexConditions.size() / 100 / (filter + 1);
+        item.cost -= item.cost * indexConditions.size() / 100 / (filter + 1);//索引条件字段越多，cost 越低
 
         if (item1 != null && item1.cost < item.cost) {
             item = item1;
         }
 
-        if (nestedJoin != null) {
+        if (nestedJoin != null) {//考虑这个？
             setEvaluatable(true);
             item.setNestedJoinPlan(nestedJoin.getBestPlanItem(s, filters, filter, allColumnsSet));
             // TODO optimizer: calculate cost of a join: should use separate
             // expected row number and lookup cost
             item.cost += item.cost * item.getNestedJoinPlan().cost;
         }
-        if (join != null) {
+        if (join != null) {//tiger
             setEvaluatable(true);
             do {
                 filter++;

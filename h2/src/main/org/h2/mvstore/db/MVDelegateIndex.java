@@ -114,7 +114,7 @@ public class MVDelegateIndex extends MVIndex<Long, SearchRow> {
             TableFilter[] filters, int filter, SortOrder sortOrder,
             AllColumnsForPlan allColumnsSet) {
         return 10 * getCostRangeIndex(masks, mainIndex.getRowCountApproximation(session),
-                filters, filter, sortOrder, true, allColumnsSet);
+                filters, filter, sortOrder, true, allColumnsSet);//根据范围计算
     }
 
     @Override

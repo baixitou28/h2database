@@ -1124,7 +1124,7 @@ public class WebApp {
      * @param size the number of statements
      * @param buff the target buffer
      */
-    void query(Connection conn, String s, int i, int size, StringBuilder buff) {
+    void query(Connection conn, String s, int i, int size, StringBuilder buff) {//tiger web 入口的查询没有绑定参数之说，sql缓存即实际的sql
         if (!(s.startsWith("@") && s.endsWith("."))) {
             buff.append(PageParser.escapeHtml(s + ";")).append("<br />");
         }
@@ -1340,7 +1340,7 @@ public class WebApp {
                 } else {
                     isResultSet = stat.execute(sql, (int[]) generatedKeys);
                 }
-                session.addCommand(sql);
+                session.addCommand(sql);//加入历史
                 if (generatedKeys != null) {
                     rs = null;
                     rs = stat.getGeneratedKeys();
@@ -1358,10 +1358,10 @@ public class WebApp {
                         stat.close();
                         return buff.toString();
                     }
-                    rs = stat.getResultSet();
+                    rs = stat.getResultSet();//结果集
                 }
             }
-            time = System.currentTimeMillis() - time;
+            time = System.currentTimeMillis() - time;//统计时间
             buff.append(getResultSet(sql, rs, metadata, list, edit, time, allowEdit));
             // SQLWarning warning = stat.getWarnings();
             // if (warning != null) {

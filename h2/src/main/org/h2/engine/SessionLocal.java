@@ -597,17 +597,17 @@ public class SessionLocal extends Session implements TransactionStore.RollbackLi
                     "session closed");
         }
         Command command;
-        if (queryCacheSize > 0) {
+        if (queryCacheSize > 0) {//01.是否客户端的每个session 采用sql缓存
             if (queryCache == null) {
-                queryCache = SmallLRUCache.newInstance(queryCacheSize);
-                modificationMetaID = database.getModificationMetaId();
+                queryCache = SmallLRUCache.newInstance(queryCacheSize);//分配缓存
+                modificationMetaID = database.getModificationMetaId();//记录时间上次更改的meta id号
             } else {
                 long newModificationMetaID = database.getModificationMetaId();
                 if (newModificationMetaID != modificationMetaID) {
                     queryCache.clear();
-                    modificationMetaID = newModificationMetaID;
+                    modificationMetaID = newModificationMetaID;//如果数据库meta id 更改，则刷新缓存
                 }
-                command = queryCache.get(sql);
+                command = queryCache.get(sql);//获取缓存的sql
                 if (command != null && command.canReuse()) {
                     command.reuse();
                     return command;
@@ -616,14 +616,14 @@ public class SessionLocal extends Session implements TransactionStore.RollbackLi
         }
         Parser parser = new Parser(this);
         try {
-            command = parser.prepareCommand(sql);//标记[堆栈explain SELECT ID]11
+            command = parser.prepareCommand(sql);//解析//标记[堆栈explain SELECT ID]11
         } finally {
             // we can't reuse sub-query indexes, so just drop the whole cache//特别注意这点
             subQueryIndexCache = null;
         }
         if (queryCache != null) {//放入cache
-            if (command.isCacheable()) {
-                queryCache.put(sql, command);
+            if (command.isCacheable()) {//如果不是update，就是可以cache的
+                queryCache.put(sql, command);//如果是web入口，sql语句没有绑定语句
             }
         }
         return command;
@@ -1288,7 +1288,7 @@ public class SessionLocal extends Session implements TransactionStore.RollbackLi
      *
      * @param command the command
      */
-    private void setCurrentCommand(Command command) {
+    private void setCurrentCommand(Command command) {//设置当前命令
         State targetState = command == null ? State.SLEEP : State.RUNNING;
         transitionToState(targetState, true);
         if (isOpen()) {
@@ -1759,7 +1759,7 @@ public class SessionLocal extends Session implements TransactionStore.RollbackLi
                         break;
                     }
                     //$FALL-THROUGH$
-                case READ_COMMITTED:
+                case READ_COMMITTED://H2默认是这个模式。
                 case READ_UNCOMMITTED:
                     for (DbObject dependency : dependencies) {
                         if (dependency instanceof MVTable) {
@@ -1780,7 +1780,7 @@ public class SessionLocal extends Session implements TransactionStore.RollbackLi
             transaction.markStatementStart(maps);
         }
         startStatement = -1;
-        if (command != null) {
+        if (command != null) {//设置当前事务的命令
             setCurrentCommand(command);
         }
     }

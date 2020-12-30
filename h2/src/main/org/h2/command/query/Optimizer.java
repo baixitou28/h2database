@@ -18,7 +18,7 @@ import org.h2.util.Permutations;
  * The optimizer is responsible to find the best execution plan
  * for a given query.
  */
-class Optimizer {
+class Optimizer {//TIGER 执行计划之优化
 
     private static final int MAX_BRUTE_FORCE_FILTERS = 7;
     private static final int MAX_BRUTE_FORCE = 2000;
@@ -75,14 +75,14 @@ class Optimizer {
         return i;
     }
 
-    private void calculateBestPlan() {
+    private void calculateBestPlan() {//TIGER 执行计划之关键函数
         cost = -1;
         if (filters.length == 1 || session.isForceJoinOrder()) {//A.如果强制join order(无法调优)，或者B. filter个数为1(可以简单理解为表的个数)？
             testPlan(filters);//标记[堆栈explain SELECT ID]17
         } else {
             startNs = System.nanoTime();
             if (filters.length <= MAX_BRUTE_FORCE_FILTERS) {
-                calculateBruteForceAll();//一般情况下个数都是少于7个的，可以直接用暴力方式即将filter采用全排列方式，对比去最小的cost
+                calculateBruteForceAll();//一般情况下个数都是少于7个的，可以直接用暴力方式即将filter采用全排列方式，对比取最小的cost
             } else {
                 calculateBruteForceSome();//如果filter个数太大，
                 random = new Random(0);
@@ -106,8 +106,8 @@ class Optimizer {
 
     private void calculateBruteForceAll() {
         TableFilter[] list = new TableFilter[filters.length];
-        Permutations<TableFilter> p = Permutations.create(filters, list);
-        for (int x = 0; !canStop(x) && p.next(); x++) {
+        Permutations<TableFilter> p = Permutations.create(filters, list);//创建排列
+        for (int x = 0; !canStop(x) && p.next(); x++) {//TIGER 停止条件是canStop(x)和是否有next,循环p.next和list有什么关系呢？ ==>
             testPlan(list);
         }
     }
@@ -182,7 +182,7 @@ class Optimizer {
         double costNow = p.calculateCost(session, allColumnsSet);//标记[堆栈explain SELECT ID]18
         if (cost < 0 || costNow < cost) {
             cost = costNow;
-            bestPlan = p;
+            bestPlan = p;//找到一个最佳的执行计划
             return true;
         }
         return false;
@@ -243,15 +243,15 @@ class Optimizer {
         }
         TableFilter[] f2 = bestPlan.getFilters();
         topFilter = f2[0];
-        for (int i = 0; i < f2.length - 1; i++) {
+        for (int i = 0; i < f2.length - 1; i++) {//n个表关联起来
             f2[i].addJoin(f2[i + 1], false, null);//多个过滤器
         }
         if (parse) {
             return;
         }
         for (TableFilter f : f2) {//其实就是过滤的where
-            PlanItem item = bestPlan.getItem(f);
-            f.setPlanItem(item);
+            PlanItem item = bestPlan.getItem(f);//取最好的执行计划，一般是针对表的
+            f.setPlanItem(item);//设置到TableFilter中
         }
     }
 

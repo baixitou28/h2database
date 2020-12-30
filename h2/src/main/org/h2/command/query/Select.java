@@ -1153,18 +1153,18 @@ public class Select extends Query {
     }
 
     @Override
-    public void prepare() {
-        if (isPrepared) {
+    public void prepare() {//TIGER 重要函数 实现的子类
+        if (isPrepared) {//如果已经运行过了，不需要再次运行
             // sometimes a subquery is prepared twice (CREATE TABLE AS SELECT)
             return;
         }
         if (!checkInit) {
             throw DbException.getInternalError("not initialized");
         }
-        if (orderList != null) {
+        if (orderList != null) {//是否需要排序
             prepareOrder(orderList, expressions.size());
         }
-        ExpressionNames expressionNames = session.getMode().expressionNames;
+        ExpressionNames expressionNames = session.getMode().expressionNames;//一般指什么？
         if (expressionNames == ExpressionNames.ORIGINAL_SQL || expressionNames == ExpressionNames.POSTGRESQL_STYLE) {
             optimizeExpressionsAndPreserveAliases();
         } else {
@@ -1175,7 +1175,7 @@ public class Select extends Query {
         if (sort != null) {
             cleanupOrder();
         }
-        if (condition != null) {
+        if (condition != null) {//条件
             condition = condition.optimizeCondition(session);
             if (condition != null) {
                 for (TableFilter f : filters) {
@@ -1196,11 +1196,11 @@ public class Select extends Query {
                 && filters.size() == 1) {
             isQuickAggregateQuery = isEverything(ExpressionVisitor.getOptimizableVisitor(filters.get(0).getTable()));
         }
-        cost = preparePlan(session.isParsingCreateView());//标记[堆栈explain SELECT ID]14
+        cost = preparePlan(session.isParsingCreateView());//获取cost //标记[堆栈explain SELECT ID]14
         if (distinct && session.getDatabase().getSettings().optimizeDistinct &&
                 !isGroupQuery && filters.size() == 1 &&
-                expressions.size() == 1 && condition == null) {
-            Expression expr = expressions.get(0);
+                expressions.size() == 1 && condition == null) {//tiger
+            Expression expr = expressions.get(0);//TIGER
             expr = expr.getNonAliasExpression();
             if (expr instanceof ExpressionColumn) {
                 Column column = ((ExpressionColumn) expr).getColumn();
@@ -1314,7 +1314,7 @@ public class Select extends Query {
         topTableFilter = optimizer.getTopFilter();
         double planCost = optimizer.getCost();
 
-        setEvaluatableRecursive(topTableFilter);
+        setEvaluatableRecursive(topTableFilter);//tiger 重要函数 设置每个列信息，将filter设置进去
 
         if (!parse) {
             topTableFilter.prepare();
@@ -1699,7 +1699,7 @@ public class Select extends Query {
         }
         ExpressionVisitor v2 = visitor.incrementQueryLevel(1);
         for (Expression e : expressions) {
-            if (!e.isEverything(v2)) {
+            if (!e.isEverything(v2)) {//tiger 不理解
                 return false;
             }
         }
@@ -1717,7 +1717,7 @@ public class Select extends Query {
 
 
     @Override
-    public boolean isCacheable() {
+    public boolean isCacheable() {//如果不是update，就是可以cache的
         return !isForUpdate;
     }
 

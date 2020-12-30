@@ -1126,7 +1126,7 @@ public class JdbcConnection extends TraceObject implements Connection, JdbcConne
      * @param fetchSize the fetch size (used in remote connections)
      * @return the command
      */
-    CommandInterface prepareCommand(String sql, int fetchSize) {
+    CommandInterface prepareCommand(String sql, int fetchSize) {//代理模式，让session来执行
         return session.prepareCommand(sql, fetchSize);//标记[堆栈explain SELECT ID]9
     }
 

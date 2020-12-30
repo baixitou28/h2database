@@ -45,7 +45,7 @@ public final class ExpressionColumn extends Expression {
 
     private final Database database;
     private final String schemaName;
-    private final String tableAlias;
+    private final String tableAlias;//查询中表的同名
     private final String columnName;
     private final boolean rowId;
     private final boolean quotedName;
@@ -383,7 +383,7 @@ public final class ExpressionColumn extends Expression {
     }
 
     @Override
-    public boolean isEverything(ExpressionVisitor visitor) {
+    public boolean isEverything(ExpressionVisitor visitor) {//TIGER 重要名词
         switch (visitor.getType()) {
         case ExpressionVisitor.OPTIMIZABLE_AGGREGATE:
             return false;

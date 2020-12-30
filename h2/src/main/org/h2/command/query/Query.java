@@ -469,14 +469,14 @@ public abstract class Query extends Prepared {
             // right queries
             return queryWithoutCacheLazyCheck(limit, target);
         }
-        fireBeforeSelectTriggers();
+        fireBeforeSelectTriggers();//事件
         if (noCache || !session.getDatabase().getOptimizeReuseResults() ||//是否有cache，没有就重新查
                 (session.isLazyQueryExecution() && !neverLazy)) {
             return queryWithoutCacheLazyCheck(limit, target);//新的查询
         }
         Value[] params = getParameterValues();
-        long now = session.getDatabase().getModificationDataId();
-        if (isEverything(ExpressionVisitor.DETERMINISTIC_VISITOR)) {
+        long now = session.getDatabase().getModificationDataId();//数据库更改了吗？
+        if (isEverything(ExpressionVisitor.DETERMINISTIC_VISITOR)) {//TIGER DETERMINISTIC_VISITOR
             if (lastResult != null && !lastResult.isClosed() &&
                     limit == lastLimit) {
                 if (sameResultAsLast(params, lastParameters, lastEvaluated)) {//如果相同?==>什么时候？

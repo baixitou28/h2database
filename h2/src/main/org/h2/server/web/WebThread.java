@@ -86,7 +86,7 @@ class WebThread extends WebApp implements Runnable {
     }
 
     @Override
-    public void run() {//tiger web 的入口
+    public void run() {//tiger web 页面执行的入口
         try {
             input = new BufferedInputStream(socket.getInputStream());
             output = new BufferedOutputStream(socket.getOutputStream());

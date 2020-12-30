@@ -177,12 +177,12 @@ public abstract class Command implements CommandInterface {
         startTimeNanos = 0L;
         long start = 0L;
         Database database = session.getDatabase();
-        Object sync = database.isMVStore() ? session : database;
+        Object sync = database.isMVStore() ? session : database;//采用session还是database
         session.waitIfExclusiveModeEnabled();//等待
         boolean callStop = true;
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
-        synchronized (sync) {//同步
-            session.startStatementWithinTransaction(this);//开始Statement
+        synchronized (sync) {//同步database还是session
+            session.startStatementWithinTransaction(this);//开始事务，将当前命令等设置到事务里
             try {
                 while (true) {
                     database.checkPowerOff();//检查是否断电

@@ -34,11 +34,11 @@ public class Plan {//TODO: TIGER 理解执行计划
      * @param condition the condition in the WHERE clause
      */
     public Plan(TableFilter[] filters, int count, Expression condition) {
-        this.filters = new TableFilter[count];
+        this.filters = new TableFilter[count];//tiger 看函数注释，
         System.arraycopy(filters, 0, this.filters, 0, count);
         final ArrayList<Expression> allCond = new ArrayList<>();
         final ArrayList<TableFilter> all = new ArrayList<>();
-        if (condition != null) {
+        if (condition != null) {//复制where 的条件如((C.TEACHER_ID = T.ID) AND (S.STUDENT_CLASS = C.ID) AND (C.GRADE_ID = G.ID))
             allCond.add(condition);
         }
         for (int i = 0; i < count; i++) {

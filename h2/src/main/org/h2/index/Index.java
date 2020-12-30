@@ -528,19 +528,19 @@ public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机�
      */
     protected final long getCostRangeIndex(int[] masks, long rowCount, TableFilter[] filters, int filter,//标记[堆栈explain SELECT ID]24
             SortOrder sortOrder, boolean isScanIndex, AllColumnsForPlan allColumnsSet) {//tiger 计算区间索引的成本
-        rowCount += Constants.COST_ROW_OFFSET;
+        rowCount += Constants.COST_ROW_OFFSET;//range index 成本常数
         int totalSelectivity = 0;
         long rowsCost = rowCount;
-        if (masks != null) {
-            int i = 0, len = columns.length;
+        if (masks != null) {//某次测试的时候mask里面的int[] 均为0
+            int i = 0, len = columns.length;//比如用索引是id，则type是integer, table是PUBLIC.STUDENT, name是ID
             boolean tryAdditional = false;
             while (i < len) {
-                Column column = columns[i++];
+                Column column = columns[i++];//选列中的第一个
                 int index = column.getColumnId();
                 int mask = masks[index];
-                if ((mask & IndexCondition.EQUALITY) == IndexCondition.EQUALITY) {//等于
+                if ((mask & IndexCondition.EQUALITY) == IndexCondition.EQUALITY) {//等于常数
                     if (i == len && getIndexType().isUnique()) {
-                        rowsCost = 3;//唯一索引优先
+                        rowsCost = 3;//唯一索引应该很快就能过滤到数据，一般情况下比较快捷，所以成本低,这里直接给出3
                         break;
                     }
                     totalSelectivity = 100 - ((100 - totalSelectivity) *
@@ -549,20 +549,20 @@ public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机�
                     if (distinctRows <= 0) {
                         distinctRows = 1;
                     }
-                    rowsCost = 2 + Math.max(rowCount / distinctRows, 1);
-                } else if ((mask & IndexCondition.RANGE) == IndexCondition.RANGE) {//区间
+                    rowsCost = 2 + Math.max(rowCount / distinctRows, 1);//如果不是唯一索引，则考虑数据的分布
+                } else if ((mask & IndexCondition.RANGE) == IndexCondition.RANGE) {//区间常数 1/4
                     rowsCost = 2 + rowsCost / 4;
                     tryAdditional = true;
                     break;
-                } else if ((mask & IndexCondition.START) == IndexCondition.START) {//大于
+                } else if ((mask & IndexCondition.START) == IndexCondition.START) {//大于常数 1/3
                     rowsCost = 2 + rowsCost / 3;
                     tryAdditional = true;
                     break;
-                } else if ((mask & IndexCondition.END) == IndexCondition.END) {//小于
+                } else if ((mask & IndexCondition.END) == IndexCondition.END) {//小于常数 1/3
                     rowsCost = rowsCost / 3;
                     tryAdditional = true;
                     break;
-                } else {
+                } else {//tiger 不是常数等
                     if (mask == 0) {
                         // Adjust counter of used columns (i)
                         i--;
@@ -584,7 +584,7 @@ public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机�
         // it will be cheaper than another index, so adjust the cost
         // accordingly.
         long sortingCost = 0;
-        if (sortOrder != null) {
+        if (sortOrder != null) {//如果需要排序，增加成本，增加100 + 100左右
             sortingCost = 100 + rowCount / 10;
         }
         if (sortOrder != null && !isScanIndex) {//看注释，是否排序和索引一致
@@ -652,16 +652,16 @@ public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机�
         }
         long rc;
         if (isScanIndex) {//一般有table scan,index scan，这里说的是：如果是索引，则加入排序成本
-            rc = rowsCost + sortingCost + 20;
+            rc = rowsCost + sortingCost + 20;//这里是几个值的综合
         } else if (needsToReadFromScanIndex) {
-            rc = rowsCost + rowsCost + sortingCost + 20;
+            rc = rowsCost + rowsCost + sortingCost + 20;//2倍 的rowCost
         } else {
             // The (20-x) calculation makes sure that when we pick a covering
             // index, we pick the covering index that has the smallest number of
             // columns (the more columns we have in index - the higher cost).
             // This is faster because a smaller index will fit into fewer data
             // blocks.
-            rc = rowsCost + sortingCost + columns.length;
+            rc = rowsCost + sortingCost + columns.length;//字段最好不要太长，这样有利于covering index
         }
         return rc;
     }

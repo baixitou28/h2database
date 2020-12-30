@@ -247,12 +247,12 @@ public class CommandContainer extends Command {
     }
 
     @Override
-    public ResultInterface query(long maxrows) {
+    public ResultInterface query(long maxrows) {//TIGER 重要的函数
         recompileIfRequired();
         setProgress(DatabaseEventListener.STATE_STATEMENT_START);
-        start();
-        prepared.checkParameters();
-        ResultInterface result = prepared.query(maxrows);
+        start();//标记开始时间
+        prepared.checkParameters();//tiger 重要  参数绑定
+        ResultInterface result = prepared.query(maxrows);//真正开始执行
         prepared.trace(startTimeNanos, result.isLazy() ? 0 : result.getRowCount());
         setProgress(DatabaseEventListener.STATE_STATEMENT_END);
         return result;

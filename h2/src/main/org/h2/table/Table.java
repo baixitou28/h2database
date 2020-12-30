@@ -339,7 +339,7 @@ public abstract class Table extends SchemaObject {
      *
      * @return true if it is
      */
-    public abstract boolean isDeterministic();
+    public abstract boolean isDeterministic();//tiger 表deterministic是什么意思
 
     /**
      * Check if the row count can be retrieved quickly.

@@ -953,12 +953,12 @@ public class Parser {//TODO: tiger 理解如何解析 ，看注释将sql 转换�
      */
     public Command prepareCommand(String sql) {
         try {
-            Prepared p = parse(sql);
+            Prepared p = parse(sql);//01.解析
             if (currentTokenType != SEMICOLON && currentTokenType != END_OF_INPUT) {
                 addExpected(SEMICOLON);
                 throw getSyntaxError();
             }
-            try {
+            try {//02.
                 p.prepare();//标记[堆栈explain SELECT ID]12
             } catch (Throwable t) {
                 CommandContainer.clearCTE(session, p);
@@ -967,9 +967,9 @@ public class Parser {//TODO: tiger 理解如何解析 ，看注释将sql 转换�
             if (parseIndex < sql.length()) {
                 sql = sql.substring(0, parseIndex);
             }
-            CommandContainer c = new CommandContainer(session, sql, p);
+            CommandContainer c = new CommandContainer(session, sql, p);//03.创建实例
             if (currentTokenType == SEMICOLON) {
-                String remaining = originalSQL.substring(parseIndex);
+                String remaining = originalSQL.substring(parseIndex);//04.remaining有什么用？
                 if (!StringUtils.isWhitespaceOrEmpty(remaining)) {
                     return prepareCommandList(c, p, sql, remaining);
                 }
