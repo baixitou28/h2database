@@ -18,7 +18,7 @@ import org.h2.value.VersionedValue;
 /**
  * An index that stores the data in an MVStore.
  */
-public abstract class MVIndex<K,V> extends Index {
+public abstract class MVIndex<K,V> extends Index {//tiger INDEX 索引 //
 
     protected MVIndex(Table newTable, int id, String name, IndexColumn[] newIndexColumns, IndexType newIndexType) {
         super(newTable, id, name, newIndexColumns, newIndexType);

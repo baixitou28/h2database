@@ -40,7 +40,7 @@ public abstract class Command implements CommandInterface {
     /**
      * The trace module.
      */
-    private final Trace trace;
+    private final Trace trace;//tiger 调试，可以使用trace模式增加了解
 
     /**
      * If this query was canceled.

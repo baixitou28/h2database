@@ -29,7 +29,7 @@ import org.h2.util.Utils;
  * of a table. Each regular table has one such object, even if no primary key or
  * indexes are defined.
  */
-public class ScanIndex extends Index {
+public class ScanIndex extends Index {//tiger INDEX
     private long firstFree = -1;
     private ArrayList<Row> rows = Utils.newSmallArrayList();
     private final PageStoreTable tableData;

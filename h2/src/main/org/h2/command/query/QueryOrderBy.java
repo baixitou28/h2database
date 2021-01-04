@@ -20,7 +20,8 @@ public class QueryOrderBy {
 
     /**
      * The column index expression. This can be a column index number (1 meaning
-     * the first column of the select list) or a parameter (the parameter is a
+     * the firs
+     * t column of the select list) or a parameter (the parameter is a
      * number representing the column index number).
      */
     public Expression columnIndexExpr;

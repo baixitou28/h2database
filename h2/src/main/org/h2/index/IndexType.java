@@ -8,9 +8,9 @@ package org.h2.index;
 /**
  * Represents information about the properties of an index
  */
-public class IndexType {
+public class IndexType {//tiger 顾名思义 是索引类型，主要描述primaryKey, persistent, unique, hash, scan, spatial属性
 
-    private boolean primaryKey, persistent, unique, hash, scan, spatial;
+    private boolean primaryKey, persistent, unique, hash, scan, spatial;//默认都是false
     private boolean belongsToConstraint;
 
     /**
@@ -25,7 +25,7 @@ public class IndexType {
         type.primaryKey = true;
         type.persistent = persistent;
         type.hash = hash;
-        type.unique = true;
+        type.unique = true;//主键肯定是唯一的
         return type;
     }
 

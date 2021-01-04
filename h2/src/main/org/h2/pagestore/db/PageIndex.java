@@ -13,7 +13,7 @@ import org.h2.table.Table;
 /**
  * A page store index.
  */
-public abstract class PageIndex extends Index {
+public abstract class PageIndex extends Index {//tiger INDEX
 
     /**
      * The root page of this index.

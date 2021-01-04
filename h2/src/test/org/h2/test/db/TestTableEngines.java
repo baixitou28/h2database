@@ -514,7 +514,7 @@ public class TestTableEngines extends TestDb {
             /**
              * A scan index for one row.
              */
-            public class Scan extends Index {
+            public class Scan extends Index {//tiger INDEX 如何测试
 
                 Scan(Table table) {
                     super(table, table.getId(), table.getName() + "_SCAN",

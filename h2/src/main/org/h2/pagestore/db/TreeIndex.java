@@ -22,7 +22,7 @@ import org.h2.value.ValueNull;
 /**
  * The tree index is an in-memory index based on a binary AVL trees.
  */
-public class TreeIndex extends Index {
+public class TreeIndex extends Index {//tiger INDEX
 
     /**
      * Compare the positions of two rows.

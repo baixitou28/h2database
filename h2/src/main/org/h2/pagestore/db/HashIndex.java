@@ -32,7 +32,7 @@ import org.h2.value.ValueNull;
 /**
  * A unique index based on an in-memory hash map.
  */
-public class HashIndex extends Index {
+public class HashIndex extends Index {//tiger INDEX
 
     /**
      * The index of the indexed column.

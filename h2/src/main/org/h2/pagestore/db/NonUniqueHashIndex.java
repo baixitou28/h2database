@@ -32,7 +32,7 @@ import org.h2.value.Value;
  *
  * @author Sergi Vladykin
  */
-public class NonUniqueHashIndex extends Index {
+public class NonUniqueHashIndex extends Index {//tiger INDEX
 
     /**
      * The index of the indexed column.
