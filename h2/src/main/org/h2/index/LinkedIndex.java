@@ -29,7 +29,7 @@ import org.h2.value.ValueNull;
  * A linked index is a index for a linked (remote) table.
  * It is backed by an index on the remote table which is accessed over JDBC.
  */
-public class LinkedIndex extends Index {
+public class LinkedIndex extends Index {//tiger 数据库链的索引
 
     private final TableLink link;
     private final String targetTableName;
@@ -47,7 +47,7 @@ public class LinkedIndex extends Index {
     @Override
     public String getCreateSQL() {
         return null;
-    }
+    }//无法创建
 
     @Override
     public void close(SessionLocal session) {
@@ -59,11 +59,11 @@ public class LinkedIndex extends Index {
     }
 
     @Override
-    public void add(SessionLocal session, Row row) {
+    public void add(SessionLocal session, Row row) {//循环插入单条记录
         ArrayList<Value> params = Utils.newSmallArrayList();
         StringBuilder buff = new StringBuilder("INSERT INTO ");
         buff.append(targetTableName).append(" VALUES(");
-        for (int i = 0; i < row.getColumnCount(); i++) {
+        for (int i = 0; i < row.getColumnCount(); i++) {//将n个列变成单条插入语句
             Value v = row.getValue(i);
             if (i > 0) {
                 buff.append(", ");
@@ -80,7 +80,7 @@ public class LinkedIndex extends Index {
         buff.append(')');
         String sql = buff.toString();
         try {
-            link.execute(sql, params, true, session);
+            link.execute(sql, params, true, session);//执行单条记录
             rowCount++;
         } catch (Exception e) {
             throw TableLink.wrapException(sql, e);
@@ -88,7 +88,7 @@ public class LinkedIndex extends Index {
     }
 
     @Override
-    public Cursor find(SessionLocal session, SearchRow first, SearchRow last) {
+    public Cursor find(SessionLocal session, SearchRow first, SearchRow last) {//区间查找
         ArrayList<Value> params = Utils.newSmallArrayList();
         StringBuilder builder = new StringBuilder("SELECT * FROM ").append(targetTableName).append(" T");
         boolean f = false;
@@ -134,7 +134,7 @@ public class LinkedIndex extends Index {
         }
     }
 
-    private void addParameter(StringBuilder builder, Column col) {
+    private void addParameter(StringBuilder builder, Column col) {//增加？参数绑定
         TypeInfo type = col.getType();
         if (type.getValueType() == Value.CHAR && link.isOracle()) {
             // workaround for Oracle
@@ -148,7 +148,7 @@ public class LinkedIndex extends Index {
     }
 
     @Override
-    public double getCost(SessionLocal session, int[] masks,
+    public double getCost(SessionLocal session, int[] masks,//tiger 这个cost 直接先加100，100相对于索引最小值3，还是比较大的。
             TableFilter[] filters, int filter, SortOrder sortOrder,
             AllColumnsForPlan allColumnsSet) {
         return 100 + getCostRangeIndex(masks, rowCount +
@@ -176,10 +176,10 @@ public class LinkedIndex extends Index {
     }
 
     @Override
-    public void remove(SessionLocal session, Row row) {
+    public void remove(SessionLocal session, Row row) {//删除单条记录
         ArrayList<Value> params = Utils.newSmallArrayList();
         StringBuilder builder = new StringBuilder("DELETE FROM ").append(targetTableName).append(" WHERE ");
-        for (int i = 0; i < row.getColumnCount(); i++) {
+        for (int i = 0; i < row.getColumnCount(); i++) {//这里的删除是包含所有字段
             if (i > 0) {
                 builder.append("AND ");
             }
@@ -198,7 +198,7 @@ public class LinkedIndex extends Index {
         String sql = builder.toString();
         try {
             PreparedStatement prep = link.execute(sql, params, false, session);
-            int count = prep.executeUpdate();
+            int count = prep.executeUpdate();//执行，返回删除的记录数
             link.reusePreparedStatement(prep, sql);
             rowCount -= count;
         } catch (Exception e) {
@@ -214,7 +214,7 @@ public class LinkedIndex extends Index {
      * @param newRow the new data
      * @param session the session
      */
-    public void update(Row oldRow, Row newRow, SessionLocal session) {
+    public void update(Row oldRow, Row newRow, SessionLocal session) {//更新
         ArrayList<Value> params = Utils.newSmallArrayList();
         StringBuilder builder = new StringBuilder("UPDATE ").append(targetTableName).append(" SET ");
         for (int i = 0; i < newRow.getColumnCount(); i++) {
