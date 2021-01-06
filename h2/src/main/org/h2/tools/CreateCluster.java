@@ -24,7 +24,7 @@ import org.h2.util.Tool;
  * Copies a database to another location if required.
  * @h2.resource
  */
-public class CreateCluster extends Tool {//tiger cluster
+public class CreateCluster extends Tool {//tiger cluster 复制数据库到另外一个db，相当于重新创建
 
     /**
      * Options are case sensitive. Supported options are:

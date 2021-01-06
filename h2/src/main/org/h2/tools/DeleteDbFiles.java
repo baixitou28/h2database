@@ -19,7 +19,7 @@ import org.h2.util.Tool;
  * The database must be closed before calling this tool.
  * @h2.resource
  */
-public class DeleteDbFiles extends Tool {
+public class DeleteDbFiles extends Tool {//删除某个数据库的所有文件
 
     /**
      * Options are case sensitive. Supported options are:

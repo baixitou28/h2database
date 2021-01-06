@@ -39,7 +39,7 @@ import org.h2.util.Utils;
 /**
  * Console for environments with AWT support.
  */
-public class GUIConsole extends Console implements ActionListener, MouseListener, WindowListener {
+public class GUIConsole extends Console implements ActionListener, MouseListener, WindowListener {//windows窗口
     private long lastOpenNs;
 
     private boolean trayIconUsed;

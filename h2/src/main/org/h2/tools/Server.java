@@ -25,7 +25,7 @@ import org.h2.util.Utils;
  * Starts the H2 Console (web-) server, TCP, and PG server.
  * @h2.resource
  */
-public class Server extends Tool implements Runnable, ShutdownHandler {//tiger 这里的server 应该只是侦听一个端口
+public class Server extends Tool implements Runnable, ShutdownHandler {//tiger 创建web server， tcp server，PostgreSQL server其中之一
 
     private final Service service;
     private Server web, tcp, pg;

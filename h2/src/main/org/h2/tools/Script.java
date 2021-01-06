@@ -16,7 +16,7 @@ import org.h2.util.Tool;
  * Creates a SQL script file by extracting the schema and data of a database.
  * @h2.resource
  */
-public class Script extends Tool {
+public class Script extends Tool {//直接备份数据库到sql脚本里
 
     /**
      * Options are case sensitive. Supported options are:

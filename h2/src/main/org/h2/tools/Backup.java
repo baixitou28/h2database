@@ -33,7 +33,7 @@ import org.h2.util.Tool;
  *
  * @h2.resource
  */
-public class Backup extends Tool {//TODO: TIGER BACKUP 理解备份机制，如何避免竞争
+public class Backup extends Tool {//TODO: TIGER BACKUP 理解备份机制，如何避免竞争 //tiger 这里只是复制文件而已，也没有增量备份
 
     /**
      * Options are case sensitive. Supported options are:
@@ -121,7 +121,7 @@ public class Backup extends Tool {//TODO: TIGER BACKUP 理解备份机制，如�
             return;
         }
         if (!quiet) {
-            FileLister.tryUnlockDatabase(list, "backup");//TIGER unlock 后续没有lock？==>
+            FileLister.tryUnlockDatabase(list, "backup");//TIGER unlock 后续没有lock？==>未知
         }
         zipFileName = FileUtils.toRealPath(zipFileName);
         FileUtils.delete(zipFileName);//删除历史文件

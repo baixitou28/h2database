@@ -32,7 +32,7 @@ import org.h2.util.Tool;
  * Runs a SQL script against a database.
  * @h2.resource
  */
-public class RunScript extends Tool {//TIGER 运行一个脚本,比如script 生成的数据库脚本
+public class RunScript extends Tool {//TIGER 运行一个脚本,比如script 生成的数据库脚本，同时createCluster里也用到这个类
 
     private boolean showResults;
     private boolean checkResults;
