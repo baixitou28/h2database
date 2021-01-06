@@ -451,13 +451,13 @@ public final class DataUtils {
     public static void readFully(FileChannel file, long pos, ByteBuffer dst) {
         try {
             do {
-                int len = file.read(dst, pos);//读一次
+                int len = file.read(dst, pos);//读4K,如果按4k保存，数据应该不会读一半停止
                 if (len < 0) {
-                    throw new EOFException();
+                    throw new EOFException();//读不到
                 }
                 pos += len;
             } while (dst.remaining() > 0);//一次读不全
-            dst.rewind();//
+            dst.rewind();//rewind 才方便读
         } catch (IOException e) {
             long size;
             try {

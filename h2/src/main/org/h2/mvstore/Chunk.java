@@ -159,7 +159,7 @@ public final class Chunk {//tiger trunk即块，多个4K页的集合，最多2^2
 
 
     private Chunk(String s) {
-        this(DataUtils.parseMap(s), true);
+        this(DataUtils.parseMap(s), true);//chunk head即头里面包含了chunk的信息
     }//用字符串构造
 
     Chunk(Map<String, String> map) {
@@ -213,9 +213,9 @@ public final class Chunk {//tiger trunk即块，多个4K页的集合，最多2^2
      * @param start the start of the chunk in the file
      * @return the chunk
      */
-    static Chunk readChunkHeader(ByteBuffer buff, long start) {
+    static Chunk readChunkHeader(ByteBuffer buff, long start) {//chunk头
         int pos = buff.position();
-        byte[] data = new byte[Math.min(buff.remaining(), MAX_HEADER_LENGTH)];//读最大可能的头文件
+        byte[] data = new byte[Math.min(buff.remaining(), MAX_HEADER_LENGTH)];//读最大可能的头文件，buff一般是4K
         buff.get(data);
         try {
             for (int i = 0; i < data.length; i++) {//最大尝试长度

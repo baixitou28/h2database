@@ -102,87 +102,87 @@ public class MVStoreTool {//TIGER 维护工具
      * @param writer the print writer
      * @param details print the page details
      */
-    public static void dump(String fileName, Writer writer, boolean details) {
+    public static void dump(String fileName, Writer writer, boolean details) {//tiger 看注释 将数据库内容打印出来
         PrintWriter pw = new PrintWriter(writer, true);
         if (!FilePath.get(fileName).exists()) {
             pw.println("File not found: " + fileName);
             return;
         }
-        long size = FileUtils.size(fileName);
+        long size = FileUtils.size(fileName);//打印长度
         pw.printf("File %s, %d bytes, %d MB\n", fileName, size, size / 1024 / 1024);
         int blockSize = MVStore.BLOCK_SIZE;
         TreeMap<Integer, Long> mapSizesTotal =
                 new TreeMap<>();
         long pageSizeTotal = 0;
-        try (FileChannel file = FilePath.get(fileName).open("r")) {
+        try (FileChannel file = FilePath.get(fileName).open("r")) {//打开文件
             long fileSize = file.size();
-            int len = Long.toHexString(fileSize).length();
-            ByteBuffer block = ByteBuffer.allocate(4096);
+            int len = Long.toHexString(fileSize).length();//文件长度的16机制表示长度
+            ByteBuffer block = ByteBuffer.allocate(4096);//分配一个4K，适合HDD磁盘
             long pageCount = 0;
-            for (long pos = 0; pos < fileSize; ) {
+            for (long pos = 0; pos < fileSize; ) {//循环读取
                 block.rewind();
                 // Bugfix - An MVStoreException that wraps EOFException is
                 // thrown when partial writes happens in the case of power off
                 // or file system issues.
                 // So we should skip the broken block at end of the DB file.
                 try {
-                    DataUtils.readFully(file, pos, block);
+                    DataUtils.readFully(file, pos, block);//一次读全4k，猜测按4k大小保存的数据，没有会自动补全
                 } catch (MVStoreException e) {
-                    pos += blockSize;
-                    pw.printf("ERROR illegal position %d%n", pos);
+                    pos += blockSize;//tiger 重要 理解partial writes，为什么跳出循环？
+                    pw.printf("ERROR illegal position %d%n", pos);//如果仅仅是MVStoreException，继续，如果是IOException错误，则无法继续
                     continue;
                 }
-                block.rewind();
-                int headerType = block.get();
-                if (headerType == 'H') {
+                block.rewind();//准备读block里面的内容
+                int headerType = block.get();//头标识
+                if (headerType == 'H') {//如果是fileHeader，直接打印
                     String header = new String(block.array(), StandardCharsets.ISO_8859_1).trim();
                     pw.printf("%0" + len + "x fileHeader %s%n",
                             pos, header);
                     pos += blockSize;
                     continue;
                 }
-                if (headerType != 'c') {
+                if (headerType != 'c') {//如果不是chunk，直接跳过
                     pos += blockSize;
                     continue;
                 }
                 block.position(0);
                 Chunk c;
                 try {
-                    c = Chunk.readChunkHeader(block, pos);
+                    c = Chunk.readChunkHeader(block, pos);//读chunk头，头最大1024， 而且以'\n'结尾，包含了chunk的信息
                 } catch (MVStoreException e) {
                     pos += blockSize;
                     continue;
                 }
-                if (c.len <= 0) {
+                if (c.len <= 0) {//如果解析出来的长度小于0，跳过4K
                     // not a chunk
                     pos += blockSize;
                     continue;
                 }
-                int length = c.len * MVStore.BLOCK_SIZE;
+                int length = c.len * MVStore.BLOCK_SIZE;//c.len是块的多少
                 pw.printf("%n%0" + len + "x chunkHeader %s%n",
                         pos, c.toString());
                 ByteBuffer chunk = ByteBuffer.allocate(length);
-                DataUtils.readFully(file, pos, chunk);
+                DataUtils.readFully(file, pos, chunk);//读取所有对应的块
                 int p = block.position();
-                pos += length;
+                pos += length;//跳过已读部分
                 int remaining = c.pageCount;
                 pageCount += c.pageCount;
                 TreeMap<Integer, Integer> mapSizes =
                         new TreeMap<>();
                 int pageSizeSum = 0;
-                while (remaining > 0) {
+                while (remaining > 0) {//分析一个chunk 块
                     int start = p;
                     try {
-                        chunk.position(p);
+                        chunk.position(p);//小心尝试位置
                     } catch (IllegalArgumentException e) {
                         // too far
                         pw.printf("ERROR illegal position %d%n", p);
                         break;
                     }
-                    int pageSize = chunk.getInt();
+                    int pageSize = chunk.getInt();//取page大小
                     // check value (ignored)
-                    chunk.getShort();
-                    int mapId = DataUtils.readVarInt(chunk);
+                    chunk.getShort();//跳过2位
+                    int mapId = DataUtils.readVarInt(chunk);//取chunk相关信息
                     int entries = DataUtils.readVarInt(chunk);
                     int type = chunk.get();
                     if ((type & DataUtils.PAGE_HAS_PAGE_NO) != 0) {
@@ -205,22 +205,22 @@ public class MVStoreTool {//TIGER 维护工具
                         );
                     }
                     p += pageSize;
-                    Integer mapSize = mapSizes.get(mapId);
+                    Integer mapSize = mapSizes.get(mapId);//获取map大小
                     if (mapSize == null) {
                         mapSize = 0;
                     }
-                    mapSizes.put(mapId, mapSize + pageSize);
+                    mapSizes.put(mapId, mapSize + pageSize);//考虑pageSize
                     Long total = mapSizesTotal.get(mapId);
                     if (total == null) {
                         total = 0L;
                     }
-                    mapSizesTotal.put(mapId, total + pageSize);
+                    mapSizesTotal.put(mapId, total + pageSize);//增加统计
                     pageSizeSum += pageSize;
                     pageSizeTotal += pageSize;
                     remaining--;
                     long[] children = null;
                     long[] counts = null;
-                    if (node) {
+                    if (node) {//如果是节点
                         children = new long[entries + 1];
                         for (int i = 0; i <= entries; i++) {
                             children[i] = chunk.getLong();
@@ -232,9 +232,9 @@ public class MVStoreTool {//TIGER 维护工具
                         }
                     }
                     String[] keys = new String[entries];
-                    if (mapId == 0 && details) {
+                    if (mapId == 0 && details) {//如果是details
                         ByteBuffer data;
-                        if (compressed) {
+                        if (compressed) {//压缩
                             boolean fast = (type & DataUtils.PAGE_COMPRESSED_HIGH) != DataUtils.PAGE_COMPRESSED_HIGH;
                             Compressor compressor = getCompressor(fast);
                             int lenAdd = DataUtils.readVarInt(chunk);
@@ -251,7 +251,7 @@ public class MVStoreTool {//TIGER 维护工具
                             String k = StringDataType.INSTANCE.read(data);
                             keys[i] = k;
                         }
-                        if (node) {
+                        if (node) {//如果是节点
                             // meta map node
                             for (int i = 0; i < entries; i++) {
                                 long cp = children[i];
@@ -296,14 +296,14 @@ public class MVStoreTool {//TIGER 维护工具
                     }
                 }
                 pageSizeSum = Math.max(1, pageSizeSum);
-                for (Integer mapId : mapSizes.keySet()) {
+                for (Integer mapId : mapSizes.keySet()) {//打印百分比
                     int percent = 100 * mapSizes.get(mapId) / pageSizeSum;
                     pw.printf("map %x: %d bytes, %d%%%n", mapId, mapSizes.get(mapId), percent);
                 }
                 int footerPos = chunk.limit() - Chunk.FOOTER_LENGTH;
                 try {
                     chunk.position(footerPos);
-                    pw.printf(
+                    pw.printf(//打印尾部信息
                             "+%0" + len + "x chunkFooter %s%n",
                             footerPos,
                             new String(chunk.array(), chunk.position(),
@@ -313,13 +313,13 @@ public class MVStoreTool {//TIGER 维护工具
                     pw.printf("ERROR illegal footer position %d%n", footerPos);
                 }
             }
-            pw.printf("%n%0" + len + "x eof%n", fileSize);
+            pw.printf("%n%0" + len + "x eof%n", fileSize);//打印总长度
             pw.printf("\n");
             pageCount = Math.max(1, pageCount);
             pw.printf("page size total: %d bytes, page count: %d, average page size: %d bytes\n",
                     pageSizeTotal, pageCount, pageSizeTotal / pageCount);
-            pageSizeTotal = Math.max(1, pageSizeTotal);
-            for (Integer mapId : mapSizesTotal.keySet()) {
+            pageSizeTotal = Math.max(1, pageSizeTotal);//总共的页的字节数
+            for (Integer mapId : mapSizesTotal.keySet()) {//打印page大小的百分比
                 int percent = (int) (100 * mapSizesTotal.get(mapId) / pageSizeTotal);
                 pw.printf("map %x: %d bytes, %d%%%n", mapId, mapSizesTotal.get(mapId), percent);
             }
@@ -328,7 +328,7 @@ public class MVStoreTool {//TIGER 维护工具
             e.printStackTrace(pw);
         }
         // ignore
-        pw.flush();
+        pw.flush();//刷到磁盘
     }
 
     private static Compressor getCompressor(boolean fast) {
@@ -343,7 +343,7 @@ public class MVStoreTool {//TIGER 维护工具
      * @return null if successful (if there was no error), otherwise the error
      *         message
      */
-    public static String info(String fileName, Writer writer) {//读取相关信息，从这里可以看到文件大致的形状，文件头+多个trunk
+    public static String info(String fileName, Writer writer) {//读取相关信息或元数据，从这里可以看到文件大致的形状，文件头+多个trunk
         PrintWriter pw = new PrintWriter(writer, true);
         if (!FilePath.get(fileName).exists()) {
             pw.println("File not found: " + fileName);

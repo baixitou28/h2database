@@ -305,7 +305,7 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
      * @param dir the directory
      * @param db the database name (null for all databases)
      */
-    public static void execute(String dir, String db) throws SQLException {
+    public static void execute(String dir, String db) throws SQLException {//可以被别的类使用，和直接运行main差不多
         try {
             new Recover().process(dir, db);
         } catch (DbException e) {
@@ -319,23 +319,23 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
             printNoDatabaseFilesFound(dir, db);
         }
         for (String fileName : list) {
-            if (fileName.endsWith(Constants.SUFFIX_PAGE_FILE)) {
+            if (fileName.endsWith(Constants.SUFFIX_PAGE_FILE)) {//如果是PageStore
                 dumpPageStore(fileName);
-            } else if (fileName.endsWith(Constants.SUFFIX_MV_FILE)) {
+            } else if (fileName.endsWith(Constants.SUFFIX_MV_FILE)) {//如果是MvStore
                 String f = fileName.substring(0, fileName.length() -
                         Constants.SUFFIX_PAGE_FILE.length());
-                try (PrintWriter writer = getWriter(fileName, ".txt")) {
-                    MVStoreTool.dump(fileName, writer, true);
-                    MVStoreTool.info(fileName, writer);
+                try (PrintWriter writer = getWriter(fileName, ".txt")) {//如果是txt文件,应该是chunk文件？
+                    MVStoreTool.dump(fileName, writer, true);//可读模式输出：打印元信息和chunk信息，以便用户分析
+                    MVStoreTool.info(fileName, writer);//读元数据
                 }
-                try (PrintWriter writer = getWriter(f + ".h2.db", ".sql")) {
-                    dumpMVStoreFile(writer, fileName);
+                try (PrintWriter writer = getWriter(f + ".h2.db", ".sql")) {//
+                    dumpMVStoreFile(writer, fileName);//尝试从writer读取文件，并写入到文件中
                 }
             }
         }
     }
 
-    private PrintWriter getWriter(String fileName, String suffix) {
+    private PrintWriter getWriter(String fileName, String suffix) {//打开一个文件流
         fileName = fileName.substring(0, fileName.length() - 3);
         String outputFile = fileName + suffix;
         trace("Created file: " + outputFile);
@@ -522,64 +522,64 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
         }
     }
 
-    private void dumpMVStoreFile(PrintWriter writer, String fileName) {
+    private void dumpMVStoreFile(PrintWriter writer, String fileName) {//导出mv文件
         writer.println("-- MVStore");
         String className = getClass().getName();
-        writer.println("CREATE ALIAS IF NOT EXISTS READ_BLOB_MAP FOR '" + className + ".readBlobMap';");
+        writer.println("CREATE ALIAS IF NOT EXISTS READ_BLOB_MAP FOR '" + className + ".readBlobMap';");//为什么要写这个className
         writer.println("CREATE ALIAS IF NOT EXISTS READ_CLOB_MAP FOR '" + className + ".readClobMap';");
         resetSchema();
         setDatabaseName(fileName.substring(0, fileName.length() -
                 Constants.SUFFIX_MV_FILE.length()));
         try (MVStore mv = new MVStore.Builder().
                 fileName(fileName).recoveryMode().readOnly().open()) {
-            dumpLobMaps(writer, mv);
+            dumpLobMaps(writer, mv);//输出lobmap
             writer.println("-- Layout");
-            dumpLayout(writer, mv);
+            dumpLayout(writer, mv);//只是打印Layout信息
             writer.println("-- Meta");
-            dumpMeta(writer, mv);
+            dumpMeta(writer, mv);//只是打印Meta信息
             writer.println("-- Types");
-            dumpTypes(writer, mv);
-            writer.println("-- Tables");
+            dumpTypes(writer, mv);//只是打印Types信息
+            writer.println("-- Tables");//开始处理表
             TransactionStore store = new TransactionStore(mv, new ValueDataType());
             try {
-                store.init();
+                store.init();//数据库实例初始化
             } catch (Throwable e) {
                 writeError(writer, e);
             }
 
             // extract the metadata so we can dump the settings
             ValueDataType type = new ValueDataType();
-            for (String mapName : mv.getMapNames()) {
+            for (String mapName : mv.getMapNames()) {//取元数据
                 if (!mapName.startsWith("table.")) {
                     continue;
                 }
-                String tableId = mapName.substring("table.".length());
+                String tableId = mapName.substring("table.".length());//处理表
                 if (Integer.parseInt(tableId) == 0) {
-                    TransactionMap<Value, Value> dataMap = store.begin().openMap(mapName, type, type);
+                    TransactionMap<Value, Value> dataMap = store.begin().openMap(mapName, type, type);//打开某个表
                     Iterator<Value> dataIt = dataMap.keyIterator(null);
-                    while (dataIt.hasNext()) {
+                    while (dataIt.hasNext()) {//重复处理数据
                         Value rowId = dataIt.next();
-                        Value[] values = ((ValueCollectionBase) dataMap.get(rowId)).getList();
+                        Value[] values = ((ValueCollectionBase) dataMap.get(rowId)).getList();//获取每个列
                         try {
-                            DefaultRow r = new DefaultRow(values);
+                            DefaultRow r = new DefaultRow(values);//创建一列
                             MetaRecord meta = new MetaRecord(r);
-                            schema.add(meta);
-                            if (meta.getObjectType() == DbObject.TABLE_OR_VIEW) {
+                            schema.add(meta);//保存在内存中
+                            if (meta.getObjectType() == DbObject.TABLE_OR_VIEW) {//如果是view或者表？==>记录会变成表吗？
                                 String sql = r.getValue(3).getString();
                                 String name = extractTableOrViewName(sql);
-                                tableMap.put(meta.getId(), name);
+                                tableMap.put(meta.getId(), name);//放入表
                             }
                         } catch (Throwable t) {
-                            writeError(writer, t);
+                            writeError(writer, t);//打印错误，这里只有简单的读文件，若出错没有额外的处理，
                         }
                     }
                 }
             }
             // Have to do these before the tables because settings like COLLATION may affect
             // some of them, and we can't change settings after we have created user tables
-            writeSchemaSET(writer);
+            writeSchemaSET(writer);//写相关表的sql
             writer.println("---- Table Data ----");
-            for (String mapName : mv.getMapNames()) {
+            for (String mapName : mv.getMapNames()) {//再次取元数据
                 if (!mapName.startsWith("table.")) {
                     continue;
                 }
@@ -590,31 +590,31 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
                 TransactionMap<?,?> dataMap = store.begin().openMap(mapName);
                 Iterator<?> dataIt = dataMap.keyIterator(null);
                 boolean init = false;
-                while (dataIt.hasNext()) {
+                while (dataIt.hasNext()) {//获取行
                     Object rowId = dataIt.next();
-                    Object value = dataMap.get(rowId);
+                    Object value = dataMap.get(rowId);//取出内存中的对应列
                     Value[] values;
-                    if (value instanceof Row) {
+                    if (value instanceof Row) {//如果是列
                         values = ((Row) value).getValueList();
                         recordLength = values.length;
                     } else {
                         values = ((ValueCollectionBase) value).getList();
                         recordLength = values.length - 1;
                     }
-                    if (!init) {
+                    if (!init) {//如果没有初始化
                         setStorage(Integer.parseInt(tableId));
                         // init the column types
                         StringBuilder builder = new StringBuilder();
                         for (valueId = 0; valueId < recordLength; valueId++) {
                             String columnName = storageName + "." + valueId;
                             builder.setLength(0);
-                            getSQL(builder, columnName, values[valueId]);
+                            getSQL(builder, columnName, values[valueId]);//获取列的sql
                         }
-                        createTemporaryTable(writer);
+                        createTemporaryTable(writer);//创建表
                         init = true;
                     }
                     StringBuilder buff = new StringBuilder();
-                    buff.append("INSERT INTO O_").append(tableId)
+                    buff.append("INSERT INTO O_").append(tableId)//使用insert into
                             .append(" VALUES(");
                     for (valueId = 0; valueId < recordLength; valueId++) {
                         if (valueId > 0) {
@@ -624,10 +624,10 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
                         getSQL(buff, columnName, values[valueId]);
                     }
                     buff.append(");");
-                    writer.println(buff.toString());
+                    writer.println(buff.toString());//输出到文件
                 }
             }
-            writeSchema(writer);
+            writeSchema(writer);//写schema
             writer.println("DROP ALIAS READ_BLOB_MAP;");
             writer.println("DROP ALIAS READ_CLOB_MAP;");
             writer.println("DROP TABLE IF EXISTS INFORMATION_SCHEMA.LOB_BLOCKS;");
@@ -1511,7 +1511,7 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
         writer.println("---- Schema SET ----");
         for (MetaRecord m : schema) {
             if (m.getObjectType() == DbObject.SETTING) {
-                String sql = m.getSQL();
+                String sql = m.getSQL();//获取相关的sql
                 writer.println(sql + ";");
             }
         }
