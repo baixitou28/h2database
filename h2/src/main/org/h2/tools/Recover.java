@@ -84,7 +84,7 @@ import org.h2.value.ValueLobDatabase;
  * Helps recovering a corrupted database.
  * @h2.resource
  */
-public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解恢复机制，如何避免竞争
+public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解恢复机制，如何避免竞争 //tiger 重要
 
     private String databaseName;
     private int storageId;
@@ -175,7 +175,7 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
     public void runTool(String... args) throws SQLException {
         String dir = ".";
         String db = null;
-        for (int i = 0; args != null && i < args.length; i++) {
+        for (int i = 0; args != null && i < args.length; i++) {//参数
             String arg = args[i];
             if ("-dir".equals(arg)) {
                 dir = args[++i];

@@ -22,7 +22,7 @@ import org.h2.util.Tool;
  * Restores a H2 database by extracting the database files from a .zip file.
  * @h2.resource
  */
-public class Restore extends Tool {
+public class Restore extends Tool {//tiger 从zip文件中恢复
 
     /**
      * Options are case sensitive. Supported options are:
@@ -48,10 +48,10 @@ public class Restore extends Tool {
 
     @Override
     public void runTool(String... args) throws SQLException {
-        String zipFileName = "backup.zip";
+        String zipFileName = "backup.zip";//默认的文件
         String dir = ".";
         String db = null;
-        for (int i = 0; args != null && i < args.length; i++) {
+        for (int i = 0; args != null && i < args.length; i++) {//处理参数
             String arg = args[i];
             if (arg.equals("-dir")) {
                 dir = args[++i];
@@ -116,7 +116,7 @@ public class Restore extends Tool {
      * @param fileName the file name (without directory)
      * @return the database name or null
      */
-    private static String getDatabaseNameFromFileName(String fileName) {
+    private static String getDatabaseNameFromFileName(String fileName) {//从文件中获取db名称
         if (fileName.endsWith(Constants.SUFFIX_PAGE_FILE)) {
             return fileName.substring(0,
                     fileName.length() - Constants.SUFFIX_PAGE_FILE.length());
@@ -178,7 +178,7 @@ public class Restore extends Tool {
                         OutputStream o = null;
                         try {
                             o = FileUtils.newOutputStream(directory + File.separatorChar + fileName, false);
-                            IOUtils.copy(zipIn, o);
+                            IOUtils.copy(zipIn, o);//只是zip文件转化而已
                             o.close();
                         } finally {
                             IOUtils.closeSilently(o);

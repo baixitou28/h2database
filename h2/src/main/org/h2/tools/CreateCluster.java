@@ -24,7 +24,7 @@ import org.h2.util.Tool;
  * Copies a database to another location if required.
  * @h2.resource
  */
-public class CreateCluster extends Tool {
+public class CreateCluster extends Tool {//tiger cluster
 
     /**
      * Options are case sensitive. Supported options are:
@@ -102,7 +102,7 @@ public class CreateCluster extends Tool {
         // use cluster='' so connecting is possible
         // even if the cluster is enabled
         try (JdbcConnection connSource = new JdbcConnection(urlSource + ";CLUSTER=''", null, user, password);
-                Statement statSource = connSource.createStatement()) {
+                Statement statSource = connSource.createStatement()) {//cluster的连接字符串不同
             // enable the exclusive mode and close other connections,
             // so that data can't change while restoring the second database
             statSource.execute("SET EXCLUSIVE 2");
@@ -121,7 +121,7 @@ public class CreateCluster extends Tool {
         // Delete the target database first.
         try (JdbcConnection connTarget = new JdbcConnection(urlTarget + ";CLUSTER=''", null, user, password);
                 Statement statTarget = connTarget.createStatement()) {
-            statTarget.execute("DROP ALL OBJECTS DELETE FILES");
+            statTarget.execute("DROP ALL OBJECTS DELETE FILES");//先删除所有表
         }
 
         try (PipedReader pipeReader = new PipedReader()) {

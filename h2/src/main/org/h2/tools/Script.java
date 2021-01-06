@@ -128,8 +128,8 @@ public class Script extends Tool {
     public static void process(Connection conn,
             String fileName, String options1, String options2) throws SQLException {
 
-        try (Statement stat = conn.createStatement()) {
-            String sql = "SCRIPT " + options1 + " TO '" + fileName + "' " + options2;
+        try (Statement stat = conn.createStatement()) {//用这个语句备份 SCRIPT SIMPLE NO DROP TO 'TEST_OUTPUT.DB'
+            String sql = "SCRIPT " + options1 + " TO '" + fileName + "' " + options2;//用这个命令可以备份sql和数据
             stat.execute(sql);
         }
     }

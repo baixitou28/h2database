@@ -34,7 +34,7 @@ import org.h2.util.Utils;
  * Interactive command line tool to access a database using JDBC.
  * @h2.resource
  */
-public class Shell extends Tool implements Runnable {
+public class Shell extends Tool implements Runnable {//tiger 命令行
 
     private static final int MAX_ROW_BUFFER = 5000;
     private static final int HISTORY_COUNT = 20;
@@ -77,7 +77,7 @@ public class Shell extends Tool implements Runnable {
      * @param args the command line arguments
      */
     public static void main(String... args) throws SQLException {
-        new Shell().runTool(args);
+        new Shell().runTool(args);//tiger learn 注意写法，简洁
     }
 
     /**
@@ -119,7 +119,7 @@ public class Shell extends Tool implements Runnable {
         String user = "";
         String password = "";
         String sql = null;
-        for (int i = 0; args != null && i < args.length; i++) {
+        for (int i = 0; args != null && i < args.length; i++) {//参数
             String arg = args[i];
             if (arg.equals("-url")) {
                 url = args[++i];
@@ -181,7 +181,7 @@ public class Shell extends Tool implements Runnable {
         runTool(args);
     }
 
-    private void showHelp() {
+    private void showHelp() {//帮助，像sqlline吗？
         println("Commands are case insensitive; SQL statements end with ';'");
         println("help or ?      Display this help");
         println("list           Toggle result list / stack trace mode");
@@ -209,7 +209,7 @@ public class Shell extends Tool implements Runnable {
                     connect();
                     showHelp();
                 }
-                if (statement == null) {
+                if (statement == null) {//提示
                     print("sql> ");
                 } else {
                     print("...> ");
@@ -228,7 +228,7 @@ public class Shell extends Tool implements Runnable {
                     trimmed = trimmed.substring(0, trimmed.length() - 1);
                 }
                 String lower = StringUtils.toLowerEnglish(trimmed);
-                if ("exit".equals(lower) || "quit".equals(lower)) {
+                if ("exit".equals(lower) || "quit".equals(lower)) {//命令解析
                     break;
                 } else if ("help".equals(lower) || "?".equals(lower)) {
                     showHelp();

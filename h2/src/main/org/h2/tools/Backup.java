@@ -33,7 +33,7 @@ import org.h2.util.Tool;
  *
  * @h2.resource
  */
-public class Backup extends Tool {//TODO: TIGER 理解备份机制，如何避免竞争
+public class Backup extends Tool {//TODO: TIGER BACKUP 理解备份机制，如何避免竞争
 
     /**
      * Options are case sensitive. Supported options are:
@@ -63,7 +63,7 @@ public class Backup extends Tool {//TODO: TIGER 理解备份机制，如何避�
         String dir = ".";
         String db = null;
         boolean quiet = false;
-        for (int i = 0; args != null && i < args.length; i++) {
+        for (int i = 0; args != null && i < args.length; i++) {//参数处理
             String arg = args[i];
             if (arg.equals("-dir")) {
                 dir = args[++i];
@@ -81,7 +81,7 @@ public class Backup extends Tool {//TODO: TIGER 理解备份机制，如何避�
             }
         }
         try {
-            process(zipFileName, dir, db, quiet);
+            process(zipFileName, dir, db, quiet);//开始处理
         } catch (Exception e) {
             throw DbException.toSQLException(e);
         }
@@ -110,9 +110,9 @@ public class Backup extends Tool {//TODO: TIGER 理解备份机制，如何避�
         List<String> list;
         boolean allFiles = db != null && db.isEmpty();
         if (allFiles) {
-            list = FileUtils.newDirectoryStream(directory);
+            list = FileUtils.newDirectoryStream(directory);//取目录所有文件
         } else {
-            list = FileLister.getDatabaseFiles(directory, db, true);
+            list = FileLister.getDatabaseFiles(directory, db, true);//取某个db文件
         }
         if (list.isEmpty()) {
             if (!quiet) {
@@ -121,10 +121,10 @@ public class Backup extends Tool {//TODO: TIGER 理解备份机制，如何避�
             return;
         }
         if (!quiet) {
-            FileLister.tryUnlockDatabase(list, "backup");
+            FileLister.tryUnlockDatabase(list, "backup");//TIGER unlock 后续没有lock？==>
         }
         zipFileName = FileUtils.toRealPath(zipFileName);
-        FileUtils.delete(zipFileName);
+        FileUtils.delete(zipFileName);//删除历史文件
         OutputStream fileOut = null;
         try {
             fileOut = FileUtils.newOutputStream(zipFileName, false);
@@ -151,11 +151,11 @@ public class Backup extends Tool {//TODO: TIGER 理解备份机制，如何避�
                     }
                     f = f.substring(base.length());
                     f = BackupCommand.correctFileName(f);
-                    ZipEntry entry = new ZipEntry(f);
+                    ZipEntry entry = new ZipEntry(f);//zip文件
                     zipOut.putNextEntry(entry);
                     InputStream in = null;
                     try {
-                        in = FileUtils.newInputStream(fileName);
+                        in = FileUtils.newInputStream(fileName);//复制文件
                         IOUtils.copyAndCloseInput(in, zipOut);
                     } catch (FileNotFoundException e) {
                         // the file could have been deleted in the meantime

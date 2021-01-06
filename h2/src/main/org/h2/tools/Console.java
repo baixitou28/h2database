@@ -20,7 +20,7 @@ import org.h2.util.Utils;
  *
  * @author Thomas Mueller, Ridvan Agar
  */
-public class Console extends Tool implements ShutdownHandler {
+public class Console extends Tool implements ShutdownHandler {//TIGER console H2启动
 
     Server web;
 
