@@ -102,10 +102,10 @@ public class CreateCluster extends Tool {//tiger cluster
         // use cluster='' so connecting is possible
         // even if the cluster is enabled
         try (JdbcConnection connSource = new JdbcConnection(urlSource + ";CLUSTER=''", null, user, password);
-                Statement statSource = connSource.createStatement()) {//cluster的连接字符串不同
+                Statement statSource = connSource.createStatement()) {//cluster的连接字符串为空
             // enable the exclusive mode and close other connections,
             // so that data can't change while restoring the second database
-            statSource.execute("SET EXCLUSIVE 2");
+            statSource.execute("SET EXCLUSIVE 2");//tiger 特殊用法
             try {
                 performTransfer(statSource, urlTarget, user, password, serverList);
             } finally {
@@ -121,20 +121,20 @@ public class CreateCluster extends Tool {//tiger cluster
         // Delete the target database first.
         try (JdbcConnection connTarget = new JdbcConnection(urlTarget + ";CLUSTER=''", null, user, password);
                 Statement statTarget = connTarget.createStatement()) {
-            statTarget.execute("DROP ALL OBJECTS DELETE FILES");//先删除所有表
+            statTarget.execute("DROP ALL OBJECTS DELETE FILES");//先删除urlTarget目标数据库所有表
         }
 
         try (PipedReader pipeReader = new PipedReader()) {
-            Future<?> threadFuture = startWriter(pipeReader, statSource);
+            Future<?> threadFuture = startWriter(pipeReader, statSource);//创建future
 
             // Read data from pipe reader, restore on target.
             try (JdbcConnection connTarget = new JdbcConnection(urlTarget, null, user, password);
                     Statement statTarget = connTarget.createStatement()) {
-                RunScript.execute(connTarget, pipeReader);
+                RunScript.execute(connTarget, pipeReader);//运行脚本，为什么放前面？ ==>感觉会卡住,应该放threadFuture.get()后面？
 
                 // Check if the writer encountered any exception
                 try {
-                    threadFuture.get();
+                    threadFuture.get();//执行future
                 } catch (ExecutionException ex) {
                     throw new SQLException(ex.getCause());
                 } catch (InterruptedException ex) {
@@ -142,8 +142,8 @@ public class CreateCluster extends Tool {//tiger cluster
                 }
 
                 // set the cluster to the serverList on both databases
-                statSource.executeUpdate("SET CLUSTER '" + serverList + "'");
-                statTarget.executeUpdate("SET CLUSTER '" + serverList + "'");
+                statSource.executeUpdate("SET CLUSTER '" + serverList + "'");//源数据库设置cluster
+                statTarget.executeUpdate("SET CLUSTER '" + serverList + "'");//目标数据库设置cluster
             }
         } catch (IOException ex) {
             throw new SQLException(ex);
@@ -153,7 +153,7 @@ public class CreateCluster extends Tool {//tiger cluster
     private static Future<?> startWriter(final PipedReader pipeReader,
             final Statement statSource) throws IOException {
         final ExecutorService thread = Executors.newFixedThreadPool(1);
-        final PipedWriter pipeWriter = new PipedWriter(pipeReader);
+        final PipedWriter pipeWriter = new PipedWriter(pipeReader);//tiger 这个写法没用过，相当于linux 的pipe，只是形式不大一样
         // Since exceptions cannot be thrown across thread boundaries, return
         // the task's future so we can check manually
         Future<?> threadFuture = thread.submit(() -> {
@@ -163,9 +163,9 @@ public class CreateCluster extends Tool {//tiger cluster
             // occurs. The reader's IOException will then trigger the
             // finally{} that releases exclusive mode on the source DB.
             try (PipedWriter writer = pipeWriter;
-                    final ResultSet rs = statSource.executeQuery("SCRIPT")) {
+                    final ResultSet rs = statSource.executeQuery("SCRIPT")) {//一条语句就够了？==>是，将建表语句和数据都导出了
                 while (rs.next()) {
-                    writer.write(rs.getString(1) + "\n");
+                    writer.write(rs.getString(1) + "\n");//往管道里面写每条结果，等待pipeReader读出
                 }
             } catch (SQLException | IOException ex) {
                 throw new IllegalStateException("Producing script from the source DB is failing.", ex);

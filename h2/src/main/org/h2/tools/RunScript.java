@@ -32,7 +32,7 @@ import org.h2.util.Tool;
  * Runs a SQL script against a database.
  * @h2.resource
  */
-public class RunScript extends Tool {//TIGER 运行一个脚本
+public class RunScript extends Tool {//TIGER 运行一个脚本,比如script 生成的数据库脚本
 
     private boolean showResults;
     private boolean checkResults;
@@ -154,7 +154,7 @@ public class RunScript extends Tool {//TIGER 运行一个脚本
      * @param reader the reader
      * @return the last result set
      */
-    public static ResultSet execute(Connection conn, Reader reader)
+    public static ResultSet execute(Connection conn, Reader reader)//执行scripts返回的每条指令
             throws SQLException {
         // can not close the statement because we return a result set from it
         Statement stat = conn.createStatement();
