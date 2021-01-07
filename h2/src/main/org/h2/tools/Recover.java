@@ -402,28 +402,28 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
         databaseName = name;
     }
 
-    private void dumpPageStore(String fileName) {
+    private void dumpPageStore(String fileName) {//tiger 重要函数，理解pagestore的结构
         setDatabaseName(fileName.substring(0, fileName.length() -
                 Constants.SUFFIX_PAGE_FILE.length()));
         PrintWriter writer = null;
         stat = new Stats();
         try {
-            writer = getWriter(fileName, ".sql");
+            writer = getWriter(fileName, ".sql");//打开文件
             String className = getClass().getName();
             writer.println("CREATE ALIAS IF NOT EXISTS READ_BLOB_DB FOR '" + className + ".readBlobDb';");
             writer.println("CREATE ALIAS IF NOT EXISTS READ_CLOB_DB FOR '" + className + ".readClobDb';");
-            resetSchema();
-            store = FileStore.open(null, fileName, remove ? "rw" : "r");
-            long length = store.length();
+            resetSchema();//重置内存
+            store = FileStore.open(null, fileName, remove ? "rw" : "r");//打开文件，不支持加密文件，可以设置是否删除老的
+            long length = store.length();//整体长度
             try {
-                store.init();
+                store.init();//初始化
             } catch (Exception e) {
                 writeError(writer, e);
             }
             Data s = Data.create(this, 128, false);
-            seek(0);
-            store.readFully(s.getBytes(), 0, 128);
-            s.setPos(48);
+            seek(0);//寻找第一页
+            store.readFully(s.getBytes(), 0, 128);//读入头部
+            s.setPos(48);//调到第一页的48
             pageSize = s.readInt();
             int writeVersion = s.readByte();
             int readVersion = s.readByte();
@@ -435,37 +435,37 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
                 pageSize = Constants.DEFAULT_PAGE_SIZE;
                 writer.println("-- ERROR: page size; using " + pageSize);
             }
-            long pageCount = length / pageSize;
-            parents = new int[(int) pageCount];
-            s = Data.create(this, pageSize, false);
-            for (long i = 3; i < pageCount; i++) {
+            long pageCount = length / pageSize;//计算一共有几页
+            parents = new int[(int) pageCount];//分配n页数的连续int长度的内存
+            s = Data.create(this, pageSize, false);//再次创建
+            for (long i = 3; i < pageCount; i++) {//从第三页开始
                 s.reset();
                 seek(i);
-                store.readFully(s.getBytes(), 0, 32);
-                s.readByte();
+                store.readFully(s.getBytes(), 0, 32);//读32
+                s.readByte();//跳过
                 s.readShortInt();
-                parents[(int) i] = s.readInt();
+                parents[(int) i] = s.readInt();//读入
             }
             int logKey = 0, logFirstTrunkPage = 0, logFirstDataPage = 0;
-            s = Data.create(this, pageSize, false);
+            s = Data.create(this, pageSize, false);//再次创建，为了不和历史的冲突或者重新初始化？
             for (long i = 1;; i++) {
-                if (i == 3) {
+                if (i == 3) {//为什么不是i < 3呢？
                     break;
                 }
                 s.reset();
-                seek(i);
-                store.readFully(s.getBytes(), 0, pageSize);
+                seek(i);//调到i页
+                store.readFully(s.getBytes(), 0, pageSize);//读入一页
                 CRC32 crc = new CRC32();
-                crc.update(s.getBytes(), 4, pageSize - 4);
+                crc.update(s.getBytes(), 4, pageSize - 4);//计算crc
                 int expected = (int) crc.getValue();
-                int got = s.readInt();
+                int got = s.readInt();//相继读入，这个是crc
                 long writeCounter = s.readLong();
                 int key = s.readInt();
-                int firstTrunkPage = s.readInt();
+                int firstTrunkPage = s.readInt();//第一个trunk page？
                 int firstDataPage = s.readInt();
-                if (expected == got) {
+                if (expected == got) {//如果crc相同
                     logKey = key;
-                    logFirstTrunkPage = firstTrunkPage;
+                    logFirstTrunkPage = firstTrunkPage;//为什么叫第一个页呢？
                     logFirstDataPage = firstDataPage;
                 }
                 writer.println("-- head " + i +
@@ -509,7 +509,7 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
             for (int i = 0; i < stat.pageTypeCount.length; i++) {
                 int count = stat.pageTypeCount[i];
                 if (count > 0) {
-                    writer.println("-- " + getPageType(i) + " " +
+                    writer.println("-- " + getPageType(i) + " " +//打印类型
                             (100 * count / pageCount) + "%, " + count + " page(s)");
                 }
             }
@@ -602,7 +602,7 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
                         recordLength = values.length - 1;
                     }
                     if (!init) {//如果没有初始化
-                        setStorage(Integer.parseInt(tableId));
+                        setStorage(Integer.parseInt(tableId));//设置名称
                         // init the column types
                         StringBuilder builder = new StringBuilder();
                         for (valueId = 0; valueId < recordLength; valueId++) {
@@ -740,7 +740,7 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
         return "[" + type + "]";
     }
 
-    private void dumpPageStore(PrintWriter writer, long pageCount) {
+    private void dumpPageStore(PrintWriter writer, long pageCount) {//dump 信息
         Data s = Data.create(this, pageSize, false);
         for (long page = 3; page < pageCount; page++) {
             s = Data.create(this, pageSize, false);
@@ -750,26 +750,26 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
         }
     }
 
-    private void dumpPage(PrintWriter writer, Data s, long page, long pageCount) {
+    private void dumpPage(PrintWriter writer, Data s, long page, long pageCount) {//DUMP 一页
         try {
             int type = s.readByte();
             switch (type) {
-            case Page.TYPE_EMPTY:
+            case Page.TYPE_EMPTY://有空闲页
                 stat.pageTypeCount[type]++;
                 return;
             }
-            boolean last = (type & Page.FLAG_LAST) != 0;
+            boolean last = (type & Page.FLAG_LAST) != 0;//是否是最后一页，利用了type的存储空间
             type &= ~Page.FLAG_LAST;
-            if (!PageStore.checksumTest(s.getBytes(), (int) page, pageSize)) {
+            if (!PageStore.checksumTest(s.getBytes(), (int) page, pageSize)) {//校验和
                 writeDataError(writer, "checksum mismatch type: " + type, s.getBytes());
             }
             s.readShortInt();
-            switch (type) {
+            switch (type) {//根据不同page类型
             // type 1
             case Page.TYPE_DATA_LEAF: {
                 stat.pageTypeCount[type]++;
                 int parentPageId = s.readInt();
-                setStorage(s.readVarInt());
+                setStorage(s.readVarInt());//设置名称
                 int columnCount = s.readVarInt();
                 int entries = s.readShortInt();
                 writer.println("-- page " + page + ": data leaf " +
@@ -782,10 +782,10 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
             // type 2
             case Page.TYPE_DATA_NODE: {
                 stat.pageTypeCount[type]++;
-                int parentPageId = s.readInt();
-                setStorage(s.readVarInt());
+                int parentPageId = s.readInt();//父节点ID，
+                setStorage(s.readVarInt());//索引
                 int rowCount = s.readInt();
-                int entries = s.readShortInt();
+                int entries = s.readShortInt();//共有几个entry
                 writer.println("-- page " + page + ": data node " +
                         (last ? "(last) " : "") + "parent: " + parentPageId +
                         " table: " + storageId + " entries: " + entries +
@@ -794,7 +794,7 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
                 break;
             }
             // type 3
-            case Page.TYPE_DATA_OVERFLOW:
+            case Page.TYPE_DATA_OVERFLOW://什么时候溢出？
                 stat.pageTypeCount[type]++;
                 writer.println("-- page " + page + ": data overflow " +
                         (last ? "(last) " : ""));
@@ -802,29 +802,29 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
             // type 4
             case Page.TYPE_BTREE_LEAF: {
                 stat.pageTypeCount[type]++;
-                int parentPageId = s.readInt();
-                setStorage(s.readVarInt());
-                int entries = s.readShortInt();
-                writer.println("-- page " + page + ": b-tree leaf " +
+                int parentPageId = s.readInt();//父节点ID，用途？
+                setStorage(s.readVarInt());//索引
+                int entries = s.readShortInt();//几个页
+                writer.println("-- page " + page + ": b-tree leaf " +//打印信息已经很明显说明内容了
                         (last ? "(last) " : "") + "parent: " + parentPageId +
                         " index: " + storageId + " entries: " + entries);
-                if (trace) {
-                    dumpPageBtreeLeaf(writer, s, entries, !last);
+                if (trace) {//只有在trace情况下才dump
+                    dumpPageBtreeLeaf(writer, s, entries, !last);//打印相关BtreeLeaf的page信息
                 }
                 break;
             }
             // type 5
             case Page.TYPE_BTREE_NODE:
                 stat.pageTypeCount[type]++;
-                int parentPageId = s.readInt();
-                setStorage(s.readVarInt());
+                int parentPageId = s.readInt();//父节点ID
+                setStorage(s.readVarInt());//索引
                 writer.println("-- page " + page + ": b-tree node " +
                         (last ? "(last) " : "") +  "parent: " + parentPageId +
                         " index: " + storageId);
-                dumpPageBtreeNode(writer, s, page, !last);
+                dumpPageBtreeNode(writer, s, page, !last);//打印相关BtreeNode的page信息，这里没有递归调用，来搜索子节点或叶子节点
                 break;
             // type 6
-            case Page.TYPE_FREE_LIST:
+            case Page.TYPE_FREE_LIST://空闲节点
                 stat.pageTypeCount[type]++;
                 writer.println("-- page " + page + ": free list " + (last ? "(last)" : ""));
                 stat.free += dumpPageFreeList(writer, s, page, pageCount);
@@ -1176,35 +1176,35 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
 
     private void dumpPageBtreeNode(PrintWriter writer, Data s, long pageId,
             boolean positionOnly) {
-        int rowCount = s.readInt();
-        int entryCount = s.readShortInt();
-        int[] children = new int[entryCount + 1];
-        int[] offsets = new int[entryCount];
-        children[entryCount] = s.readInt();
-        checkParent(writer, pageId, children, entryCount);
+        int rowCount = s.readInt();//列数，这里只是参考用
+        int entryCount = s.readShortInt();//ENTRY数目
+        int[] children = new int[entryCount + 1];//
+        int[] offsets = new int[entryCount];//offset 确实是少1的
+        children[entryCount] = s.readInt();//末位子节点的必须指向父节点，形成链式
+        checkParent(writer, pageId, children, entryCount);//检查最后一个子节点的父节点是否一致
         int empty = Integer.MAX_VALUE;
-        for (int i = 0; i < entryCount; i++) {
-            children[i] = s.readInt();
-            checkParent(writer, pageId, children, i);
-            int off = s.readShortInt();
+        for (int i = 0; i < entryCount; i++) {//循环读入entry
+            children[i] = s.readInt();//读入父节点
+            checkParent(writer, pageId, children, i);//父节点是否一致
+            int off = s.readShortInt();//读入页码
             empty = Math.min(off, empty);
-            offsets[i] = off;
+            offsets[i] = off;//保存页码
         }
         empty = empty - s.length();
         if (!trace) {
             return;
         }
-        writer.println("--   empty: " + empty);
+        writer.println("--   empty: " + empty);//trace 时候才打印
         for (int i = 0; i < entryCount; i++) {
             int off = offsets[i];
             s.setPos(off);
-            long key = s.readVarLong();
+            long key = s.readVarLong();//读key
             Value data;
             if (positionOnly) {
                 data = ValueBigint.get(key);
             } else {
                 try {
-                    data = s.readValue();
+                    data = s.readValue();//读数据
                 } catch (Throwable e) {
                     writeDataError(writer, "exception " + e, s.getBytes());
                     continue;
@@ -1247,25 +1247,25 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
 
     private void dumpPageBtreeLeaf(PrintWriter writer, Data s, int entryCount,
             boolean positionOnly) {
-        int[] offsets = new int[entryCount];
+        int[] offsets = new int[entryCount];//n个点位记录具体记录在哪一页
         int empty = Integer.MAX_VALUE;
-        for (int i = 0; i < entryCount; i++) {
-            int off = s.readShortInt();
+        for (int i = 0; i < entryCount; i++) {//前面的记录了每页在哪里
+            int off = s.readShortInt();//读入每个entry的页码
             empty = Math.min(off, empty);
-            offsets[i] = off;
+            offsets[i] = off;//记录
         }
-        empty = empty - s.length();
+        empty = empty - s.length();//长度之外就是空的，冗余空间
         writer.println("--   empty: " + empty);
-        for (int i = 0; i < entryCount; i++) {
+        for (int i = 0; i < entryCount; i++) {//循环输出每个entry
             int off = offsets[i];
-            s.setPos(off);
-            long key = s.readVarLong();
+            s.setPos(off);//跳到n页，因为数据在第n页
+            long key = s.readVarLong();//读取key
             Value data;
-            if (positionOnly) {
+            if (positionOnly) {//只需要位置，就可以不读数据
                 data = ValueBigint.get(key);
             } else {
                 try {
-                    data = s.readValue();
+                    data = s.readValue();//读数据
                 } catch (Throwable e) {
                     writeDataError(writer, "exception " + e, s.getBytes());
                     continue;
@@ -1275,13 +1275,13 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
         }
     }
 
-    private void checkParent(PrintWriter writer, long pageId, int[] children,
+    private void checkParent(PrintWriter writer, long pageId, int[] children,//检查子节点的父节点是否一致
             int index) {
         int child = children[index];
-        if (child < 0 || child >= parents.length) {
+        if (child < 0 || child >= parents.length) {//检查边界，是否溢出
             writer.println("-- ERROR [" + pageId + "] child[" +
                     index + "]: " + child + " >= page count: " + parents.length);
-        } else if (parents[child] != pageId) {
+        } else if (parents[child] != pageId) {//检查父节点是否都一致
             writer.println("-- ERROR [" + pageId + "] child[" +
                     index + "]: " + child + " parent: " + parents[child]);
         }
@@ -1293,10 +1293,10 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
         long[] keys = new long[entryCount];
         children[entryCount] = s.readInt();
         checkParent(writer, pageId, children, entryCount);
-        for (int i = 0; i < entryCount; i++) {
-            children[i] = s.readInt();
-            checkParent(writer, pageId, children, i);
-            keys[i] = s.readVarLong();
+        for (int i = 0; i < entryCount; i++) {//循环处理每个entry
+            children[i] = s.readInt();//读入页
+            checkParent(writer, pageId, children, i);//检查
+            keys[i] = s.readVarLong();//读入key
         }
         if (!trace) {
             return;
@@ -1312,21 +1312,21 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
         long[] keys = new long[entryCount];
         int[] offsets = new int[entryCount];
         long next = 0;
-        if (!last) {
+        if (!last) {//如果不是末尾，打印下一个，
             next = s.readInt();
             writer.println("--   next: " + next);
         }
         int empty = pageSize;
         for (int i = 0; i < entryCount; i++) {
-            keys[i] = s.readVarLong();
-            int off = s.readShortInt();
+            keys[i] = s.readVarLong();//读key， key是long，疑问：实际的key 内容应该有很多类型
+            int off = s.readShortInt();//读页码
             empty = Math.min(off, empty);
             offsets[i] = off;
         }
-        stat.pageDataRows += pageSize - empty;
+        stat.pageDataRows += pageSize - empty;//页的后面就是数据
         empty = empty - s.length();
-        stat.pageDataHead += s.length();
-        stat.pageDataEmpty += empty;
+        stat.pageDataHead += s.length();//s.length()为pageDataHead的长度
+        stat.pageDataEmpty += empty;//
         if (trace) {
             writer.println("--   empty: " + empty);
         }

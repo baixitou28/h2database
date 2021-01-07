@@ -46,25 +46,25 @@ public class DataReader extends Reader {
      *
      * @return the value
      */
-    public int readVarInt() throws IOException {
+    public int readVarInt() throws IOException {//tiger 变长的int，数据只利用了每个byte的7位，第8位是标识符
         int b = readByte();
-        if (b >= 0) {
-            return b;
+        if (b >= 0) {//如果是大于0，即127以下
+            return b;//最后一位
         }
-        int x = b & 0x7f;
+        int x = b & 0x7f;//这里0b1000,0000这位是标识符
         b = readByte();
         if (b >= 0) {
-            return x | (b << 7);
+            return x | (b << 7);//合并最后一位
         }
         x |= (b & 0x7f) << 7;
         b = readByte();
         if (b >= 0) {
-            return x | (b << 14);
+            return x | (b << 14);//合并最后一位
         }
         x |= (b & 0x7f) << 14;
         b = readByte();
         if (b >= 0) {
-            return x | b << 21;
+            return x | b << 21;//合并最后一位
         }
         return x | ((b & 0x7f) << 21) | (readByte() << 28);
     }
