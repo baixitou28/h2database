@@ -15,7 +15,7 @@ import org.h2.store.Data;
 /**
  * A page that contains data rows.
  */
-abstract class PageData extends Page {
+abstract class PageData extends Page {//包含数据行data rows的页，这个是抽象类，PageDataNode和PageDataLeaf是相关子类
 
     /**
      * The memory needed by an object of class PageData.
@@ -50,7 +50,7 @@ abstract class PageData extends Page {
     /**
      * The data page.
      */
-    protected final Data data;
+    protected final Data data;//可持久化的数据
 
     /**
      * The number of entries.
@@ -110,7 +110,7 @@ abstract class PageData extends Page {
     int find(long key) {
         int l = 0, r = entryCount;
         while (l < r) {
-            int i = (l + r) >>> 1;
+            int i = (l + r) >>> 1;//折半算法
             long k = keys[i];
             if (k == key) {
                 return i;

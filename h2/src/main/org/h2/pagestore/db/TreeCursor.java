@@ -29,7 +29,7 @@ public class TreeCursor implements Cursor {
     @Override
     public Row get() {
         return node == null ? null : node.row;
-    }
+    }//返回row
 
     @Override
     public SearchRow getSearchRow() {
@@ -69,23 +69,23 @@ public class TreeCursor implements Cursor {
      * @param x the node
      * @return the next node or null
      */
-    private static TreeNode next(TreeNode x) {
+    private static TreeNode next(TreeNode x) {//左中右的次序
         if (x == null) {
             return null;
         }
         TreeNode r = x.right;
-        if (r != null) {
+        if (r != null) {//如果有右节点
             x = r;
             TreeNode l = x.left;
-            while (l != null) {
+            while (l != null) {//一直找左节点
                 x = l;
                 l = x.left;
             }
-            return x;
+            return x;//如果没有左节点，就直接返回右节点也可以
         }
         TreeNode ch = x;
         x = x.parent;
-        while (x != null && ch == x.right) {
+        while (x != null && ch == x.right) {//沿着右节点一直往上，知道不是右节点为止
             ch = x;
             x = x.parent;
         }
@@ -104,18 +104,18 @@ public class TreeCursor implements Cursor {
             return null;
         }
         TreeNode l = x.left;
-        if (l != null) {
+        if (l != null) {//如果有有左节点，
             x = l;
             TreeNode r = x.right;
-            while (r != null) {
+            while (r != null) {//一直找右节点
                 x = r;
                 r = x.right;
             }
-            return x;
+            return x;//如果没有就直接返回左节点
         }
         TreeNode ch = x;
-        x = x.parent;
-        while (x != null && ch == x.left) {
+        x = x.parent;//父节点
+        while (x != null && ch == x.left) {//沿着左节点一直向上，知道不是左节点为止
             ch = x;
             x = x.parent;
         }

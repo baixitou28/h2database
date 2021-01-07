@@ -35,7 +35,7 @@ import org.h2.value.VersionedValue;
 /**
  * A table stored in a MVStore.
  */
-public class MVPrimaryIndex extends MVIndex<Long, SearchRow> {
+public class MVPrimaryIndex extends MVIndex<Long, SearchRow> {//tiger index
 
     private final MVTable mvTable;
     private final String mapName;

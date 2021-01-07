@@ -67,7 +67,7 @@ import org.h2.value.ValueVarcharIgnoreCase;
  * @author Noel Grandin
  * @author Nicolas Fortin, Atelier SIG, IRSTV FR CNRS 24888
  */
-public class Data {
+public class Data {//tiger 重要 数据库的行数据的持久化
 
     /**
      * The length of an integer value.
@@ -456,7 +456,7 @@ public class Data {
      *
      * @param v the value
      */
-    public void writeValue(Value v) {
+    public void writeValue(Value v) {//序列化
         int start = pos;
         if (v == ValueNull.INSTANCE) {
             data[pos++] = NULL;
@@ -765,7 +765,7 @@ public class Data {
      *
      * @return the value
      */
-    public Value readValue() {
+    public Value readValue() {//反序列化
         int type = data[pos++] & 255;
         switch (type) {
         case NULL:
@@ -979,7 +979,7 @@ public class Data {
      *            time storage format
      * @return the number of bytes required to store this value
      */
-    public static int getValueLen(Value v, boolean storeLocalTime) {
+    public static int getValueLen(Value v, boolean storeLocalTime) {//长度
         if (v == ValueNull.INSTANCE) {
             return 1;
         }

@@ -29,7 +29,7 @@ import org.h2.util.Utils;
  * of a table. Each regular table has one such object, even if no primary key or
  * indexes are defined.
  */
-public class ScanIndex extends Index {//tiger INDEX
+public class ScanIndex extends Index {//tiger INDEX 真个是一个逻辑的概念，不是严格意思的索引，其中删除一行，并没有直接删除，而是标记，仍然放在rows中
     private long firstFree = -1;
     private ArrayList<Row> rows = Utils.newSmallArrayList();
     private final PageStoreTable tableData;
@@ -60,7 +60,7 @@ public class ScanIndex extends Index {//tiger INDEX
     @Override
     public String getCreateSQL() {
         return null;
-    }
+    }//没有建表语句
 
     @Override
     public void close(SessionLocal session) {
@@ -75,41 +75,41 @@ public class ScanIndex extends Index {//tiger INDEX
     @Override
     public void add(SessionLocal session, Row row) {
         // in-memory
-        if (firstFree == -1) {
+        if (firstFree == -1) {//如果以前删除过，即firstFree 不为空
             int key = rows.size();
             row.setKey(key);
-            rows.add(row);
+            rows.add(row);//直接加入
         } else {
-            long key = firstFree;
+            long key = firstFree;//最后一个
             Row free = rows.get((int) key);
-            firstFree = free.getKey();
-            row.setKey(key);
-            rows.set((int) key, row);
+            firstFree = free.getKey();//因为是单向列表，firstFree更新为指向的下一个
+            row.setKey(key);//更新
+            rows.set((int) key, row);//插入
         }
         rowCount++;
     }
 
     @Override
-    public void remove(SessionLocal session, Row row) {
+    public void remove(SessionLocal session, Row row) {//删除一行，并没有直接删除，而是标记，仍然放在rows中
         // in-memory
-        if (rowCount == 1) {
+        if (rowCount == 1) {//如果只有一个，简单模式处理
             rows = Utils.newSmallArrayList();
             firstFree = -1;
         } else {
-            Row free = new PageStoreRow.RemovedRow(firstFree);
+            Row free = new PageStoreRow.RemovedRow(firstFree);//生成一个free row
             long key = row.getKey();
-            if (rows.size() <= key) {
+            if (rows.size() <= key) {//如果范围超出
                 throw DbException.get(ErrorCode.ROW_NOT_FOUND_WHEN_DELETING_1,
                         rows.size() + ": " + key);
             }
-            rows.set((int) key, free);
-            firstFree = key;
+            rows.set((int) key, free);//将rows里第key个用free来替代
+            firstFree = key;//更新第一个空闲的值==>这样所有的空闲row，形成了一个单向列表，但适合并发吗？它是如何处理的，是上层吗？
         }
-        rowCount--;
+        rowCount--;//整体减1
     }
 
     @Override
-    public Cursor find(SessionLocal session, SearchRow first, SearchRow last) {
+    public Cursor find(SessionLocal session, SearchRow first, SearchRow last) {//返回自己的游标
         return new ScanCursor(this);
     }
 
@@ -117,7 +117,7 @@ public class ScanIndex extends Index {//tiger INDEX
     public double getCost(SessionLocal session, int[] masks,
             TableFilter[] filters, int filter, SortOrder sortOrder,
             AllColumnsForPlan allColumnsSet) {
-        return tableData.getRowCountApproximation(session) + Constants.COST_ROW_OFFSET;
+        return tableData.getRowCountApproximation(session) + Constants.COST_ROW_OFFSET;//常规设置为1000+行数，就是很不推荐的意思
     }
 
     @Override
@@ -140,13 +140,13 @@ public class ScanIndex extends Index {//tiger INDEX
         }
         while (true) {
             key++;
-            if (key >= rows.size()) {
+            if (key >= rows.size()) {//如果key 超出范围
                 return null;
             }
-            row = rows.get((int) key);
-            if (row.getValueList() != null) {
+            row = rows.get((int) key);//按key值获取row，若RemovedRow.getValueList()为空
+            if (row.getValueList() != null) {//如果不是RemovedRow则继续循环，
                 return row;
-            }
+            }//如果有很多删除，这里有很多RemovedRow
         }
     }
 
@@ -169,7 +169,7 @@ public class ScanIndex extends Index {//tiger INDEX
     @Override
     public boolean needRebuild() {
         return false;
-    }
+    }//重来不需要重建
 
     @Override
     public long getRowCountApproximation(SessionLocal session) {
@@ -178,7 +178,7 @@ public class ScanIndex extends Index {//tiger INDEX
 
     @Override
     public String getPlanSQL() {
-        return table.getSQL(new StringBuilder(), TRACE_SQL_FLAGS).append(".tableScan").toString();
+        return table.getSQL(new StringBuilder(), TRACE_SQL_FLAGS).append(".tableScan").toString();//explian时候的标记
     }
 
 }

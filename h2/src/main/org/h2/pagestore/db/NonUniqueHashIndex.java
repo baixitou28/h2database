@@ -66,12 +66,12 @@ public class NonUniqueHashIndex extends Index {//tiger INDEX
     @Override
     public void add(SessionLocal session, Row row) {
         Value key = row.getValue(indexColumn);
-        ArrayList<Long> positions = rows.get(key);
+        ArrayList<Long> positions = rows.get(key);//每个key 对应一个list，就是所谓的桶
         if (positions == null) {
             positions = Utils.newSmallArrayList();
             rows.put(key, positions);
         }
-        positions.add(row.getKey());
+        positions.add(row.getKey());//在
         rowCount++;
     }
 
@@ -79,27 +79,27 @@ public class NonUniqueHashIndex extends Index {//tiger INDEX
     public void remove(SessionLocal session, Row row) {
         if (rowCount == 1) {
             // last row in table
-            reset();
+            reset();//如果只有一个元素，简单的reset就可以了
         } else {
             Value key = row.getValue(indexColumn);
-            ArrayList<Long> positions = rows.get(key);
+            ArrayList<Long> positions = rows.get(key);//找到桶
             if (positions.size() == 1) {
                 // last row with such key
                 rows.remove(key);
             } else {
-                positions.remove(row.getKey());
+                positions.remove(row.getKey());//删除桶里的一个元素
             }
             rowCount--;
         }
     }
 
     @Override
-    public Cursor find(SessionLocal session, SearchRow first, SearchRow last) {
+    public Cursor find(SessionLocal session, SearchRow first, SearchRow last) {//
         if (first == null || last == null) {
             throw DbException.getInternalError(first + " " + last);
         }
         if (first != last) {
-            if (TreeIndex.compareKeys(first, last) != 0) {
+            if (TreeIndex.compareKeys(first, last) != 0) {//利用TreeIndex来比对区间是否合理
                 throw DbException.getInternalError();
             }
         }
@@ -110,9 +110,9 @@ public class NonUniqueHashIndex extends Index {//tiger INDEX
          * case we need to convert, otherwise the HashMap will not find the
          * result.
          */
-        v = v.convertTo(tableData.getColumn(indexColumn).getType(), session);
+        v = v.convertTo(tableData.getColumn(indexColumn).getType(), session);//int 和long 有时候也会成为困难，如果仅用一种类型，可能会浪费存储空间
         ArrayList<Long> positions = rows.get(v);
-        return new NonUniqueHashCursor(session, tableData, positions);
+        return new NonUniqueHashCursor(session, tableData, positions);//返回cursor
     }
 
     @Override
@@ -142,7 +142,7 @@ public class NonUniqueHashIndex extends Index {//tiger INDEX
         for (Column column : columns) {
             int index = column.getColumnId();
             int mask = masks[index];
-            if ((mask & IndexCondition.EQUALITY) != IndexCondition.EQUALITY) {
+            if ((mask & IndexCondition.EQUALITY) != IndexCondition.EQUALITY) {//仅支持等号
                 return Long.MAX_VALUE;
             }
         }

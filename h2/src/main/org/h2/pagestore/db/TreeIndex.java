@@ -356,7 +356,7 @@ public class TreeIndex extends Index {//tiger INDEX
     }
 
     @Override
-    public Cursor findFirstOrLast(SessionLocal session, boolean first) {
+    public Cursor findFirstOrLast(SessionLocal session, boolean first) {//TIGER 这个有啥用？
         if (closed) {
             throw DbException.getInternalError(toString());
         }

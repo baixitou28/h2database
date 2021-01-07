@@ -48,7 +48,7 @@ public class PageStoreTable extends RegularTable {//简单的页存储数据，�
     public PageStoreTable(CreateTableData data) {
         super(data);
         nextAnalyze = database.getSettings().analyzeAuto;
-        if (data.persistData && database.isPersistent()) {
+        if (data.persistData && database.isPersistent()) {//是否持久化
             mainIndex = new PageDataIndex(this, data.id,
                     IndexColumn.wrap(getColumns()),
                     IndexType.createScan(data.persistData),
@@ -56,7 +56,7 @@ public class PageStoreTable extends RegularTable {//简单的页存储数据，�
             scanIndex = mainIndex;
         } else {
             mainIndex = null;
-            scanIndex = new ScanIndex(this, data.id,
+            scanIndex = new ScanIndex(this, data.id,//定义
                     IndexColumn.wrap(getColumns()), IndexType.createScan(data.persistData));
         }
         indexes.add(scanIndex);

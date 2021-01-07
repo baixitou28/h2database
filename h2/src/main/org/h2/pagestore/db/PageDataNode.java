@@ -33,7 +33,7 @@ import org.h2.util.Utils;
  * The key is the largest key of the respective child, meaning key[0] is the
  * largest key of child[0].
  */
-public class PageDataNode extends PageData {
+public class PageDataNode extends PageData {/
 
     /**
      * The page ids of the children.

@@ -10,12 +10,12 @@ import org.h2.result.Row;
 /**
  * Represents a index node of a tree index.
  */
-class TreeNode {
+class TreeNode {//tiger 典型的node形式
 
     /**
      * The balance. For more information, see the AVL tree documentation.
      */
-    int balance;
+    int balance;//
 
     /**
      * The left child node or null.
@@ -35,7 +35,7 @@ class TreeNode {
     /**
      * The row.
      */
-    final Row row;
+    final Row row;//TIGER row放这里
 
     TreeNode(Row row) {
         this.row = row;

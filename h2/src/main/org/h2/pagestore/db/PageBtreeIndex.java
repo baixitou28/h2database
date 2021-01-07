@@ -29,7 +29,7 @@ import org.h2.value.ValueNull;
  * This is the most common type of index, a b tree index.
  * Only the data of the indexed columns are stored in the index.
  */
-public class PageBtreeIndex extends PageIndex {
+public class PageBtreeIndex extends PageIndex {//tiger index 简单的 b 树
 
     private static int memoryChangeRequired;
 

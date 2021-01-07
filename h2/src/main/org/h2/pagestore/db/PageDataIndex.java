@@ -54,26 +54,26 @@ public class PageDataIndex extends PageIndex {
         // trace.setLevel(TraceSystem.DEBUG);
         tableData = table;
         this.store = database.getPageStore();
-        store.addIndex(this);
-        if (!database.isPersistent()) {
+        store.addIndex(this);//加入本索引
+        if (!database.isPersistent()) {//必须持久化
             throw DbException.getInternalError(table.getName());
         }
-        if (create) {
-            rootPageId = store.allocatePage();
-            store.addMeta(this, session);
-            PageDataLeaf root = PageDataLeaf.create(this, rootPageId, PageData.ROOT);
+        if (create) {//如果第一次创建
+            rootPageId = store.allocatePage();//创建根节点
+            store.addMeta(this, session);//增加元信息
+            PageDataLeaf root = PageDataLeaf.create(this, rootPageId, PageData.ROOT);//创建一个页
             store.update(root);
         } else {
-            rootPageId = store.getRootPageId(id);
-            PageData root = getPage(rootPageId, 0);
-            lastKey = root.getLastKey();
+            rootPageId = store.getRootPageId(id);//获取根节点
+            PageData root = getPage(rootPageId, 0);//分配页
+            lastKey = root.getLastKey();//一般是主键索引
             rowCount = root.getRowCount();
         }
         if (trace.isDebugEnabled()) {
             trace.debug("{0} opened rows: {1}", this, rowCount);
         }
         table.setRowCount(rowCount);
-        memoryPerPage = (PageData.MEMORY_PAGE_DATA + store.getPageSize()) >> 2;
+        memoryPerPage = (PageData.MEMORY_PAGE_DATA + store.getPageSize()) >> 2;//1/4倍的值分配 ,那一般只有4k/4?
     }
 
     @Override
@@ -85,14 +85,14 @@ public class PageDataIndex extends PageIndex {
     }
 
     @Override
-    public void add(SessionLocal session, Row row) {
+    public void add(SessionLocal session, Row row) {//tiger 加入和删除是最能看出结构的地方
         boolean retry = false;
-        if (mainIndexColumn != -1) {
-            row.setKey(row.getValue(mainIndexColumn).getLong());
+        if (mainIndexColumn != -1) {//有主键，设置主键
+            row.setKey(row.getValue(mainIndexColumn).getLong());//使用最近的key
         } else {
             if (row.getKey() == 0) {
-                row.setKey((int) ++lastKey);
-                retry = true;
+                row.setKey((int) ++lastKey);//没有主索引就用lastKey，不需要老查找了。//这个lastKey好像不利于并发插入
+                retry = true;//如果不是主键索引，可以再次尝试
             }
         }
         if (tableData.getContainsLargeObject()) {
@@ -100,9 +100,9 @@ public class PageDataIndex extends PageIndex {
                 Value v = row.getValue(i);
                 if (v instanceof ValueLob) {
                     ValueLob lob = ((ValueLob) v).copy(database, getId());
-                    session.removeAtCommitStop(lob);
+                    session.removeAtCommitStop(lob);//标记，如果失败，记得删除
                     if (v != lob) {
-                        row.setValue(i, lob);
+                        row.setValue(i, lob);//把id，记录在row中
                     }
                 }
             }
@@ -118,32 +118,32 @@ public class PageDataIndex extends PageIndex {
                 addTry(session, row);
                 break;
             } catch (DbException e) {
-                if (e != fastDuplicateKeyException) {
+                if (e != fastDuplicateKeyException) {//tiger
                     throw e;
                 }
-                if (!retry) {
+                if (!retry) {//如果是主键，不允许重复
                     e = DbException.get(ErrorCode.DUPLICATE_KEY_1,
                             getDuplicatePrimaryKeyMessage(mainIndexColumn).toString());
                     e.setSource(this);
                     throw e;
                 }
-                if (add == 0) {
+                if (add == 0) {//因为使用最近的key失败，所以增加一个随机值，随后再随机值上加1，
                     // in the first re-try add a small random number,
                     // to avoid collisions after a re-start
-                    row.setKey((long) (row.getKey() + Math.random() * 10_000));
+                    row.setKey((long) (row.getKey() + Math.random() * 10_000));//add为0，则换一个key
                 } else {
                     row.setKey(row.getKey() + add);
                 }
                 add++;
             } finally {
-                store.incrementChangeCount();
+                store.incrementChangeCount();//增加
             }
         }
-        lastKey = Math.max(lastKey, row.getKey());
+        lastKey = Math.max(lastKey, row.getKey());//取最大值
     }
 
-    private void addTry(SessionLocal session, Row row) {
-        while (true) {
+    private void addTry(SessionLocal session, Row row) {//尝试插入 //TODO: tiger
+        while (true) {//循环操作
             PageData root = getPage(rootPageId, 0);
             int splitPoint = root.addRowTry(row);
             if (splitPoint == -1) {
@@ -194,19 +194,19 @@ public class PageDataIndex extends PageIndex {
      * @return the page
      */
     PageData getPage(int id, int parent) {
-        Page pd = store.getPage(id);
-        if (pd == null) {
+        Page pd = store.getPage(id);//通过store来统一获取页
+        if (pd == null) {//如果没有，创建PageDataLeaf
             PageDataLeaf empty = PageDataLeaf.create(this, id, parent);
             // could have been created before, but never committed
-            store.logUndo(empty, null);
+            store.logUndo(empty, null);//不理解//TODO: tiger 重要 getPage
             store.update(empty);
             return empty;
-        } else if (!(pd instanceof PageData)) {
+        } else if (!(pd instanceof PageData)) {//如果不是需要的类型
             throw DbException.get(ErrorCode.FILE_CORRUPTED_1, String.valueOf(pd));
         }
         PageData p = (PageData) pd;
         if (parent != -1) {
-            if (p.getParentPageId() != parent) {
+            if (p.getParentPageId() != parent) {//如果父节点不对 //TIGER 什么时候需要？
                 throw DbException.getInternalError(p + " parent " + p.getParentPageId() + " expected " + parent);
             }
         }
@@ -270,7 +270,7 @@ public class PageDataIndex extends PageIndex {
         // because MVStore uses the same cost calculation code for the ScanIndex (i.e.
         // the MVPrimaryIndex) and all other indices.
         return 10 * (tableData.getRowCountApproximation(session) +
-                Constants.COST_ROW_OFFSET) + 200;
+                Constants.COST_ROW_OFFSET) + 200;//成本也有点太高了
     }
 
     @Override
@@ -312,8 +312,8 @@ public class PageDataIndex extends PageIndex {
         if (trace.isDebugEnabled()) {
             trace.debug("{0} remove", this);
         }
-        removeAllRows();
-        store.free(rootPageId);
+        removeAllRows();//删除所有行
+        store.free(rootPageId);//删除根节点，和元数据
         store.removeMeta(this, session);
     }
 
@@ -322,23 +322,23 @@ public class PageDataIndex extends PageIndex {
         if (trace.isDebugEnabled()) {
             trace.debug("{0} truncate", this);
         }
-        store.logTruncate(session, tableData.getId());
-        removeAllRows();
+        store.logTruncate(session, tableData.getId());//删除日志
+        removeAllRows();//删除所有列
         if (tableData.getContainsLargeObject() && tableData.isPersistData()) {
             // unfortunately, the data is gone on rollback
-            session.commit(false);
-            database.getLobStorage().removeAllForTable(table.getId());
+            session.commit(false);//必须设置session commit 为false
+            database.getLobStorage().removeAllForTable(table.getId());//删除lob
         }
-        tableData.setRowCount(0);
+        tableData.setRowCount(0);//设为0
     }
 
     private void removeAllRows() {
         try {
-            PageData root = getPage(rootPageId, 0);
-            root.freeRecursive();
-            root = PageDataLeaf.create(this, rootPageId, PageData.ROOT);
-            store.removeFromCache(rootPageId);
-            store.update(root);
+            PageData root = getPage(rootPageId, 0);//获取根节点
+            root.freeRecursive();//递归删除
+            root = PageDataLeaf.create(this, rootPageId, PageData.ROOT);//创建一个新的根节点
+            store.removeFromCache(rootPageId);//从cache中删除
+            store.update(root);//更新为新的节点
             rowCount = 0;
             lastKey = 0;
         } finally {
@@ -456,7 +456,7 @@ public class PageDataIndex extends PageIndex {
 
     @Override
     public String getPlanSQL() {
-        return table.getSQL(new StringBuilder(), TRACE_SQL_FLAGS).append(".tableScan").toString();
+        return table.getSQL(new StringBuilder(), TRACE_SQL_FLAGS).append(".tableScan").toString();//这里也返回tableScan
     }
 
     int getMemoryPerPage() {
@@ -469,7 +469,7 @@ public class PageDataIndex extends PageIndex {
      *
      * @param x the new memory size
      */
-    void memoryChange(int x) {
+    void memoryChange(int x) {//tiger 未知
         if (memoryCount < Constants.MEMORY_FACTOR) {
             memoryPerPage += (x - memoryPerPage) / ++memoryCount;
         } else {
