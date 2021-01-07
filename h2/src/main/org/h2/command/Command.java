@@ -205,7 +205,7 @@ public abstract class Command implements CommandInterface {
                         // the transaction may be applied partially
                         // in this case we need to panic:
                         // close the database
-                        database.shutdownImmediately();
+                        database.shutdownImmediately();//没有内存直接关闭数据库
                         throw DbException.convert(e);
                     } catch (Throwable e) {
                         throw DbException.convert(e);
@@ -217,7 +217,7 @@ public abstract class Command implements CommandInterface {
                 database.exceptionThrown(s, sql);
                 if (s.getErrorCode() == ErrorCode.OUT_OF_MEMORY) {
                     callStop = false;
-                    database.shutdownImmediately();
+                    database.shutdownImmediately();//没有内存直接关闭数据库
                     throw e;
                 }
                 database.checkPowerOff();

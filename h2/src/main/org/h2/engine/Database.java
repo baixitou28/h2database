@@ -471,7 +471,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
     }
 
     public void setPowerOffCount(int count) {
-        if (powerOffCount == -1) {
+        if (powerOffCount == -1) {//如果是-1，是忽略吗?
             return;
         }
         powerOffCount = count;
@@ -520,18 +520,18 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
 
     @Override
     public void checkPowerOff() {
-        if (powerOffCount == 0) {
+        if (powerOffCount == 0) {//比如 会设置0
             return;
         }
         if (powerOffCount > 1) {
             powerOffCount--;
             return;
         }
-        if (powerOffCount != -1) {
+        if (powerOffCount != -1) {//设置为-1 说明已经在处理了 //shutdownImmediately 里面会直接设置 powerOffCount 为1
             try {
                 powerOffCount = -1;
                 if (store != null) {
-                    store.closeImmediately();
+                    store.closeImmediately();//关闭
                 } else {
                     synchronized (this) {
                         if (pageStore != null) {

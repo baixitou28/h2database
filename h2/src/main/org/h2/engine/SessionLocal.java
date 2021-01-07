@@ -1717,7 +1717,7 @@ public class SessionLocal extends Session implements TransactionStore.RollbackLi
             if (store != null) {
                 if (store.getMvStore().isClosed()) {
                     Throwable backgroundException = database.getBackgroundException();
-                    database.shutdownImmediately();
+                    database.shutdownImmediately();//数据库已经关闭了，直接关闭这个实例
                     throw DbException.get(ErrorCode.DATABASE_IS_CLOSED, backgroundException);
                 }
                 transaction = store.getTransactionStore().begin(this, this.lockTimeout, id, isolationLevel);

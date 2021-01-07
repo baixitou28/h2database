@@ -402,7 +402,7 @@ public class Recover extends Tool implements DataHandler {//TODO: TIGER 理解�
         databaseName = name;
     }
 
-    private void dumpPageStore(String fileName) {//tiger 重要函数，理解pagestore的结构
+    private void dumpPageStore(String fileName) {//tiger 重要函数，理解pagestore的结构 参看class PageStore的注释
         setDatabaseName(fileName.substring(0, fileName.length() -
                 Constants.SUFFIX_PAGE_FILE.length()));
         PrintWriter writer = null;
