@@ -34,7 +34,7 @@ import org.h2.value.Value;
  * <li>data</li>
  * </ul>
  */
-public class PageDataLeaf extends PageData {
+public class PageDataLeaf extends PageData {//tiger 包含一条或者多条rows的数据节点
 
     /**
      * The row offsets.
