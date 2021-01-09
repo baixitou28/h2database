@@ -5,7 +5,7 @@
  */
 package org.h2.store;
 
-public enum FileLockMethod {
+public enum FileLockMethod {//文件锁的类型
     /**
      * This locking method means no locking is used at all.
      */

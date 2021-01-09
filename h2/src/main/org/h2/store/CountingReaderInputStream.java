@@ -20,7 +20,7 @@ import org.h2.engine.Constants;
  * An input stream that reads the data from a reader and limits the number of
  * bytes that can be read.
  */
-public class CountingReaderInputStream extends InputStream {
+public class CountingReaderInputStream extends InputStream {//TIGER 限制读的数目， 但fillBuffer实现不大一样
 
     private final Reader reader;
 
@@ -37,7 +37,7 @@ public class CountingReaderInputStream extends InputStream {
 
     public CountingReaderInputStream(Reader reader, long maxLength) {
         this.reader = reader;
-        this.remaining = maxLength;
+        this.remaining = maxLength;//限制的最大长度
     }
 
     @Override

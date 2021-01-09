@@ -23,7 +23,7 @@ import org.h2.store.fs.FileUtils;
  * Each file contains a magic header, and reading / writing is done in blocks.
  * See also {@link SecureFileStore}
  */
-public class FileStore {
+public class FileStore {//tiger 注释,随机访问文件，是一个facade， 包装了文件的访问，和锁等。同时用SecureFileStore实现了加密层的解耦，
 
     /**
      * The size of the file header in bytes.
@@ -136,8 +136,8 @@ public class FileStore {
         FileStore store;
         if (cipher == null) {
             store = new FileStore(handler, name, mode);
-        } else {
-            store = new SecureFileStore(handler, name, mode,
+        } else {//如果加密
+            store = new SecureFileStore(handler, name, mode,//加密
                     cipher, key, keyIterations);
         }
         return store;
@@ -172,7 +172,7 @@ public class FileStore {
         }
     }
 
-    private void checkPowerOff() {
+    private void checkPowerOff() {//掉电
         if (handler != null) {
             handler.checkPowerOff();
         }
@@ -397,7 +397,7 @@ public class FileStore {
      *
      * @return the location
      */
-    public long getFilePointer() {
+    public long getFilePointer() {//位置
         if (ASSERT) {
             try {
                 if (file.position() != filePos) {
@@ -414,7 +414,7 @@ public class FileStore {
      * Call fsync. Depending on the operating system and hardware, this may or
      * may not in fact write the changes.
      */
-    public void sync() {
+    public void sync() {//刷新
         try {
             file.force(true);
         } catch (IOException e) {
@@ -426,7 +426,7 @@ public class FileStore {
     /**
      * Automatically delete the file once it is no longer in use.
      */
-    public void autoDelete() {
+    public void autoDelete() {//自动删除
         if (autoDeleteReference == null) {
             autoDeleteReference = handler.getTempFileDeleter().addFile(name, this);
         }
@@ -472,7 +472,7 @@ public class FileStore {
         }
     }
 
-    private static void trace(String method, String fileName, Object o) {
+    private static void trace(String method, String fileName, Object o) {//TIGER DEBUG 打开日志，便于调试IO
         if (SysProperties.TRACE_IO) {
             System.out.println("FileStore." + method + " " + fileName + " " + o);
         }
@@ -483,7 +483,7 @@ public class FileStore {
      *
      * @return true if successful
      */
-    public synchronized boolean tryLock() {
+    public synchronized boolean tryLock() {//锁
         try {
             lock = file.tryLock();
             return lock != null;

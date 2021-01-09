@@ -67,7 +67,7 @@ import org.h2.value.ValueVarcharIgnoreCase;
  * @author Noel Grandin
  * @author Nicolas Fortin, Atelier SIG, IRSTV FR CNRS 24888
  */
-public class Data {//tiger 重要 数据库的行数据的持久化
+public class Data {//tiger 重要 数据库的列和行数据的持久化，writeValue和readValue是主函数，writeValue不仅写单个数据，也可以写行和队列参见writeValue的Value.ROW分支
 
     /**
      * The length of an integer value.
@@ -681,7 +681,7 @@ public class Data {//tiger 重要 数据库的行数据的持久化
             }
             break;
         }
-        case Value.BLOB:
+        case Value.BLOB://写blob
         case Value.CLOB: {
             writeByte(type == Value.BLOB ? BLOB : CLOB);
             ValueLob lob = (ValueLob) v;
@@ -698,8 +698,8 @@ public class Data {//tiger 重要 数据库的行数据的持久化
             }
             break;
         }
-        case Value.ARRAY:
-        case Value.ROW: {
+        case Value.ARRAY://写队列
+        case Value.ROW: {//写行
             writeByte(type == Value.ARRAY ? ARRAY : ROW);
             Value[] list = ((ValueCollectionBase) v).getList();
             writeVarInt(list.length);
@@ -756,8 +756,8 @@ public class Data {//tiger 重要 数据库的行数据的持久化
         writeByte(type);
         byte[] b = v.getBytesNoCopy();
         int len = b.length;
-        writeVarInt(len);
-        write(b, 0, len);
+        writeVarInt(len);//先写长度
+        write(b, 0, len);//再写内容
     }
 
     /**
@@ -1218,7 +1218,7 @@ public class Data {//tiger 重要 数据库的行数据的持久化
      *
      * @param size the new size
      */
-    public void truncate(int size) {
+    public void truncate(int size) {//强制缩短，不会数据不全吗？
         if (pos > size) {
             byte[] buff = Arrays.copyOf(data, size);
             this.pos = size;

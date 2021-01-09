@@ -15,7 +15,7 @@ import org.h2.util.IOUtils;
  * This class is backed by an input stream and supports reading values and
  * variable size data.
  */
-public class DataReader extends Reader {
+public class DataReader extends Reader {//tiger 看注释，以 input stream 为基础，实现值的读写，虽然没有实现列的序列化，但可以读取数据的长度
 
     private final InputStream in;
 
@@ -33,7 +33,7 @@ public class DataReader extends Reader {
      *
      * @return the byte
      */
-    public byte readByte() throws IOException {
+    public byte readByte() throws IOException {//仅读一个字节
         int x = in.read();
         if (x < 0) {
             throw new FastEOFException();
@@ -74,7 +74,7 @@ public class DataReader extends Reader {
      *
      * @return the value
      */
-    public long readVarLong() throws IOException {
+    public long readVarLong() throws IOException {//读可变的long
         long x = readByte();
         if (x >= 0) {
             return x;
@@ -114,7 +114,7 @@ public class DataReader extends Reader {
      * @param buff the target buffer
      * @param len the number of bytes to read
      */
-    public void readFully(byte[] buff, int len) throws IOException {
+    public void readFully(byte[] buff, int len) throws IOException {//读入最大可能的长度
         int got = IOUtils.readFully(in, buff, len);
         if (got < len) {
             throw new FastEOFException();
@@ -126,7 +126,7 @@ public class DataReader extends Reader {
      *
      * @return the string
      */
-    public String readString() throws IOException {
+    public String readString() throws IOException {//读string
         int len = readVarInt();
         return readString(len);
     }
@@ -164,7 +164,7 @@ public class DataReader extends Reader {
     }
 
     @Override
-    public int read(char[] buff, int off, int len) throws IOException {
+    public int read(char[] buff, int off, int len) throws IOException {//读buffer
         if (len == 0) {
             return 0;
         }

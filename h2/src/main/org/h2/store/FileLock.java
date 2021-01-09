@@ -36,7 +36,7 @@ import org.h2.value.Transfer;
  * to it. It uses a cooperative locking protocol. Usually a .lock.db file is
  * used, but locking by creating a socket is supported as well.
  */
-public class FileLock implements Runnable {
+public class FileLock implements Runnable {//tiger 数据库的锁:文件、scoket等
 
     private static final String MAGIC = "FileLock";
     private static final String FILE = "file";

@@ -13,7 +13,7 @@ import org.h2.util.IOUtils;
 /**
  * Reader that reads only a specified range from the source reader.
  */
-public final class RangeReader extends Reader {
+public final class RangeReader extends Reader {//增加一个offset和limit限制而已
     private final Reader r;
 
     private long limit;
@@ -30,10 +30,10 @@ public final class RangeReader extends Reader {
      * @throws IOException
      *             on I/O exception during seeking to the specified offset
      */
-    public RangeReader(Reader r, long offset, long limit) throws IOException {
+    public RangeReader(Reader r, long offset, long limit) throws IOException {//增加一个offset和limit
         this.r = r;
         this.limit = limit;
-        IOUtils.skipFully(r, offset);
+        IOUtils.skipFully(r, offset);//跳到offset位置
     }
 
     @Override
@@ -41,7 +41,7 @@ public final class RangeReader extends Reader {
         if (limit <= 0) {
             return -1;
         }
-        int c = r.read();
+        int c = r.read();//这里仅仅读一个byte
         if (c >= 0) {
             limit--;
         }
@@ -49,14 +49,14 @@ public final class RangeReader extends Reader {
     }
 
     @Override
-    public int read(char cbuf[], int off, int len) throws IOException {
+    public int read(char cbuf[], int off, int len) throws IOException {//从cbuf里的offset位置读取
         if (limit <= 0) {
             return -1;
         }
         if (len > limit) {
             len = (int) limit;
         }
-        int cnt = r.read(cbuf, off, len);
+        int cnt = r.read(cbuf, off, len);//代理实现读
         if (cnt > 0) {
             limit -= cnt;
         }
@@ -66,7 +66,7 @@ public final class RangeReader extends Reader {
     @Override
     public long skip(long n) throws IOException {
         if (n > limit) {
-            n = (int) limit;
+            n = (int) limit;//如果超过limit，限制为limit
         }
         n = r.skip(n);
         limit -= n;

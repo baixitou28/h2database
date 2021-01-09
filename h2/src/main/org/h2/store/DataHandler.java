@@ -14,7 +14,7 @@ import org.h2.value.CompareMode;
  * A data handler contains a number of callback methods, mostly related to CLOB
  * and BLOB handling. The most important implementing class is a database.
  */
-public interface DataHandler {
+public interface DataHandler {//处理blob等数据，需要
 
     /**
      * Get the database path.

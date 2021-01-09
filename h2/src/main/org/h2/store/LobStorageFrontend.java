@@ -16,7 +16,7 @@ import org.h2.value.ValueLobFile;
  * This factory creates in-memory objects and temporary files. It is used on the
  * client side.
  */
-public class LobStorageFrontend implements LobStorageInterface {
+public class LobStorageFrontend implements LobStorageInterface {//TIGER LOB
 
     /**
      * The table id for session variables (LOBs not assigned to a table).
@@ -71,7 +71,7 @@ public class LobStorageFrontend implements LobStorageInterface {
         // need to use a temp file, because the input stream could come from
         // the same database, which would create a weird situation (trying
         // to read a block while writing something)
-        return ValueLobFile.createTempBlob(in, maxLength, sessionRemote);
+        return ValueLobFile.createTempBlob(in, maxLength, sessionRemote);//代理实现
     }
 
     /**
@@ -86,7 +86,7 @@ public class LobStorageFrontend implements LobStorageInterface {
         // need to use a temp file, because the input stream could come from
         // the same database, which would create a weird situation (trying
         // to read a block while writing something)
-        return ValueLobFile.createTempClob(reader, maxLength, sessionRemote);
+        return ValueLobFile.createTempClob(reader, maxLength, sessionRemote);//代理实现
     }
 
     @Override

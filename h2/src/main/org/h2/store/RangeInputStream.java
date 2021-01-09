@@ -14,7 +14,7 @@ import org.h2.util.IOUtils;
 /**
  * Input stream that reads only a specified range from the source stream.
  */
-public final class RangeInputStream extends FilterInputStream {
+public final class RangeInputStream extends FilterInputStream {//增加offset和limit限制
     private long limit;
 
     /**
@@ -36,11 +36,11 @@ public final class RangeInputStream extends FilterInputStream {
     }
 
     @Override
-    public int read() throws IOException {
-        if (limit <= 0) {
+    public int read() throws IOException {//读入一个byte
+        if (limit <= 0) {//已经超出限制了
             return -1;
         }
-        int b = in.read();
+        int b = in.read();//代理实现
         if (b >= 0) {
             limit--;
         }
@@ -63,7 +63,7 @@ public final class RangeInputStream extends FilterInputStream {
     }
 
     @Override
-    public long skip(long n) throws IOException {
+    public long skip(long n) throws IOException {//skip也是有limit限制的
         if (n > limit) {
             n = (int) limit;
         }
@@ -73,7 +73,7 @@ public final class RangeInputStream extends FilterInputStream {
     }
 
     @Override
-    public int available() throws IOException {
+    public int available() throws IOException {//还剩多少，最多就是limit
         int cnt = in.available();
         if (cnt > limit) {
             return (int) limit;
