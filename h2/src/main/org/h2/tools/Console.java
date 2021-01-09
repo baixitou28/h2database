@@ -62,10 +62,10 @@ public class Console extends Tool implements ShutdownHandler {//TIGER console H2
      *
      * @param args the command line arguments
      */
-    public static void main(String... args) throws SQLException {//tiger 命令行入口
+    public static void main(String... args) throws SQLException {//tiger 命令行入口, 注释已说明
         Console console;
         try {
-            console = (Console) Utils.newInstance("org.h2.tools.GUIConsole");
+            console = (Console) Utils.newInstance("org.h2.tools.GUIConsole");//尝试加载gui类
         } catch (Exception | NoClassDefFoundError e) {
             console = new Console();
         }
@@ -244,7 +244,7 @@ public class Console extends Tool implements ShutdownHandler {//TIGER console H2
         }
         if (pgStart) {
             try {
-                pg = Server.createPgServer(args);//打开pg模式，pg是啥？
+                pg = Server.createPgServer(args);//打开pg模式，pg是啥？==>pg数据库
                 pg.start();
                 if (printStatus) {
                     out.println(pg.getStatus());
@@ -282,7 +282,7 @@ public class Console extends Tool implements ShutdownHandler {//TIGER console H2
      * Stop all servers that were started using the console.
      */
     @Override
-    public void shutdown() {
+    public void shutdown() {//三种模式，选择一种关闭
         if (web != null && web.isRunning(false)) {
             web.stop();
             web = null;

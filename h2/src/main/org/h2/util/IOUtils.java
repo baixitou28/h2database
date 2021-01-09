@@ -276,10 +276,10 @@ public class IOUtils {
      * @param max the number of bytes to read at most
      * @return the number of bytes read, 0 meaning EOF
      */
-    public static int readFully(InputStream in, byte[] buffer, int max)
+    public static int readFully(InputStream in, byte[] buffer, int max)//读入最大可能的长度
             throws IOException {
         try {
-            int result = 0, len = Math.min(max, buffer.length);
+            int result = 0, len = Math.min(max, buffer.length);//选一个合适长度
             while (len > 0) {
                 int l = in.read(buffer, result, len);
                 if (l < 0) {
