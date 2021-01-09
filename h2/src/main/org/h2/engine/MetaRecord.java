@@ -20,7 +20,7 @@ import org.h2.value.ValueVarchar;
  * A record in the system table of the database.
  * It contains the SQL statement to create the database object.
  */
-public class MetaRecord implements Comparable<MetaRecord> {
+public class MetaRecord implements Comparable<MetaRecord> {//tiger 不知
 
     /**
      * Comparator for prepared constraints, sorts unique and primary key

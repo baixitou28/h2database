@@ -19,7 +19,7 @@ import org.h2.value.Value;
  * The compatibility modes. There is a fixed set of modes (for example
  * PostgreSQL, MySQL). Each mode has different settings.
  */
-public class Mode {
+public class Mode {//兼容类型
 
     public enum ModeEnum {
         REGULAR, DB2, Derby, MSSQLServer, HSQLDB, MySQL, Oracle, PostgreSQL

@@ -11,7 +11,7 @@ import org.h2.command.Prepared;
  * Represents a procedure. Procedures are implemented for PostgreSQL
  * compatibility.
  */
-public class Procedure {
+public class Procedure {//存储过程
 
     private final String name;
     private final Prepared prepared;
