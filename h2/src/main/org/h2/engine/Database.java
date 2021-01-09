@@ -182,7 +182,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
     private boolean readOnly;
     private DatabaseEventListener eventListener;
     private int maxMemoryRows = SysProperties.MAX_MEMORY_ROWS;
-    private int maxMemoryUndo = Constants.DEFAULT_MAX_MEMORY_UNDO;
+    private int maxMemoryUndo = Constants.DEFAULT_MAX_MEMORY_UNDO;//最大是5万，是不是太大？
     private int lockMode = Constants.DEFAULT_LOCK_MODE;
     private int maxLengthInplaceLob;
     private int allowLiterals = Constants.ALLOW_LITERALS_ALL;
@@ -512,11 +512,11 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
 
     public long getNextRemoteSettingsId() {
         return remoteSettingsId.incrementAndGet();
-    }
+    }//简单递增
 
     public int getPowerOffCount() {
         return powerOffCount;
-    }
+    }//关机次数
 
     @Override
     public void checkPowerOff() {

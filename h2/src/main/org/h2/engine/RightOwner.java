@@ -19,7 +19,7 @@ import org.h2.util.StringUtils;
 /**
  * A right owner (sometimes called principal).
  */
-public abstract class RightOwner extends DbObject {
+public abstract class RightOwner extends DbObject {//一个用户，有多个权限
 
     /**
      * The map of granted roles.
@@ -153,7 +153,7 @@ public abstract class RightOwner extends DbObject {
      *
      * @param object the object
      */
-    void revokeRight(DbObject object) {
+    void revokeRight(DbObject object) {//收回某个对象
         if (grantedRights == null) {
             return;
         }
@@ -169,7 +169,7 @@ public abstract class RightOwner extends DbObject {
      * @param role the role
      * @param right the right to grant
      */
-    public void grantRole(Role role, Right right) {
+    public void grantRole(Role role, Right right) {//赋予
         if (grantedRoles == null) {
             grantedRoles = new HashMap<>();
         }
@@ -181,7 +181,7 @@ public abstract class RightOwner extends DbObject {
      *
      * @param role the role to revoke
      */
-    void revokeRole(Role role) {
+    void revokeRole(Role role) {//收回
         if (grantedRoles == null) {
             return;
         }
@@ -221,7 +221,7 @@ public abstract class RightOwner extends DbObject {
      * @param object the granted object (table or schema)
      * @return the right or null if the right has not been granted
      */
-    public Right getRightForObject(DbObject object) {
+    public Right getRightForObject(DbObject object) {//某个表的权限
         if (grantedRights == null) {
             return null;
         }
@@ -234,7 +234,7 @@ public abstract class RightOwner extends DbObject {
      * @param role the granted role
      * @return the right or null if the right has not been granted
      */
-    public Right getRightForRole(Role role) {
+    public Right getRightForRole(Role role) {//某个角色的权限
         if (grantedRoles == null) {
             return null;
         }

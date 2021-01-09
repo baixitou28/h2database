@@ -51,7 +51,7 @@ import org.h2.value.ValueVarchar;
  * The client side part of a session when using the server mode. This object
  * communicates with a Session on the server side.
  */
-public final class SessionRemote extends Session implements DataHandler {
+public final class SessionRemote extends Session implements DataHandler {//客户端的session
 
     public static final int SESSION_PREPARE = 0;
     public static final int SESSION_CLOSE = 1;
@@ -115,7 +115,7 @@ public final class SessionRemote extends Session implements DataHandler {
     }
 
     @Override
-    public ArrayList<String> getClusterServers() {
+    public ArrayList<String> getClusterServers() {//cluster的信息
         ArrayList<String> serverList = new ArrayList<>();
         for (Transfer transfer : transferList) {
             serverList.add(transfer.getSocket().getInetAddress().
@@ -694,7 +694,7 @@ public final class SessionRemote extends Session implements DataHandler {
     }
 
     @Override
-    public FileStore openFile(String name, String mode, boolean mustExist) {
+    public FileStore openFile(String name, String mode, boolean mustExist) {//打开文件
         if (mustExist && !FileUtils.exists(name)) {
             throw DbException.get(ErrorCode.FILE_NOT_FOUND_1, name);
         }

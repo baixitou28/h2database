@@ -71,7 +71,7 @@ import org.h2.value.VersionedValue;
  * mode, this object resides on the server side and communicates with a
  * SessionRemote object on the client side.
  */
-public class SessionLocal extends Session implements TransactionStore.RollbackListener {
+public class SessionLocal extends Session implements TransactionStore.RollbackListener {//tiger 服务端的session
 
     public enum State { INIT, RUNNING, BLOCKED, SLEEP, THROTTLED, SUSPENDED, CLOSED }
 
@@ -386,7 +386,7 @@ public class SessionLocal extends Session implements TransactionStore.RollbackLi
      * @param table the table to add
      * @throws DbException if a table with this name already exists
      */
-    public void addLocalTempTable(Table table) {
+    public void addLocalTempTable(Table table) {//有时候需要临时表 //TIGER 重要实现
         if (localTempTables == null) {
             localTempTables = database.newStringMap();
         }
@@ -421,7 +421,7 @@ public class SessionLocal extends Session implements TransactionStore.RollbackLi
      * @param name the table name
      * @return the table, or null
      */
-    public Index findLocalTempTableIndex(String name) {
+    public Index findLocalTempTableIndex(String name) {//临时的索引
         if (localTempTableIndexes == null) {
             return null;
         }
@@ -959,11 +959,11 @@ public class SessionLocal extends Session implements TransactionStore.RollbackLi
      * @param operation the operation type (see {@link UndoLogRecord})
      * @param row the row
      */
-    public void log(Table table, short operation, Row row) {
+    public void log(Table table, short operation, Row row) {//重做日志
         if (table.isMVStore()) {
-            return;
+            return;//如果mv 不需要//为什么？
         }
-        if (undoLogEnabled) {
+        if (undoLogEnabled) {//undo日志需打开才能使用
             UndoLogRecord log = new UndoLogRecord(table, operation, row);
             // called _after_ the row was inserted successfully into the table,
             // otherwise rollback will try to rollback a not-inserted row
@@ -982,7 +982,7 @@ public class SessionLocal extends Session implements TransactionStore.RollbackLi
             if (undoLog == null) {
                 undoLog = new UndoLog(database);
             }
-            undoLog.add(log);
+            undoLog.add(log);//加入日志，不是立即立即刷到磁盘， 是5万条，才刷新一次磁盘
         }
     }
 
@@ -1017,7 +1017,7 @@ public class SessionLocal extends Session implements TransactionStore.RollbackLi
         sessionStateChanged = true;
     }
 
-    private void cleanTempTables(boolean closeSession) {
+    private void cleanTempTables(boolean closeSession) {//清除临时表
         if (localTempTables != null && localTempTables.size() > 0) {
             if (database.isMVStore()) {
                 _cleanTempTables(closeSession);

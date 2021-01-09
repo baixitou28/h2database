@@ -48,7 +48,7 @@ public interface HasSQL {
      */
     default String getTraceSQL() {
         return getSQL(TRACE_SQL_FLAGS);
-    }
+    }//tiger debug 调试需要理解
 
     /**
      * Get the SQL statement of this expression. This may not always be the
@@ -58,7 +58,7 @@ public interface HasSQL {
      *            formatting flags
      * @return the SQL statement
      */
-    default String getSQL(int sqlFlags) {
+    default String getSQL(int sqlFlags) {//tiger 看注释，不是原生的sql，是优化后的sql
         return getSQL(new StringBuilder(), sqlFlags).toString();
     }
 
@@ -71,6 +71,6 @@ public interface HasSQL {
      *            formatting flags
      * @return the specified string builder
      */
-    StringBuilder getSQL(StringBuilder builder, int sqlFlags);
+    StringBuilder getSQL(StringBuilder builder, int sqlFlags);//同上
 
 }

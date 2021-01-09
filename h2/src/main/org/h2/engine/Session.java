@@ -20,7 +20,7 @@ import org.h2.value.ValueLob;
 /**
  * A local or remote session. A session represents a database connection.
  */
-public abstract class Session implements CastDataProvider, AutoCloseable {
+public abstract class Session implements CastDataProvider, AutoCloseable {//tiger
 
     /**
      * Static settings.
@@ -107,7 +107,7 @@ public abstract class Session implements CastDataProvider, AutoCloseable {
      * @return A list of "ip:port" strings for the cluster servers in this
      *         session.
      */
-    public abstract ArrayList<String> getClusterServers();
+    public abstract ArrayList<String> getClusterServers();//支持cluster
 
     /**
      * Parse a command and prepare it for execution.
@@ -163,7 +163,7 @@ public abstract class Session implements CastDataProvider, AutoCloseable {
      *
      * @return the TCP protocol version
      */
-    public abstract int getClientVersion();
+    public abstract int getClientVersion();//客户端版本
 
     /**
      * Check if this session is in auto-commit mode.
@@ -229,7 +229,7 @@ public abstract class Session implements CastDataProvider, AutoCloseable {
      *
      * @return the isolation level
      */
-    public abstract IsolationLevel getIsolationLevel();
+    public abstract IsolationLevel getIsolationLevel();//隔离类型
 
     /**
      * Sets the isolation level.
