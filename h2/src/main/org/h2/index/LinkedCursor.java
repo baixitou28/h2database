@@ -18,7 +18,7 @@ import org.h2.value.ValueToObjectConverter2;
 /**
  * The cursor implementation for the linked index.
  */
-public class LinkedCursor implements Cursor {
+public class LinkedCursor implements Cursor {//tiger 数据库链的游标
 
     private final TableLink tableLink;
     private final PreparedStatement prep;
@@ -50,9 +50,9 @@ public class LinkedCursor implements Cursor {
     public boolean next() {
         try {
             boolean result = rs.next();
-            if (!result) {
+            if (!result) {//如果没有数据了
                 rs.close();
-                tableLink.reusePreparedStatement(prep, sql);
+                tableLink.reusePreparedStatement(prep, sql);//tiger 不明白
                 current = null;
                 return false;
             }
@@ -62,7 +62,7 @@ public class LinkedCursor implements Cursor {
         current = tableLink.getTemplateRow();
         for (int i = 0; i < current.getColumnCount(); i++) {
             current.setValue(i, ValueToObjectConverter2.readValue(session, rs, i + 1,
-                    tableLink.getColumn(i).getType().getValueType()));
+                    tableLink.getColumn(i).getType().getValueType()));//设置行中相关列的值
         }
         return true;
     }

@@ -101,7 +101,7 @@ import org.h2.value.ValueTimestampTimeZone;
  *
  * @since 2004-04-15 22:49
  */
-public final class Database implements DataHandler, CastDataProvider {//TODO: TIGER 理解Database大体机制
+public final class Database implements DataHandler, CastDataProvider {//TODO: TIGER 理解Database大体机制， 是在openSession中使用的
 
     private static int initialPowerOffCount;
 
@@ -233,7 +233,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
 
     private int createBuild = Constants.BUILD_ID;
 
-    public Database(ConnectionInfo ci, String cipher) {//TIGER 关键函数 初始化，对于理解原理很重要
+    public Database(ConnectionInfo ci, String cipher) {//TIGER 关键函数 在openSession中初始化，对于理解原理很重要
         if (ASSERT) {
             META_LOCK_DEBUGGING.set(null);
             META_LOCK_DEBUGGING_DB.set(null);

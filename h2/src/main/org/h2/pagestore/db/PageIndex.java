@@ -18,7 +18,7 @@ public abstract class PageIndex extends Index {//tiger INDEX
     /**
      * The root page of this index.
      */
-    protected int rootPageId;
+    protected int rootPageId;//重要的成员变量
 
     private boolean sortedInsertMode;
 
@@ -53,7 +53,7 @@ public abstract class PageIndex extends Index {//tiger INDEX
     @Override
     public void setSortedInsertMode(boolean sortedInsertMode) {
         this.sortedInsertMode = sortedInsertMode;
-    }
+    }//如果排序插入效果不错
 
     boolean isSortedInsertMode() {
         return sortedInsertMode;

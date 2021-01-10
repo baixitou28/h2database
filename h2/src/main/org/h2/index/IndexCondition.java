@@ -31,7 +31,7 @@ import org.h2.value.Value;
  * @author Noel Grandin
  * @author Nicolas Fortin, Atelier SIG, IRSTV FR CNRS 24888
  */
-public class IndexCondition {
+public class IndexCondition {//tiger index 索引条件的n种类型，相等，区间，空间
 
     /**
      * A bit of a search mask meaning 'equal'.
@@ -77,11 +77,11 @@ public class IndexCondition {
      * @param compareType the comparison type, see constants in
      *            {@link Comparison}
      */
-    private IndexCondition(int compareType, ExpressionColumn column,
+    private IndexCondition(int compareType, ExpressionColumn column,//tiger 构造函数体现了最重要的成员变量
             Expression expression) {
-        this.compareType = compareType;
-        this.column = column == null ? null : column.getColumn();
-        this.expression = expression;
+        this.compareType = compareType;//类型
+        this.column = column == null ? null : column.getColumn();//列
+        this.expression = expression;//表达式
     }
 
     /**
@@ -93,7 +93,7 @@ public class IndexCondition {
      * @param expression the expression
      * @return the index condition
      */
-    public static IndexCondition get(int compareType, ExpressionColumn column,
+    public static IndexCondition get(int compareType, ExpressionColumn column,//用一个表达之构造
             Expression expression) {
         return new IndexCondition(compareType, column, expression);
     }
@@ -106,7 +106,7 @@ public class IndexCondition {
      * @param list the expression list
      * @return the index condition
      */
-    public static IndexCondition getInList(ExpressionColumn column,
+    public static IndexCondition getInList(ExpressionColumn column,//用多个表达式构造
             List<Expression> list) {
         IndexCondition cond = new IndexCondition(Comparison.IN_LIST, column,
                 null);
@@ -122,7 +122,7 @@ public class IndexCondition {
      * @param query the select statement
      * @return the index condition
      */
-    public static IndexCondition getInQuery(ExpressionColumn column, Query query) {
+    public static IndexCondition getInQuery(ExpressionColumn column, Query query) {//嵌入式sql需要
         assert query.isRandomAccessResult();
         IndexCondition cond = new IndexCondition(Comparison.IN_QUERY, column, null);
         cond.expressionQuery = query;
@@ -174,7 +174,7 @@ public class IndexCondition {
      * @param sqlFlags formatting flags
      * @return the SQL snippet
      */
-    public String getSQL(int sqlFlags) {//TIGER index的子类函数生成SQL， 一般用再执行计划里，用于那些使用了索引为特别标记
+    public String getSQL(int sqlFlags) {//TIGER index的子类函数生成SQL， 一般用在执行计划里，用于那些使用了索引为特别标记
         if (compareType == Comparison.FALSE) {
             return "FALSE";
         }

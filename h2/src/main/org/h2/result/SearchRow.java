@@ -20,7 +20,7 @@ public abstract class SearchRow extends Value {
     /**
      * Index of a virtual "_ROWID_" column within a row or a table
      */
-    public static final int ROWID_INDEX = -1;
+    public static final int ROWID_INDEX = -1;//伪列
 
     /**
      * If the key is this value, then the key is considered equal to all other

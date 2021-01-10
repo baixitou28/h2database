@@ -62,7 +62,7 @@ public final class Engine {//TODO: TIGER 理解Database大体机制
                 if (ci.isPersistent()) {
                     String p = ci.getProperty("MV_STORE");
                     String fileName;
-                    if (p == null) {
+                    if (p == null) {//如果是mv
                         fileName = name + Constants.SUFFIX_MV_FILE;
                         if (!FileUtils.exists(fileName)) {
                             fileName = name + Constants.SUFFIX_PAGE_FILE;
@@ -77,7 +77,7 @@ public final class Engine {//TODO: TIGER 理解Database大体机制
                                 fileName = null;
                             }
                         }
-                    } else {
+                    } else {//如果不是mv
                         fileName = name + (Utils.parseBoolean(p, true, false) ? Constants.SUFFIX_MV_FILE
                                 : Constants.SUFFIX_PAGE_FILE);
                         if (!FileUtils.exists(fileName)) {
@@ -89,19 +89,19 @@ public final class Engine {//TODO: TIGER 理解Database大体机制
                         ci.setProperty("ACCESS_MODE_DATA", "r");
                     }
                 } else {
-                    throwNotFound(ifExists, forbidCreation, name);
+                    throwNotFound(ifExists, forbidCreation, name);//找不到
                 }
-                database = new Database(ci, cipher);
+                database = new Database(ci, cipher);//tiger 关键结构
                 opened = true;
-                checkUserExists: {
+                checkUserExists: {//如果用户存在
                     for (RightOwner rightOwner : database.getAllUsersAndRoles()) {
-                        if (rightOwner instanceof User) {
+                        if (rightOwner instanceof User) {//如果
                             break checkUserExists;
                         }
                     }
                     // users is the last thing we add, so if no user is around,
                     // the database is new (or not initialized correctly)
-                    user = new User(database, database.allocateObjectId(), ci.getUserName(), false);
+                    user = new User(database, database.allocateObjectId(), ci.getUserName(), false);//第一次启动创建管理员用户，否则无法进行后续操作
                     user.setAdmin(true);
                     user.setUserPasswordHash(ci.getUserPasswordHash());
                     database.setMasterUser(user);
@@ -121,7 +121,7 @@ public final class Engine {//TODO: TIGER 理解Database大体机制
             return null;
         }
         if (user == null) {
-            if (database.validateFilePasswordHash(cipher, ci.getFilePasswordHash())) {
+            if (database.validateFilePasswordHash(cipher, ci.getFilePasswordHash())) {//验证
                 if (ci.getProperty("AUTHREALM")== null) {
                     user = database.findUser(ci.getUserName());
                     if (user != null) {
@@ -148,10 +148,10 @@ public final class Engine {//TODO: TIGER 理解Database大体机制
             if (opened && (user == null || !user.isAdmin())) {
                 // reset - because the user is not an admin, and has no
                 // right to listen to exceptions
-                database.setEventListener(null);
+                database.setEventListener(null);//tiger learn admin 还有特殊的功能
             }
         }
-        if (user == null) {
+        if (user == null) {//找不到用户
             DbException er = DbException.get(ErrorCode.WRONG_USER_OR_PASSWORD);
             database.getTrace(Trace.DATABASE).error(er, "wrong user or password; user: \"" +
                     ci.getUserName() + "\"");
@@ -159,9 +159,9 @@ public final class Engine {//TODO: TIGER 理解Database大体机制
             throw er;
         }
         //Prevent to set _PASSWORD
-        ci.cleanAuthenticationInfo();
+        ci.cleanAuthenticationInfo();//避免用户信息泄露
         checkClustering(ci, database);
-        SessionLocal session = database.createSession(user, ci.getNetworkConnectionInfo());
+        SessionLocal session = database.createSession(user, ci.getNetworkConnectionInfo());//创建session
         if (session == null) {
             // concurrently closing
             return null;
@@ -199,8 +199,8 @@ public final class Engine {//TODO: TIGER 理解Database大体机制
      */
     public static SessionLocal createSession(ConnectionInfo ci) {
         try {
-            SessionLocal session = openSession(ci);
-            validateUserAndPassword(true);
+            SessionLocal session = openSession(ci);//打开session
+            validateUserAndPassword(true);//密码验证后，是否delay
             return session;
         } catch (DbException e) {
             if (e.getErrorCode() == ErrorCode.WRONG_USER_OR_PASSWORD) {
@@ -211,7 +211,7 @@ public final class Engine {//TODO: TIGER 理解Database大体机制
     }
 
     private static synchronized SessionLocal openSession(ConnectionInfo ci) {
-        boolean ifExists = ci.removeProperty("IFEXISTS", false);
+        boolean ifExists = ci.removeProperty("IFEXISTS", false);//删除历史信息
         boolean forbidCreation = ci.removeProperty("FORBID_CREATION", false);
         boolean ignoreUnknownSetting = ci.removeProperty(
                 "IGNORE_UNKNOWN_SETTINGS", false);
@@ -219,14 +219,14 @@ public final class Engine {//TODO: TIGER 理解Database大体机制
         String init = ci.removeProperty("INIT", null);
         SessionLocal session;
         long start = System.nanoTime();
-        for (;;) {
+        for (;;) {//反复尝试
             session = openSession(ci, ifExists, forbidCreation, cipher);
             if (session != null) {
                 break;
             }
             // we found a database that is currently closing
             // wait a bit to avoid a busy loop (the method is synchronized)
-            if (System.nanoTime() - start > DateTimeUtils.NANOS_PER_MINUTE) {
+            if (System.nanoTime() - start > DateTimeUtils.NANOS_PER_MINUTE) {//tiger
                 throw DbException.get(ErrorCode.DATABASE_ALREADY_OPEN_1,
                         "Waited for database closing longer than 1 minute");
             }
@@ -350,17 +350,17 @@ public final class Engine {//TODO: TIGER 理解Database大体机制
      * @param correct if the user name or the password was correct
      * @throws DbException the exception 'wrong user or password'
      */
-    private static void validateUserAndPassword(boolean correct) {
+    private static void validateUserAndPassword(boolean correct) {//tiger learn 看注释
         int min = SysProperties.DELAY_WRONG_PASSWORD_MIN;
         if (correct) {
-            long delay = WRONG_PASSWORD_DELAY;
-            if (delay > min && delay > 0) {
+            long delay = WRONG_PASSWORD_DELAY;//WRONG_PASSWORD_DELAY时间随着攻击增加，会不停增加，导致delay增加
+            if (delay > min && delay > 0) {//如果小于DELAY_WRONG_PASSWORD_MIN 就不会产生延时了
                 // the first correct password must be blocked,
                 // otherwise parallel attacks are possible
-                synchronized (Engine.class) {
+                synchronized (Engine.class) {//第一次一定要延时
                     // delay up to the last delay
                     // an attacker can't know how long it will be
-                    delay = MathUtils.secureRandomInt((int) delay);
+                    delay = MathUtils.secureRandomInt((int) delay);//随机时间
                     try {
                         Thread.sleep(delay);
                     } catch (InterruptedException e) {
@@ -376,15 +376,15 @@ public final class Engine {//TODO: TIGER 理解Database大体机制
                 long delay = WRONG_PASSWORD_DELAY;
                 int max = SysProperties.DELAY_WRONG_PASSWORD_MAX;
                 if (max <= 0) {
-                    max = Integer.MAX_VALUE;
+                    max = Integer.MAX_VALUE;//不能太大
                 }
-                WRONG_PASSWORD_DELAY += WRONG_PASSWORD_DELAY;
+                WRONG_PASSWORD_DELAY += WRONG_PASSWORD_DELAY;//加倍，//这样等于所有的延时都增加，
                 if (WRONG_PASSWORD_DELAY > max || WRONG_PASSWORD_DELAY < 0) {
                     WRONG_PASSWORD_DELAY = max;
                 }
                 if (min > 0) {
                     // a bit more to protect against timing attacks
-                    delay += Math.abs(MathUtils.secureRandomLong() % 100);
+                    delay += Math.abs(MathUtils.secureRandomLong() % 100);//100的余数，这样最大可能有1分半多了
                     try {
                         Thread.sleep(delay);
                     } catch (InterruptedException e) {

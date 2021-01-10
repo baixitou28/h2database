@@ -83,11 +83,11 @@ public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机�
      *            not yet known
      * @param newIndexType the index type
      */
-    protected Index(Table newTable, int id, String name, IndexColumn[] newIndexColumns, IndexType newIndexType) {
+    protected Index(Table newTable, int id, String name, IndexColumn[] newIndexColumns, IndexType newIndexType) {//TIGER 构造函数的重要元素
         super(newTable.getSchema(), id, name, Trace.INDEX);
-        this.indexType = newIndexType;
-        this.table = newTable;
-        if (newIndexColumns != null) {
+        this.indexType = newIndexType;//类型
+        this.table = newTable;//表
+        if (newIndexColumns != null) {//可能是多个列的索引
             this.indexColumns = newIndexColumns;
             columns = new Column[newIndexColumns.length];
             int len = columns.length;
@@ -98,10 +98,10 @@ public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机�
                 columnIds[i] = col.getColumnId();
             }
         }
-        rowFactory = database.getRowFactory().createRowFactory(
+        rowFactory = database.getRowFactory().createRowFactory(//这是一个抽象类型，默认的子类DefaultRowFactory
                 database, database.getCompareMode(), database.getMode(),
                 database, table.getColumns(),
-                newIndexType.isScan() ? null : newIndexColumns);
+                newIndexType.isScan() ? null : newIndexColumns);//如果没有索引列
     }
 
     @Override
@@ -379,7 +379,7 @@ public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机�
      * @param col the column
      * @return the index (0 meaning first column)
      */
-    public int getColumnIndex(Column col) {
+    public int getColumnIndex(Column col) {//索引里的需要
         for (int i = 0, len = columns.length; i < len; i++) {
             if (columns[i].equals(col)) {
                 return i;

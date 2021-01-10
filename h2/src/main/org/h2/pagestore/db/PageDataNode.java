@@ -33,7 +33,7 @@ import org.h2.util.Utils;
  * The key is the largest key of the respective child, meaning key[0] is the
  * largest key of child[0].
  */
-public class PageDataNode extends PageData {//tiger 包含一条或者多条rows的数据节点
+public class PageDataNode extends PageData {//tiger pageStore 重要  包含一条或者多条rows的数据节点
 
     /**
      * The page ids of the children.
