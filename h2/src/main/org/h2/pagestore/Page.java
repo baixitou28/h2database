@@ -16,7 +16,7 @@ import org.h2.util.CacheObject;
  * </li><li>page-type specific data
  * </li></ul>
  */
-public abstract class Page extends CacheObject {
+public abstract class Page extends CacheObject {//tiger page 页的格式 看注释 //tiger 要素
 
     /**
      * This is the last page of a chain.

@@ -101,8 +101,7 @@ import org.h2.value.ValueTimestampTimeZone;
  *
  * @since 2004-04-15 22:49
  */
-public final class Database implements DataHandler, CastDataProvider {//TODO: TIGER 理解Database大体机制
-
+public final class Database implements DataHandler, CastDataProvider {//TODO: TIGER 理解Database大体机制， 是在openSession中使用的
     private static int initialPowerOffCount;
 
     private static final boolean ASSERT;
@@ -115,7 +114,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
     static {
         boolean a = false;
         // Intentional side-effect
-        assert a = true;
+        assert a = true;//为什么要这么多？
         ASSERT = a;
         if (a) {
             META_LOCK_DEBUGGING = new ThreadLocal<>();
@@ -127,7 +126,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
             META_LOCK_DEBUGGING_STACK = null;
         }
     }
-
+    //tiger 类成员变量体现了复杂度
     /**
      * The default name of the system user. This name is only used as long as
      * there is no administrator user registered.
@@ -182,7 +181,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
     private boolean readOnly;
     private DatabaseEventListener eventListener;
     private int maxMemoryRows = SysProperties.MAX_MEMORY_ROWS;
-    private int maxMemoryUndo = Constants.DEFAULT_MAX_MEMORY_UNDO;
+    private int maxMemoryUndo = Constants.DEFAULT_MAX_MEMORY_UNDO;//最大是5万，是不是太大？
     private int lockMode = Constants.DEFAULT_LOCK_MODE;
     private int maxLengthInplaceLob;
     private int allowLiterals = Constants.ALLOW_LITERALS_ALL;
@@ -233,12 +232,12 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
 
     private int createBuild = Constants.BUILD_ID;
 
-    public Database(ConnectionInfo ci, String cipher) {
+    public Database(ConnectionInfo ci, String cipher) {//TIGER 关键函数 在openSession中初始化，对于理解原理很重要
         if (ASSERT) {
             META_LOCK_DEBUGGING.set(null);
             META_LOCK_DEBUGGING_DB.set(null);
             META_LOCK_DEBUGGING_STACK.set(null);
-        }
+        }//01. 成员变量初始化
         String databaseName = ci.getName();
         this.dbSettings = ci.getDbSettings();
         this.compareMode = CompareMode.getInstance(null, 0);
@@ -301,8 +300,8 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
         this.ignoreCatalogs = ci.getProperty("IGNORE_CATALOGS", dbSettings.ignoreCatalogs);
         this.lockMode = ci.getProperty("LOCK_MODE", Constants.DEFAULT_LOCK_MODE);
         String traceFile;
-        if (persistent) {
-            if (readOnly) {
+        if (persistent) {//如果要持久化
+            if (readOnly) {//只读
                 if (traceLevelFile >= TraceSystem.DEBUG) {
                     traceFile = Utils.getProperty("java.io.tmpdir", ".") + "/h2_" + System.currentTimeMillis()
                             + Constants.SUFFIX_TRACE_FILE;
@@ -326,22 +325,22 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
                 throw DbException.getUnsupportedException(
                         "AUTO_SERVER=TRUE && (readOnly || inMemory || FILE_LOCK=NO || FILE_LOCK=FS)");
             }
-            if (persistent) {
+            if (persistent) {//如果持久化
                 String lockFileName = databaseName + Constants.SUFFIX_LOCK_FILE;
-                if (readOnly) {
-                    if (FileUtils.exists(lockFileName)) {
+                if (readOnly) {//如果是只读
+                    if (FileUtils.exists(lockFileName)) {//已存在lock文件，抛出异常
                         throw DbException.get(ErrorCode.DATABASE_ALREADY_OPEN_1, "Lock file exists: " + lockFileName);
                     }
                 } else if (fileLockMethod != FileLockMethod.NO && fileLockMethod != FileLockMethod.FS) {
                     lock = new FileLock(traceSystem, lockFileName, Constants.LOCK_SLEEP);
                     lock.lock(fileLockMethod);
-                    if (autoServerMode) {
+                    if (autoServerMode) {//如果自动启动就立即启动
                         startServer(lock.getUniqueId());
                     }
                 }
-                deleteOldTempFiles();
+                deleteOldTempFiles();//删除临时我呢间
                 starting = true;
-                if (dbSettings.mvStore) {
+                if (dbSettings.mvStore) {//如果是mv类型，创建mv
                     store = createStore();
                 } else {
                     store = null;
@@ -355,11 +354,11 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
             }
             Set<String> settingKeys = dbSettings.getSettings().keySet();
             if (store != null) {
-                store.getTransactionStore().init();
+                store.getTransactionStore().init();//事务初始化
                 settingKeys.removeIf(name -> name.startsWith("PAGE_STORE_"));
             } else {
                 settingKeys.removeIf(name -> "COMPRESS".equals(name) || "REUSE_SPACE".equals(name));
-            }
+            }//设置系统用户和权限
             systemUser = new User(this, 0, SYSTEM_USER_NAME, true);
             systemUser.setAdmin(true);
             mainSchema = new Schema(this, Constants.MAIN_SCHEMA_ID, sysIdentifier(Constants.SCHEMA_MAIN), systemUser,
@@ -374,10 +373,11 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
                 pgCatalogSchema = null;
             }
             publicRole = new Role(this, 0, sysIdentifier(Constants.PUBLIC_ROLE_NAME), true);
-            usersAndRoles.put(publicRole.getName(), publicRole);
+
+            usersAndRoles.put(publicRole.getName(), publicRole);//加入权限
             systemSession = createSession(systemUser);
             lobSession = createSession(systemUser);
-            CreateTableData data = createSysTableData();
+            CreateTableData data = createSysTableData();//创建系统表
             starting = true;
             meta = mainSchema.createTable(data);
             handleUpgradeIssues();
@@ -386,7 +386,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
                     true, null);
             systemSession.commit(true);
             objectIds.set(0);
-            executeMeta();
+            executeMeta();//执行
             systemSession.commit(true);
             if (store != null) {
                 store.getTransactionStore().endLeftoverTransactions();
@@ -397,7 +397,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
                 // from 1.2.x releases are also not supported.
                 throw DbException.getFileVersionError(databaseName + Constants.SUFFIX_PAGE_FILE);
             }
-            recompileInvalidViews();
+            recompileInvalidViews();//创建视图
             starting = false;
             if (!readOnly) {
                 // set CREATE_BUILD in a new database
@@ -417,10 +417,10 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
                 }
             }
             lobStorage = dbSettings.mvStore ? new LobStorageMap(this) : new LobStorageBackend(this);
-            lobStorage.init();
+            lobStorage.init();//lob store初始化
             systemSession.commit(true);
             trace.info("opened {0}", databaseName);
-            if (persistent) {
+            if (persistent) {//写延时
                 int writeDelay = ci.getProperty("WRITE_DELAY", Constants.DEFAULT_WRITE_DELAY);
                 if (store != null) {
                     setWriteDelay(writeDelay);
@@ -471,7 +471,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
     }
 
     public void setPowerOffCount(int count) {
-        if (powerOffCount == -1) {//如果是-1，是忽略吗?
+        if (powerOffCount == -1) {//如果是-1，是已经设置了powerOff
             return;
         }
         powerOffCount = count;
@@ -512,14 +512,14 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
 
     public long getNextRemoteSettingsId() {
         return remoteSettingsId.incrementAndGet();
-    }
+    }//简单递增
 
     public int getPowerOffCount() {
         return powerOffCount;
-    }
+    }//关机次数
 
     @Override
-    public void checkPowerOff() {
+    public void checkPowerOff() {//来得及吗？//tiger log //TIGER CRASH 考虑哪一步会停
         if (powerOffCount == 0) {//比如 会设置0
             return;
         }
@@ -535,9 +535,9 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
                 } else {
                     synchronized (this) {
                         if (pageStore != null) {
-                            pageStore.stopWriter();
+                            pageStore.stopWriter();//停止写
                             try {
-                                pageStore.close();
+                                pageStore.close();//关闭
                             } catch (DbException e) {
                                 // ignore
                             }
@@ -546,7 +546,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
                     }
                 }
                 if (lock != null) {
-                    stopServer();
+                    stopServer();//停止server
                     // allow testing shutdown
                     lock.unlock();
                     lock = null;
@@ -558,7 +558,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
                 DbException.traceThrowable(e);
             }
         }
-        Engine.close(databaseName);
+        Engine.close(databaseName);//关闭engine
         throw DbException.get(ErrorCode.DATABASE_IS_CLOSED);
     }
 
@@ -573,14 +573,14 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
     }
 
     @Override
-    public FileStore openFile(String name, String openMode, boolean mustExist) {
+    public FileStore openFile(String name, String openMode, boolean mustExist) {//打开store的文件进行store的初始化
         if (mustExist && !FileUtils.exists(name)) {
-            throw DbException.get(ErrorCode.FILE_NOT_FOUND_1, name);
+            throw DbException.get(ErrorCode.FILE_NOT_FOUND_1, name);//文件是否存在
         }
-        FileStore store = FileStore.open(this, name, openMode, cipher,
+        FileStore store = FileStore.open(this, name, openMode, cipher,//打开文件，如果加密，需要解密方式打开
                 filePasswordHash);
         try {
-            store.init();
+            store.init();//store文件初始化，并返回mvstore，或者pagestore等
         } catch (DbException e) {
             store.closeSilently();
             throw e;
@@ -620,7 +620,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
                 : dbSettings.databaseToLower ? StringUtils.toLowerEnglish(n) : n;
     }
 
-    private CreateTableData createSysTableData() {
+    private CreateTableData createSysTableData() {//创建系统表
         CreateTableData data = new CreateTableData();
         ArrayList<Column> cols = data.columns;
         Column columnId = new Column("ID", TypeInfo.TYPE_INTEGER);
@@ -827,7 +827,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
                     "-tcpAllowOthers",
                     "-tcpDaemon",
                     "-key", key, databaseName);
-            server.start();
+            server.start();//启动
         } catch (SQLException e) {
             throw DbException.convert(e);
         }
@@ -836,7 +836,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
         lock.setProperty("server", address);
         String hostName = NetUtils.getHostName(localAddress);
         lock.setProperty("hostName", hostName);
-        lock.save();
+        lock.save();//lock文件里面放入 ip和hostname，便于查找问题
     }
 
     private void stopServer() {
@@ -850,7 +850,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
         }
     }
 
-    private void recompileInvalidViews() {
+    private void recompileInvalidViews() {//重新编译失效的视图
         boolean atLeastOneRecompiledSuccessfully;
         do {
             atLeastOneRecompiledSuccessfully = false;
@@ -874,7 +874,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
     private void addMeta(SessionLocal session, DbObject obj) {
         assert Thread.holdsLock(this);
         int id = obj.getId();
-        if (id > 0 && !obj.isTemporary()) {
+        if (id > 0 && !obj.isTemporary()) {//如果是临时
             if (isMVStore()) {
                 if (!isReadOnly()) {
                     Row r = meta.getTemplateRow();
@@ -1092,7 +1092,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
             checkWritingAllowed();
         }
         Map<String, DbObject> map = getMap(obj.getType());
-        if (obj.getType() == DbObject.USER) {
+        if (obj.getType() == DbObject.USER) {//如果是用户
             User user = (User) obj;
             if (user.isAdmin() && systemUser.getName().equals(SYSTEM_USER_NAME)) {
                 systemUser.rename(user.getName());
@@ -1103,7 +1103,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
             throw DbException.getInternalError("object already exists");
         }
         lockMeta(session);
-        addMeta(session, obj);
+        addMeta(session, obj);//加入
         map.put(name, obj);
     }
 
@@ -1201,16 +1201,16 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
      * @return the session, or null if the database is currently closing
      * @throws DbException if the database is in exclusive mode
      */
-    synchronized SessionLocal createSession(User user, NetworkConnectionInfo networkConnectionInfo) {
-        if (closing) {
+    synchronized SessionLocal createSession(User user, NetworkConnectionInfo networkConnectionInfo) {//TIGER 创建session
+        if (closing) {//判断数据库状态
             return null;
         }
-        if (exclusiveSession.get() != null) {
+        if (exclusiveSession.get() != null) {//独占模式
             throw DbException.get(ErrorCode.DATABASE_IS_IN_EXCLUSIVE_MODE);
         }
-        SessionLocal session = createSession(user);
-        session.setNetworkConnectionInfo(networkConnectionInfo);
-        userSessions.add(session);
+        SessionLocal session = createSession(user);//创建服务端session
+        session.setNetworkConnectionInfo(networkConnectionInfo);//加入网络连接状态
+        userSessions.add(session);//加入
         trace.info("connecting session #{0} to {1}", session.getId(), databaseName);
         if (delayedCloser != null) {
             delayedCloser.reset();
@@ -1220,7 +1220,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
     }
 
     private SessionLocal createSession(User user) {
-        int id = ++nextSessionId;
+        int id = ++nextSessionId;//session id 是递增的
         return dbSettings.mvStore ? new SessionLocal(this, user, id) : new SessionPageStore(this, user, id);
     }
 
@@ -1256,7 +1256,7 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
         return session != systemSession && session != lobSession;
     }
 
-    private synchronized void closeAllSessionsExcept(SessionLocal except) {
+    private synchronized void closeAllSessionsExcept(SessionLocal except) {//删除所有session，除一个外
         SessionLocal[] all = userSessions.toArray(EMPTY_SESSION_ARRAY);
         for (SessionLocal s : all) {
             if (s != except) {
@@ -2106,19 +2106,19 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
     /**
      * Flush all pending changes to the transaction log.
      */
-    public synchronized void flush() {
+    public synchronized void flush() {//tiger transaction //tiger   刷新所有交易日志，不同store方式略有区别
         if (readOnly) {
             return;
         }
         if (store != null) {
             try {
-                store.flush();
+                store.flush();//刷新，不同实现都不一样
             } catch (RuntimeException e) {
                 backgroundException.compareAndSet(null, DbException.convert(e));
                 throw e;
             }
         } else if (pageStore != null) {
-            pageStore.flushLog();
+            pageStore.flushLog();//
         }
     }
 
@@ -2574,10 +2574,10 @@ public final class Database implements DataHandler, CastDataProvider {//TODO: TI
     /**
      * Flush all changes and open a new transaction log.
      */
-    public void checkpoint() {
+    public void checkpoint() {//tiger
         if (persistent) {
             if (store != null) {
-                store.flush();
+                store.flush();//先全部刷新
             } else {
                 synchronized (this) {
                     if (pageStore != null) {

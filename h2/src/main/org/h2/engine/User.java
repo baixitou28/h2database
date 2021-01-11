@@ -26,8 +26,7 @@ import org.h2.util.Utils;
 /**
  * Represents a user object.
  */
-public final class User extends RightOwner {
-
+public final class User extends RightOwner {//tiger
     private final boolean systemUser;
     private byte[] salt;
     private byte[] passwordHash;
@@ -92,7 +91,8 @@ public final class User extends RightOwner {
      *            be returned
      * @return the SQL statement
      */
-    public String getCreateSQL(boolean password) {
+
+    public String getCreateSQL(boolean password) {//产生创建sql
         StringBuilder buff = new StringBuilder("CREATE USER IF NOT EXISTS ");
         getSQL(buff, DEFAULT_SQL_FLAGS);
         if (comment != null) {
@@ -120,7 +120,7 @@ public final class User extends RightOwner {
      * @param userPasswordHash the password data (the user password hash)
      * @return true if the user password hash is correct
      */
-    boolean validateUserPasswordHash(byte[] userPasswordHash) {
+    boolean validateUserPasswordHash(byte[] userPasswordHash) {//验证密码
         if (userPasswordHash.length == 0 && passwordHash.length == 0) {
             return true;
         }
@@ -137,7 +137,7 @@ public final class User extends RightOwner {
      *
      * @throws DbException if this user is not an admin
      */
-    public void checkAdmin() {
+    public void checkAdmin() {//是否是admin
         if (!admin) {
             throw DbException.get(ErrorCode.ADMIN_RIGHTS_REQUIRED);
         }
@@ -149,7 +149,7 @@ public final class User extends RightOwner {
      *
      * @throws DbException if this user is not a schema admin
      */
-    public void checkSchemaAdmin() {
+    public void checkSchemaAdmin() {//是否有admin权限
         if (!hasSchemaRight(null)) {
             throw DbException.get(ErrorCode.ADMIN_RIGHTS_REQUIRED);
         }
@@ -205,18 +205,18 @@ public final class User extends RightOwner {
      * @param rightMask the rights required
      * @return true if the user has the rights
      */
-    public boolean hasTableRight(Table table, int rightMask) {
+    public boolean hasTableRight(Table table, int rightMask) {//常见的是否用表的权限
         if (rightMask != Right.SELECT && !systemUser) {
-            table.checkWritingAllowed();
+            table.checkWritingAllowed();//是否有写权限
         }
-        if (admin) {
+        if (admin) {//如果是admin，权限都可以
             return true;
         }
-        Role publicRole = database.getPublicRole();
+        Role publicRole = database.getPublicRole();//
         if (publicRole.isTableRightGrantedRecursive(table, rightMask)) {
             return true;
         }
-        if (table instanceof MetaTable || table instanceof DualTable || table instanceof RangeTable) {
+        if (table instanceof MetaTable || table instanceof DualTable || table instanceof RangeTable) {//有些表，所有用户可以访问
             // everybody has access to the metadata information
             return true;
         }
@@ -236,7 +236,7 @@ public final class User extends RightOwner {
             // the owner has all rights on local temporary tables
             return true;
         }
-        return isTableRightGrantedRecursive(table, rightMask);
+        return isTableRightGrantedRecursive(table, rightMask);//递归
     }
 
     @Override

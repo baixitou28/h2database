@@ -12,7 +12,7 @@ import org.h2.message.Trace;
 /**
  * This class is responsible to close a database on JVM shutdown.
  */
-class OnExitDatabaseCloser extends Thread {
+class OnExitDatabaseCloser extends Thread {//TIGER jvm关闭
 
     private static final WeakHashMap<Database, Void> DATABASES = new WeakHashMap<>();
 
@@ -38,7 +38,7 @@ class OnExitDatabaseCloser extends Thread {
             // shutdown hook in case of exception.
             registered = true;
             try {
-                Runtime.getRuntime().addShutdownHook(INSTANCE);
+                Runtime.getRuntime().addShutdownHook(INSTANCE);//经典做法
             } catch (IllegalStateException e) {
                 // shutdown in progress - just don't register the handler
                 // (maybe an application wants to write something into a

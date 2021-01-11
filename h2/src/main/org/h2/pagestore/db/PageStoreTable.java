@@ -37,11 +37,11 @@ public class PageStoreTable extends RegularTable {//简单的页存储数据，�
      * The queue of sessions waiting to lock the table. It is a FIFO queue to
      * prevent starvation, since Java's synchronized locking is biased.
      */
-    private final ArrayDeque<SessionLocal> waitingSessions = new ArrayDeque<>();
+    private final ArrayDeque<SessionLocal> waitingSessions = new ArrayDeque<>();//有多少session在等待我
     private final Trace traceLock;
-    private final ArrayList<Index> indexes = Utils.newSmallArrayList();
-    private long lastModificationId;
-    private final PageDataIndex mainIndex;
+    private final ArrayList<Index> indexes = Utils.newSmallArrayList();//索引
+    private long lastModificationId;//最后更改ID
+    private final PageDataIndex mainIndex;//index位置
     private int changesSinceAnalyze;
     private int nextAnalyze;
 

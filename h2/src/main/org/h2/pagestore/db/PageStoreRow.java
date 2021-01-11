@@ -15,7 +15,7 @@ import org.h2.value.ValueBigint;
 /**
  * Page Store implementation of a row.
  */
-public final class PageStoreRow {
+public final class PageStoreRow {//tiger 定义了一个空的数组EMPTY_ARRAY和空的搜索数组EMPTY_SEARCH_ARRAY
 
     /**
      * An empty array of Row objects.
@@ -30,22 +30,22 @@ public final class PageStoreRow {
     /**
      * The implementation of a removed row in an in-memory table.
      */
-    static final class RemovedRow extends Row {
+    static final class RemovedRow extends Row {//重新定义一个构造函数，setValue，getValue
 
         RemovedRow(long key) {
             setKey(key);
-        }
+        }//构造是用key
 
         @Override
-        public Value getValue(int i) {
+        public Value getValue(int i) {//
             if (i == ROWID_INDEX) {
-                return ValueBigint.get(key);
+                return ValueBigint.get(key);//一个伪列，返回key值
             }
             throw DbException.getInternalError();
         }
 
         @Override
-        public void setValue(int i, Value v) {
+        public void setValue(int i, Value v) {//一个伪列，设置key值
             if (i == ROWID_INDEX) {
                 key = v.getLong();
             } else {
@@ -56,7 +56,7 @@ public final class PageStoreRow {
         @Override
         public int getColumnCount() {
             return 0;
-        }
+        }//已删除，没有列了
 
         @Override
         public String toString() {
@@ -69,7 +69,7 @@ public final class PageStoreRow {
         }
 
         @Override
-        public Value[] getValueList() {
+        public Value[] getValueList() {//删除了，就没有值了
             return null;
         }
 

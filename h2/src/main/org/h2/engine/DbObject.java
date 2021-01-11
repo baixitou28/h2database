@@ -17,7 +17,7 @@ import org.h2.util.ParserUtil;
 /**
  * A database object such as a table, an index, or a user.
  */
-public abstract class DbObject implements HasSQL {
+public abstract class DbObject implements HasSQL {//TIGER  表/索引/用户等都是实实在在的数据库对象，且可以用sql操作
 
     /**
      * The object is of the type table or view.
@@ -142,7 +142,7 @@ public abstract class DbObject implements HasSQL {
     /**
      * Tell the object that is was modified.
      */
-    public final void setModified() {
+    public final void setModified() {//数据库是否被更改
         this.modificationId = database == null ? -1 : database.getNextModificationMetaId();
     }
 
@@ -205,7 +205,7 @@ public abstract class DbObject implements HasSQL {
      * Set the main attributes to null to make sure the object is no longer
      * used.
      */
-    protected void invalidate() {
+    protected void invalidate() {//失效
         if (id == -1) {
             throw DbException.getInternalError();
         }
@@ -228,7 +228,7 @@ public abstract class DbObject implements HasSQL {
      * @param quotedName the quoted name
      * @return the SQL statement
      */
-    public abstract String getCreateSQLForCopy(Table table, String quotedName);
+    public abstract String getCreateSQLForCopy(Table table, String quotedName);//重建sql
 
     /**
      * Construct the CREATE ... SQL statement for this object for meta table.
@@ -237,14 +237,14 @@ public abstract class DbObject implements HasSQL {
      */
     public String getCreateSQLForMeta() {
         return getCreateSQL();
-    }
+    }//meta信息
 
     /**
      * Construct the CREATE ... SQL statement for this object.
      *
      * @return the SQL statement
      */
-    public abstract String getCreateSQL();
+    public abstract String getCreateSQL();//创建语句
 
     /**
      * Construct a DROP ... SQL statement for this object.
@@ -253,7 +253,7 @@ public abstract class DbObject implements HasSQL {
      */
     public String getDropSQL() {
         return null;
-    }
+    }//drop语句
 
     /**
      * Get the object type.

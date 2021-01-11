@@ -77,7 +77,7 @@ public class IndexType {//tiger 顾名思义 是索引类型，主要描述prima
      * @param persistent if the index is persistent
      * @return the index type
      */
-    public static IndexType createScan(boolean persistent) {
+    public static IndexType createScan(boolean persistent) {//如果是持久化的
         IndexType type = new IndexType();
         type.persistent = persistent;
         type.scan = true;
@@ -181,7 +181,7 @@ public class IndexType {//tiger 顾名思义 是索引类型，主要描述prima
      * @return true if it is
      */
     public boolean isScan() {
-        return scan;
+        return scan;//持久化才需要设置为scan
     }
 
 }

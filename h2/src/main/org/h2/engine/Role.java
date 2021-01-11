@@ -15,7 +15,7 @@ import org.h2.table.Table;
 /**
  * Represents a role. Roles can be granted to users, and to other roles.
  */
-public final class Role extends RightOwner {
+public final class Role extends RightOwner {//TIGER 角色
 
     private final boolean system;
 
@@ -35,7 +35,7 @@ public final class Role extends RightOwner {
      * @param ifNotExists true if IF NOT EXISTS should be used
      * @return the SQL statement
      */
-    public String getCreateSQL(boolean ifNotExists) {
+    public String getCreateSQL(boolean ifNotExists) {//创建语句
         if (system) {
             return null;
         }

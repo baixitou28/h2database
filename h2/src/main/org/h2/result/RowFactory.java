@@ -107,7 +107,7 @@ public abstract class RowFactory {
             int[] indexes = null;
             int[] sortTypes = null;
             int columnCount = 0;
-            if (columns != null) {
+            if (columns != null) {//如果有列
                 columnCount = columns.length;
                 if (indexColumns == null) {
                     sortTypes = new int[columnCount];

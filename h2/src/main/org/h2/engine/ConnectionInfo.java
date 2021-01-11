@@ -29,8 +29,7 @@ import org.h2.util.Utils;
 /**
  * Encapsulates the connection settings, including user name and password.
  */
-public class ConnectionInfo implements Cloneable {
-
+public class ConnectionInfo implements Cloneable {//数据库连接
     private static final HashSet<String> KNOWN_SETTINGS;
 
     private static final HashSet<String> IGNORED_BY_PARSER;

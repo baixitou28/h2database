@@ -29,8 +29,7 @@ import org.h2.util.Utils;
  * A tool that simulates a crash while writing to the database, and then
  * verifies the database doesn't get corrupt.
  */
-public class RecoverTester implements Recorder {
-
+public class RecoverTester implements Recorder {//TIGER crash机制还是非常重要的
     private static final RecoverTester instance = new RecoverTester();
 
     private String testDatabase = "memFS:reopen";
@@ -107,8 +106,8 @@ public class RecoverTester implements Recorder {
             Database database = new Database(ci, null);
             // close the database
             SessionLocal sysSession = database.getSystemSession();
-            sysSession.prepare("script to '" + testDatabase + ".sql'").query(0);
-            sysSession.prepare("shutdown immediately").update();
+            sysSession.prepare("script to '" + testDatabase + ".sql'").query(0);//什么操作？
+            sysSession.prepare("shutdown immediately").update();//直接关机？
             database.removeSession(null);
             // everything OK - return
             return;
@@ -118,7 +117,7 @@ public class RecoverTester implements Recorder {
             if (errorCode == ErrorCode.WRONG_USER_OR_PASSWORD) {
                 return;
             } else if (errorCode == ErrorCode.FILE_ENCRYPTION_ERROR_1) {
-                return;
+                return;//要的是这个？
             }
             e.printStackTrace(System.out);
         } catch (Exception e) {
@@ -130,7 +129,7 @@ public class RecoverTester implements Recorder {
             if (errorCode == ErrorCode.WRONG_USER_OR_PASSWORD) {
                 return;
             } else if (errorCode == ErrorCode.FILE_ENCRYPTION_ERROR_1) {
-                return;
+                return;//要的是这个？
             }
             e.printStackTrace(System.out);
         }

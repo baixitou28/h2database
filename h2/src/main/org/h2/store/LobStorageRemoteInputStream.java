@@ -15,7 +15,7 @@ import org.h2.mvstore.DataUtils;
  * An input stream used by the client side of a tcp connection to fetch LOB data
  * on demand from the server.
  */
-public class LobStorageRemoteInputStream extends InputStream {
+public class LobStorageRemoteInputStream extends InputStream {//TIGER 看注释lob
 
     private final SessionRemote sessionRemote;
 
@@ -38,7 +38,7 @@ public class LobStorageRemoteInputStream extends InputStream {
     }
 
     @Override
-    public int read() throws IOException {
+    public int read() throws IOException {//读入随机值吗？
         byte[] buff = new byte[1];
         int len = read(buff, 0, 1);
         return len < 0 ? len : (buff[0] & 255);
@@ -50,13 +50,13 @@ public class LobStorageRemoteInputStream extends InputStream {
     }
 
     @Override
-    public int read(byte[] buff, int off, int length) throws IOException {
+    public int read(byte[] buff, int off, int length) throws IOException {//主函数
         assert(length >= 0);
         if (length == 0) {
             return 0;
         }
         try {
-            length = sessionRemote.readLob(lobId, hmac, pos, buff, off, length);
+            length = sessionRemote.readLob(lobId, hmac, pos, buff, off, length);//代理读入
         } catch (DbException e) {
             throw DataUtils.convertToIOException(e);
         }

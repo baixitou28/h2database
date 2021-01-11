@@ -17,7 +17,7 @@ import org.h2.message.TraceSystem;
  * The writer thread is responsible to flush the transaction log
  * from time to time.
  */
-class WriterThread implements Runnable {
+class WriterThread implements Runnable {//tiger log 事务记录线程
 
     /**
      * The reference to the database.
@@ -31,7 +31,7 @@ class WriterThread implements Runnable {
      */
     private volatile WeakReference<Database> databaseRef;
 
-    private int writeDelay;
+    private int writeDelay;//写延时，一般0.5秒
     private Thread thread;
     private volatile boolean stop;
 
@@ -59,10 +59,10 @@ class WriterThread implements Runnable {
      */
     static WriterThread create(Database database, int writeDelay) {
         try {
-            WriterThread writer = new WriterThread(database, writeDelay);
+            WriterThread writer = new WriterThread(database, writeDelay);//延时默认0.5秒
             writer.thread = new Thread(writer, "H2 Log Writer " + database.getShortName());
             Driver.setThreadContextClassLoader(writer.thread);
-            writer.thread.setDaemon(true);
+            writer.thread.setDaemon(true);//后台模式
             return writer;
         } catch (AccessControlException e) {
             // // Google App Engine does not allow threads
@@ -73,13 +73,13 @@ class WriterThread implements Runnable {
     @Override
     public void run() {
         while (!stop) {
-            Database database = databaseRef.get();
+            Database database = databaseRef.get();//获取
             if (database == null) {
                 break;
             }
             int wait = writeDelay;
             try {
-                database.flush();
+                database.flush();//刷新
             } catch (Exception e) {
                 TraceSystem traceSystem = database.getTraceSystem();
                 if (traceSystem != null) {
@@ -92,7 +92,7 @@ class WriterThread implements Runnable {
             synchronized (this) {
                 while (!stop && wait > 0) {
                     // wait 100 ms at a time
-                    int w = Math.min(wait, 100);
+                    int w = Math.min(wait, 100);//一般等待0.5秒
                     try {
                         wait(w);
                     } catch (InterruptedException e) {
@@ -102,7 +102,7 @@ class WriterThread implements Runnable {
                 }
             }
         }
-        databaseRef = null;
+        databaseRef = null;//这里为什么故意设置为0?
     }
 
     /**

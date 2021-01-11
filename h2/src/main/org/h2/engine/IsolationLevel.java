@@ -12,7 +12,7 @@ import org.h2.message.DbException;
 /**
  * Level of isolation.
  */
-public enum IsolationLevel {
+public enum IsolationLevel {//常规概念
 
     /**
      * Dirty reads, non-repeatable reads and phantom reads are allowed.

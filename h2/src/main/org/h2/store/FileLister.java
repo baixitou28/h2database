@@ -19,7 +19,7 @@ import org.h2.store.fs.FileUtils;
 /**
  * Utility class to list the files of a database.
  */
-public class FileLister {
+public class FileLister {//TIGER 枚举某个目录下数据库的文件
 
     private FileLister() {
         // utility class
@@ -33,7 +33,7 @@ public class FileLister {
      * @param message the text to include in the error message
      * @throws SQLException if it failed
      */
-    public static void tryUnlockDatabase(List<String> files, String message)
+    public static void tryUnlockDatabase(List<String> files, String message)//尝试是否能锁上
             throws SQLException {
         for (String fileName : files) {
             if (fileName.endsWith(Constants.SUFFIX_LOCK_FILE)) {
@@ -83,7 +83,7 @@ public class FileLister {
      *            and lob files are returned
      * @return the list of files
      */
-    public static ArrayList<String> getDatabaseFiles(String dir, String db,
+    public static ArrayList<String> getDatabaseFiles(String dir, String db,//数据库目录下的几种类型
             boolean all) {
         ArrayList<String> files = new ArrayList<>();
         // for Windows, File.getCanonicalPath("...b.") returns just "...b"
