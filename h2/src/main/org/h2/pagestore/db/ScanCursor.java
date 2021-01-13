@@ -13,11 +13,11 @@ import org.h2.result.SearchRow;
 /**
  * The cursor implementation for the scan index.
  */
-public class ScanCursor implements Cursor {
+public class ScanCursor implements Cursor {//tiger 简单的游标ScanCursor，可以实现简单的下一行next()
     private final ScanIndex scan;
     private Row row;
 
-    ScanCursor(ScanIndex scan) {
+    ScanCursor(ScanIndex scan) {//构造函数，只需要索引即可
         this.scan = scan;
         row = null;
     }
@@ -34,8 +34,8 @@ public class ScanCursor implements Cursor {
 
     @Override
     public boolean next() {
-        row = scan.getNextRow(row);
-        return row != null;
+        row = scan.getNextRow(row);//根据索引获取下一个行，并更新
+        return row != null;//返回状态
     }
 
     @Override

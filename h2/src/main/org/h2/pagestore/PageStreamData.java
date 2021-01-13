@@ -18,7 +18,7 @@ import org.h2.store.Data;
  * <li>data (11-)</li>
  * </ul>
  */
-public class PageStreamData extends Page {
+public class PageStreamData extends Page {//tiger page 的流格式参看注释
 
     private static final int DATA_START = 11;
 
@@ -28,7 +28,7 @@ public class PageStreamData extends Page {
     private Data data;
     private int remaining;
 
-    private PageStreamData(PageStore store, int pageId, int trunk, int logKey) {
+    private PageStreamData(PageStore store, int pageId, int trunk, int logKey) {//构造函数：主要成员
         setPos(pageId);
         this.store = store;
         this.trunk = trunk;
@@ -43,7 +43,7 @@ public class PageStreamData extends Page {
      * @param pageId the page id
      * @return the page
      */
-    static PageStreamData read(PageStore store, Data data, int pageId) {
+    static PageStreamData read(PageStore store, Data data, int pageId) {//静态函数：
         PageStreamData p = new PageStreamData(store, pageId, 0, 0);
         p.data = data;
         p.read();
@@ -67,7 +67,7 @@ public class PageStreamData extends Page {
     /**
      * Read the page from the disk.
      */
-    private void read() {
+    private void read() {//格式参看注释
         data.reset();
         data.readByte();
         data.readShortInt();
@@ -78,13 +78,13 @@ public class PageStreamData extends Page {
     /**
      * Write the header data.
      */
-    void initWrite() {
+    void initWrite() {//格式参看注释
         data = store.createData();
         data.writeByte((byte) Page.TYPE_STREAM_DATA);
         data.writeShortInt(0);
         data.writeInt(trunk);
         data.writeInt(logKey);
-        remaining = store.getPageSize() - data.length();
+        remaining = store.getPageSize() - data.length();//剩余
     }
 
     /**
@@ -95,7 +95,7 @@ public class PageStreamData extends Page {
      * @param len the number of bytes to write
      * @return the number of bytes written
      */
-    int write(byte[] buff, int offset, int len) {
+    int write(byte[] buff, int offset, int len) {//简单的写数据
         int max = Math.min(remaining, len);
         data.write(buff, offset, max);
         remaining -= max;
@@ -105,7 +105,7 @@ public class PageStreamData extends Page {
     @Override
     public void write() {
         store.writePage(getPos(), data);
-    }
+    }//直接写一个buffer
 
     /**
      * Get the number of bytes that fit in a page.

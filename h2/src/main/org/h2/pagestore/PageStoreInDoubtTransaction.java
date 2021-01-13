@@ -11,7 +11,7 @@ import org.h2.store.InDoubtTransaction;
 /**
  * Represents an in-doubt transaction (a transaction in the prepare phase).
  */
-public class PageStoreInDoubtTransaction implements InDoubtTransaction {
+public class PageStoreInDoubtTransaction implements InDoubtTransaction {//tiger
 
     private final PageStore store;
     private final int sessionId;

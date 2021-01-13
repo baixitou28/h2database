@@ -15,15 +15,15 @@ import org.h2.store.Data;
  * page number of the next trunk. The format is:
  * <ul>
  * <li>page type: byte (0)</li>
- * <li>checksum: short (1-2)</li>
- * <li>previous trunk page, or 0 if none: int (3-6)</li>
- * <li>log key: int (7-10)</li>
- * <li>next trunk page: int (11-14)</li>
- * <li>number of pages: short (15-16)</li>
- * <li>page ids (17-)</li>
+ * <li>checksum: short (1-2)</li>//校验和
+ * <li>previous trunk page, or 0 if none: int (3-6)</li>//上一trunk
+ * <li>log key: int (7-10)</li>//日志ID
+ * <li>next trunk page: int (11-14)</li>//下一个trunk
+ * <li>number of pages: short (15-16)</li>//页数
+ * <li>page ids (17-)</li>//
  * </ul>
  */
-public class PageStreamTrunk extends Page {
+public class PageStreamTrunk extends Page {//TIGER page 一块(trunk)流(stream)的格式见注释
 
     private static final int DATA_START = 17;
 
@@ -39,7 +39,7 @@ public class PageStreamTrunk extends Page {
 
     private final PageStore store;
     private int logKey;
-    private int[] pageIds;
+    private int[] pageIds;//缓存列表
     private int pageCount;
     private Data data;
 
@@ -152,7 +152,7 @@ public class PageStreamTrunk extends Page {
      * @return true if it is
      */
     boolean contains(int dataPageId) {
-        for (int i = 0; i < pageCount; i++) {
+        for (int i = 0; i < pageCount; i++) {//从pageIds查找
             if (pageIds[i] == dataPageId) {
                 return true;
             }

@@ -14,7 +14,7 @@ import org.h2.util.IntArray;
 /**
  * An output stream that writes into a page store.
  */
-public class PageOutputStream {
+public class PageOutputStream {//TIGER
 
     private PageStore store;
     private final Trace trace;
@@ -43,7 +43,7 @@ public class PageOutputStream {
      * @param logKey the log key of the first trunk page
      * @param atEnd whether only pages at the end of the file should be used
      */
-    public PageOutputStream(PageStore store, int trunkPage, BitSet exclude,
+    public PageOutputStream(PageStore store, int trunkPage, BitSet exclude,//构造函数
             int logKey, boolean atEnd) {
         this.trace = store.getTrace();
         this.store = store;

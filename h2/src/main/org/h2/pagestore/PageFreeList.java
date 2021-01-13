@@ -19,9 +19,9 @@ import org.h2.store.Data;
  * <li>data (3-)</li>
  * </ul>
  */
-public class PageFreeList extends Page {
+public class PageFreeList extends Page {//tiger page 空闲列表
 
-    private static final int DATA_START = 3;
+    private static final int DATA_START = 3;//看PageStore的注释：Page 3 contains the first free list page
 
     private final PageStore store;
     private final BitSet used;
@@ -29,7 +29,7 @@ public class PageFreeList extends Page {
     private boolean full;
     private Data data;
 
-    private PageFreeList(PageStore store, int pageId, int pageCount, BitSet used) {
+    private PageFreeList(PageStore store, int pageId, int pageCount, BitSet used) {//构造函数
         // kept in cache, and array list in page store
         setPos(pageId);
         this.store = store;
@@ -45,13 +45,13 @@ public class PageFreeList extends Page {
      * @param pageId the page id
      * @return the page
      */
-    static PageFreeList read(PageStore store, Data data, int pageId) {
+    static PageFreeList read(PageStore store, Data data, int pageId) {//TIGER 从Data里面读取BitSet，来创建PageFreeList
         data.reset();
-        data.readByte();
-        data.readShortInt();
+        data.readByte();//跳过1个byte
+        data.readShortInt();//跳过short
         int length = store.getPageSize() - DATA_START;
         byte[] b = new byte[length];
-        data.read(b, 0, b.length);
+        data.read(b, 0, b.length);//读取BitSet
         PageFreeList p = new PageFreeList(store, pageId, length * 8, BitSet.valueOf(b));
         p.data = data;
         p.full = false;
@@ -65,7 +65,7 @@ public class PageFreeList extends Page {
      * @param pageId the page id
      * @return the page
      */
-    static PageFreeList create(PageStore store, int pageId) {
+    static PageFreeList create(PageStore store, int pageId) {//创建
         int pageCount = (store.getPageSize() - DATA_START) * 8;
         BitSet used = new BitSet(pageCount);
         used.set(0);
@@ -79,19 +79,19 @@ public class PageFreeList extends Page {
      * @param first the first page to look for
      * @return the page, or -1 if all pages are used
      */
-    int allocate(BitSet exclude, int first) {
+    int allocate(BitSet exclude, int first) {//
         if (full) {
             return -1;
         }
         // TODO cache last result
-        int start = Math.max(0, first - getPos());
+        int start = Math.max(0, first - getPos());//
         while (true) {
-            int free = used.nextClearBit(start);
-            if (free >= pageCount) {
-                if (start == 0) {
+            int free = used.nextClearBit(start);//找到未使用的
+            if (free >= pageCount) {//如果空闲足够大
+                if (start == 0) {//已经是从头开始找了，说明满了
                     full = true;
                 }
-                return -1;
+                return -1;//从start开始的位置找不到
             }
             if (exclude != null && exclude.get(free + getPos())) {
                 start = exclude.nextClearBit(free + getPos()) - getPos();

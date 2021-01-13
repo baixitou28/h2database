@@ -9,7 +9,7 @@ package org.h2.pagestore;
  * The session state contains information about when was the last commit of a
  * session. It is only used during recovery.
  */
-class SessionState {
+class SessionState {//recovery 中session最后提交日志的状态
 
     /**
      * The session id

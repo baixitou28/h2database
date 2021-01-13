@@ -19,7 +19,7 @@ import org.h2.value.ValueVarchar;
 /**
  * Local session for databases with PageStore engine.
  */
-public final class SessionPageStore extends SessionLocal {
+public final class SessionPageStore extends SessionLocal {//TIGER 多一个有没有日志刷新的标记，并能生成一个事务ID
 
     /**
      * This special log position means that the log entry has been written.
@@ -45,8 +45,8 @@ public final class SessionPageStore extends SessionLocal {
      * @param pos the position of the log entry in the transaction log
      */
     public void addLogPos(int logId, int pos) {
-        if (firstUncommittedLog == LOG_WRITTEN) {
-            firstUncommittedLog = logId;
+        if (firstUncommittedLog == LOG_WRITTEN) {//如果是第一次
+            firstUncommittedLog = logId;//记录未写的日志
             firstUncommittedPos = pos;
         }
     }
@@ -59,7 +59,7 @@ public final class SessionPageStore extends SessionLocal {
      * This method is called after the transaction log has written the commit
      * entry for this session.
      */
-    public void setAllCommitted() {
+    public void setAllCommitted() {//如果日志已经完成写
         firstUncommittedLog = LOG_WRITTEN;
         firstUncommittedPos = LOG_WRITTEN;
     }
@@ -82,7 +82,7 @@ public final class SessionPageStore extends SessionLocal {
         if (!getDatabase().isPersistent() || undoLog == null || undoLog.size() == 0) {
             return ValueNull.INSTANCE;
         }
-        return ValueVarchar.get(new StringBuilder().append(firstUncommittedLog).append('-') //
+        return ValueVarchar.get(new StringBuilder().append(firstUncommittedLog).append('-') //id 名称定义
                 .append(firstUncommittedPos).append('-').append(getId()).toString());
     }
 

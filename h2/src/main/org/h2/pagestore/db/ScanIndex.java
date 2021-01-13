@@ -29,7 +29,7 @@ import org.h2.util.Utils;
  * of a table. Each regular table has one such object, even if no primary key or
  * indexes are defined.
  */
-public class ScanIndex extends Index {//tiger INDEX 真个是一个逻辑的概念，不是严格意思的索引，其中删除一行，并没有直接删除，而是标记，仍然放在rows中
+public class ScanIndex extends Index {//tiger INDEX 是一个逻辑的概念，不是严格意思的索引，其中删除一行，并没有直接删除，而是标记，仍然放在rows中
     private long firstFree = -1;
     private ArrayList<Row> rows = Utils.newSmallArrayList();
     private final PageStoreTable tableData;
@@ -131,7 +131,7 @@ public class ScanIndex extends Index {//tiger INDEX 真个是一个逻辑的概�
      * @param row the current row or null to start the scan
      * @return the next row or null if there are no more rows
      */
-    Row getNextRow(Row row) {
+    Row getNextRow(Row row) {//下一个行
         long key;
         if (row == null) {
             key = -1;

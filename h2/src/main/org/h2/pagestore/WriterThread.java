@@ -17,19 +17,19 @@ import org.h2.message.TraceSystem;
  * The writer thread is responsible to flush the transaction log
  * from time to time.
  */
-class WriterThread implements Runnable {//tiger log 事务记录线程
+class WriterThread implements Runnable {//tiger log 定时写事务记录线程
 
     /**
      * The reference to the database.
      *
      * Thread objects are not garbage collected
-     * until they returned from the run() method
+     * until they returned from the run() method//tiger 注释已经说得很明白了，run不结束，线程是不能回收的，和C++是一致的
      * (even if they where never started)
      * so if the connection was not closed,
-     * the database object cannot get reclaimed
-     * by the garbage collector if we use a hard reference.
+     * the database object cannot get reclaimed//一般理解线程回收之前database也是不能被回收的。但这里不是这个意思
+     * by the garbage collector if we use a hard reference.//这里允许提前回收，有什么好处呢？
      */
-    private volatile WeakReference<Database> databaseRef;
+    private volatile WeakReference<Database> databaseRef;//tiger learn 这个用法我没用过。
 
     private int writeDelay;//写延时，一般0.5秒
     private Thread thread;
@@ -57,25 +57,25 @@ class WriterThread implements Runnable {//tiger log 事务记录线程
      * @param writeDelay the delay
      * @return the writer thread object or null
      */
-    static WriterThread create(Database database, int writeDelay) {
+    static WriterThread create(Database database, int writeDelay) {//静态函数
         try {
             WriterThread writer = new WriterThread(database, writeDelay);//延时默认0.5秒
             writer.thread = new Thread(writer, "H2 Log Writer " + database.getShortName());
-            Driver.setThreadContextClassLoader(writer.thread);
-            writer.thread.setDaemon(true);//后台模式
+            Driver.setThreadContextClassLoader(writer.thread);//tiger learn 避免某些错误
+            writer.thread.setDaemon(true);//tiger learn 后台模式，如果只有后台进程，就可以退出了。
             return writer;
-        } catch (AccessControlException e) {
+        } catch (AccessControlException e) {//tiger learn google 不能用，那有什么补救？
             // // Google App Engine does not allow threads
             return null;
         }
     }
 
     @Override
-    public void run() {
+    public void run() {//线程主函数
         while (!stop) {
             Database database = databaseRef.get();//获取
             if (database == null) {
-                break;
+                break;//已经被回收了？
             }
             int wait = writeDelay;
             try {
@@ -94,21 +94,21 @@ class WriterThread implements Runnable {//tiger log 事务记录线程
                     // wait 100 ms at a time
                     int w = Math.min(wait, 100);//一般等待0.5秒
                     try {
-                        wait(w);
+                        wait(w);//最多等待100ms
                     } catch (InterruptedException e) {
                         // ignore
                     }
-                    wait -= w;
+                    wait -= w;//反复等待
                 }
             }
         }
-        databaseRef = null;//这里为什么故意设置为0?
+        databaseRef = null;//tiger learn
     }
 
     /**
      * Stop the thread. This method is called when closing the database.
      */
-    void stopThread() {
+    void stopThread() {//停
         stop = true;
         synchronized (this) {
             notify();
@@ -121,7 +121,7 @@ class WriterThread implements Runnable {//tiger log 事务记录线程
      * Start the thread. This method is called after opening the database
      * (to avoid deadlocks)
      */
-    void startThread() {
+    void startThread() {//起
         thread.start();
         thread = null;
     }

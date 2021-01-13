@@ -60,8 +60,8 @@ import org.h2.value.ValueInteger;
 import org.h2.value.ValueVarchar;
 
 /**
- * This class represents a file that is organized as a number of pages. Page 0
- * contains a static file header, and pages 1 and 2 both contain the variable
+ * This class represents a file that is organized as a number of pages. Page 0//TIGER 零页包含文件头的固定部分
+ * contains a static file header, and pages 1 and 2 both contain the variable//TIGER 1-2页包含文件头的变长部分，2是1的复制
  * file header (page 2 is a copy of page 1 and is only read if the checksum of
  * page 1 is invalid). The format of page 0 is:
  * <ul>
@@ -78,10 +78,10 @@ import org.h2.value.ValueVarchar;
  * <li>log trunk page (0 for none): int (16-19)</li>
  * <li>log data page (0 for none): int (20-23)</li>
  * </ul>
- * Page 3 contains the first free list page.
- * Page 4 contains the meta table root page.
+ * Page 3 contains the first free list page.//TIGER 3页 是第一个空闲页的根节点
+ * Page 4 contains the meta table root page.//TIGER 4页 是元数据页的根节点
  */
-public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体机制
+public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体机制 //tiger 最重要 注释包含了页的头部格式
 
     // TODO test running out of disk space (using a special file system)
     // TODO unused pages should be freed once in a while
@@ -132,16 +132,16 @@ public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体�
     private static final int META_TYPE_BTREE_INDEX = 1;
     private static final int META_TABLE_ID = -1;
     private static final int COMPACT_BLOCK_SIZE = 1536;
-    private final Database database;
+    private final Database database;//看注释：There is one database object per open database.
     private final Trace trace;
     private final String fileName;
-    private FileStore file;
+    private FileStore file;//文件记录的操作
     private String accessMode;
     private int pageSize = Constants.DEFAULT_PAGE_SIZE;
     private int pageSizeShift;
     private long writeCountBase, writeCount, readCount;
     private int logKey, logFirstTrunkPage, logFirstDataPage;
-    private final Cache cache;
+    private final Cache cache;//tiger
     private int freeListPagesPerList;
     private boolean recoveryRunning;
     private boolean ignoreBigLog;
@@ -161,33 +161,33 @@ public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体�
      */
     private int pageCount;
 
-    private PageLog log;
-    private Schema metaSchema;
-    private PageStoreTable metaTable;
-    private PageDataIndex metaIndex;
-    private final IntIntHashMap metaRootPageId = new IntIntHashMap();
-    private final HashMap<Integer, PageIndex> metaObjects = new HashMap<>();
-    private HashMap<Integer, PageIndex> tempObjects;
+    private PageLog log;//日志
+    private Schema metaSchema;//某个数据库
+    private PageStoreTable metaTable;//表
+    private PageDataIndex metaIndex;//索引
+    private final IntIntHashMap metaRootPageId = new IntIntHashMap();//根节点
+    private final HashMap<Integer, PageIndex> metaObjects = new HashMap<>();//元数据
+    private HashMap<Integer, PageIndex> tempObjects;//临时
 
     /**
      * The map of reserved pages, to ensure index head pages
      * are not used for regular data during recovery. The key is the page id,
      * and the value the latest transaction position where this page is used.
      */
-    private HashMap<Integer, Integer> reservedPages;
+    private HashMap<Integer, Integer> reservedPages;//保留资源
     private boolean isNew;
     private long maxLogSize = Constants.DEFAULT_MAX_LOG_SIZE;
-    private final SessionPageStore pageStoreSession;
+    private final SessionPageStore pageStoreSession;//带是否刷新日志标记的SessionLocal
 
     /**
      * Each free page is marked with a set bit.
      */
-    private final BitSet freed = new BitSet();
-    private final ArrayList<PageFreeList> freeLists = new ArrayList<>();
+    private final BitSet freed = new BitSet();//空闲
+    private final ArrayList<PageFreeList> freeLists = new ArrayList<>();//空闲列表
 
     private boolean recordPageReads;
-    private ArrayList<Integer> recordedPagesList;
-    private IntIntHashMap recordedPagesIndex;
+    private ArrayList<Integer> recordedPagesList;//日志页
+    private IntIntHashMap recordedPagesIndex;//日志页的ID
 
     /**
      * The change count is something like a "micro-transaction-id".
@@ -198,16 +198,16 @@ public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体�
      */
     private long changeCount = 1;
 
-    private Data emptyPage;
+    private Data emptyPage;//行操作类
     private long logSizeBase;
-    private HashMap<String, Integer> statistics;
+    private HashMap<String, Integer> statistics;//统计
     private int logMode = LOG_MODE_SYNC;
     private boolean lockFile;
     private boolean readMode;
     private int backupLevel;
 
-    private WriterThread writer;
-    private boolean flushOnEachCommit;
+    private WriterThread writer;//写线程
+    private boolean flushOnEachCommit;//是否每次写入都commit
 
     /**
      * Create a new page store object.
@@ -217,8 +217,8 @@ public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体�
      * @param accessMode the access mode
      * @param cacheSizeDefault the default cache size
      */
-    public PageStore(Database database, String fileName, String accessMode,
-            int cacheSizeDefault) {
+    public PageStore(Database database, String fileName, String accessMode,//tiger 文件是：
+            int cacheSizeDefault) {//定义了cacheSize，一般是多少？
         this.fileName = fileName;
         this.accessMode = accessMode;
         this.database = database;
@@ -262,7 +262,7 @@ public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体�
      * @param out the output stream
      * @return the new position, or -1 if there is no more data to copy
      */
-    public synchronized int copyDirect(int pageId, OutputStream out)
+    public synchronized int copyDirect(int pageId, OutputStream out)//tiger
             throws IOException {
         byte[] buffer = new byte[pageSize];
         if (pageId >= pageCount) {
@@ -278,12 +278,12 @@ public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体�
     /**
      * Open the file and read the header.
      */
-    public synchronized void open() {
+    public synchronized void open() {//TIGER
         try {
             metaRootPageId.put(META_TABLE_ID, PAGE_ID_META_ROOT);
-            if (FileUtils.exists(fileName)) {
+            if (FileUtils.exists(fileName)) {//如果文件存在
                 long length = FileUtils.size(fileName);
-                if (length < MIN_PAGE_COUNT * PAGE_SIZE_MIN) {
+                if (length < MIN_PAGE_COUNT * PAGE_SIZE_MIN) {//如果文件太小, MIN_PAGE_COUNT相当于什么也没写
                     if (database.isReadOnly()) {
                         throw DbException.get(
                                 ErrorCode.FILE_CORRUPTED_1, fileName + " length: " + length);
@@ -304,32 +304,32 @@ public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体�
 
     private void openNew() {
         setPageSize(pageSize);
-        freeListPagesPerList = PageFreeList.getPagesAddressed(pageSize);
-        file = database.openFile(fileName, accessMode, false);
+        freeListPagesPerList = PageFreeList.getPagesAddressed(pageSize);//从空闲队列里面优先获取某个页大小的
+        file = database.openFile(fileName, accessMode, false);//打开数据库文件
         lockFile();
         recoveryRunning = true;
-        writeStaticHeader();
-        writeVariableHeader();
-        log = new PageLog(this);
-        increaseFileSize(MIN_PAGE_COUNT);
-        openMetaIndex();
-        logFirstTrunkPage = allocatePage();
+        writeStaticHeader();//静态部分，0页，参看PageStore注释
+        writeVariableHeader();//动态部分，1-2页
+        log = new PageLog(this);//日志
+        increaseFileSize(MIN_PAGE_COUNT);//至少MIN_PAGE_COUNT已被用掉
+        openMetaIndex();//元数据
+        logFirstTrunkPage = allocatePage();//日志页
         log.openForWriting(logFirstTrunkPage, false);
         isNew = true;
-        recoveryRunning = false;
-        increaseFileSize();
+        recoveryRunning = false;//前面好像没有运行recover()函数？
+        increaseFileSize();//增加文件？
     }
 
     private void lockFile() {
         if (lockFile) {
-            if (!file.tryLock()) {
+            if (!file.tryLock()) {//如果锁不上，是已经被占用了
                 throw DbException.get(
                         ErrorCode.DATABASE_ALREADY_OPEN_1, fileName);
             }
         }
     }
 
-    private void openExisting() {
+    private void openExisting() {//读已存在的
         try {
             file = database.openFile(fileName, accessMode, true);
         } catch (DbException e) {
@@ -347,28 +347,28 @@ public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体�
             throw e;
         }
         lockFile();
-        readStaticHeader();
-        freeListPagesPerList = PageFreeList.getPagesAddressed(pageSize);
+        readStaticHeader();//读文件头静态部分 0页
+        freeListPagesPerList = PageFreeList.getPagesAddressed(pageSize);//获取空闲页
         fileLength = file.length();
-        pageCount = (int) (fileLength / pageSize);
+        pageCount = (int) (fileLength / pageSize);//折算出页数
         if (pageCount < MIN_PAGE_COUNT) {
-            if (database.isReadOnly()) {
+            if (database.isReadOnly()) {//如果只读直接抛出异常
                 throw DbException.get(ErrorCode.FILE_CORRUPTED_1,
                         fileName + " pageCount: " + pageCount);
             }
             file.releaseLock();
             file.close();
-            FileUtils.delete(fileName);
+            FileUtils.delete(fileName);//文件太小，直接删除
             openNew();
             return;
         }
-        readVariableHeader();
-        log = new PageLog(this);
-        log.openForReading(logKey, logFirstTrunkPage, logFirstDataPage);
-        recover();
-        if (!database.isReadOnly()) {
+        readVariableHeader();//读文件头动态部分 2-3页
+        log = new PageLog(this);//日志
+        log.openForReading(logKey, logFirstTrunkPage, logFirstDataPage);//开始操作
+        recover();//异常恢复
+        if (!database.isReadOnly()) {//数据库可写
             readMode = true;
-            openForWriting();
+            openForWriting();//
             removeOldTempIndexes();
         }
     }
@@ -875,15 +875,15 @@ public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体�
         setPageSize(page.readInt());
         int writeVersion = page.readByte();
         int readVersion = page.readByte();
-        if (readVersion > READ_VERSION) {
+        if (readVersion > READ_VERSION) {//版本太高不兼容，直接退出
             throw DbException.get(
                     ErrorCode.FILE_VERSION_ERROR_1, fileName);
         }
-        if (writeVersion > WRITE_VERSION) {
+        if (writeVersion > WRITE_VERSION) {//保守做法：版本太高不兼容，只支持读模式
             close();
             database.setReadOnly(true);
             accessMode = "r";
-            file = database.openFile(fileName, accessMode, true);
+            file = database.openFile(fileName, accessMode, true);//重新只读方式打开
         }
     }
 
@@ -939,12 +939,12 @@ public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体�
         pageSizeShift = shift;
     }
 
-    private void writeStaticHeader() {
+    private void writeStaticHeader() {//tiger写静态的头部数据，数据格式如下
         Data page = Data.create(database, pageSize - FileStore.HEADER_LENGTH, false);
-        page.writeInt(pageSize);
-        page.writeByte((byte) WRITE_VERSION);
-        page.writeByte((byte) READ_VERSION);
-        file.seek(FileStore.HEADER_LENGTH);
+        page.writeInt(pageSize);//48-51: page size in bytes (512 - 32768, must be a power of 2)
+        page.writeByte((byte) WRITE_VERSION);//52: write version (read-only if larger than 1)
+        page.writeByte((byte) READ_VERSION);//read version (opening fails if larger than 1)
+        file.seek(FileStore.HEADER_LENGTH);//直接在0页的HEADER_LENGTH之后写。//0-47: file header (3 time "-- H2 0.5/B -- \n")
         file.write(page.getBytes(), 0, pageSize - FileStore.HEADER_LENGTH);
         writeCount++;
     }
@@ -967,23 +967,23 @@ public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体�
         writeVariableHeader();
     }
 
-    private void writeVariableHeader() {
+    private void writeVariableHeader() {//动态部分的头格式，参看PageStore注释
         trace.debug("writeVariableHeader");
         if (logMode == LOG_MODE_SYNC) {
             file.sync();
         }
-        Data page = createData();
-        page.writeInt(0);
-        page.writeLong(getWriteCountTotal());
-        page.writeInt(logKey);
-        page.writeInt(logFirstTrunkPage);
-        page.writeInt(logFirstDataPage);
+        Data page = createData();//二进制数据,参看注释
+        page.writeInt(0);//CRC先写0，后面再更新//CRC32 of the remaining data: int (0-3)
+        page.writeLong(getWriteCountTotal());//write counter (incremented on each write): long (4-11)
+        page.writeInt(logKey);//log trunk key: int (12-15)
+        page.writeInt(logFirstTrunkPage);//log trunk page (0 for none): int (16-19)
+        page.writeInt(logFirstDataPage);//log data page (0 for none): int (20-23)
         CRC32 crc = new CRC32();
         crc.update(page.getBytes(), 4, pageSize - 4);
-        page.setInt(0, (int) crc.getValue());
-        file.seek(pageSize);
+        page.setInt(0, (int) crc.getValue());//更新CRC
+        file.seek(pageSize);//从0页跳到1页
         file.write(page.getBytes(), 0, pageSize);
-        file.seek(pageSize + pageSize);
+        file.seek(pageSize + pageSize);//为什么要写2次？跳到第二页，因为1-2页是复制的关系
         file.write(page.getBytes(), 0, pageSize);
         // don't increment the write counter, because it was just written
     }
@@ -1377,10 +1377,10 @@ public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体�
     /**
      * Run recovery.
      */
-    private void recover() {
+    private void recover() {//TIGER 重要机制
         trace.debug("log recover");
         recoveryRunning = true;
-        log.recover(PageLog.RECOVERY_STAGE_UNDO);
+        log.recover(PageLog.RECOVERY_STAGE_UNDO);//状态1
         if (reservedPages != null) {
             for (int r : reservedPages.keySet()) {
                 if (trace.isDebugEnabled()) {
@@ -1389,10 +1389,10 @@ public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体�
                 allocatePage(r);
             }
         }
-        log.recover(PageLog.RECOVERY_STAGE_ALLOCATE);
+        log.recover(PageLog.RECOVERY_STAGE_ALLOCATE);//状态2
         openMetaIndex();
         readMetaData();
-        log.recover(PageLog.RECOVERY_STAGE_REDO);
+        log.recover(PageLog.RECOVERY_STAGE_REDO);//状态3
         boolean setReadOnly = false;
         if (!database.isReadOnly()) {
             if (log.getInDoubtTransactions().isEmpty()) {
@@ -1579,7 +1579,7 @@ public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体�
         table.truncate(pageStoreSession);
     }
 
-    private void openMetaIndex() {
+    private void openMetaIndex() {//
         CreateTableData data = new CreateTableData();
         ArrayList<Column> cols = data.columns;
         cols.add(new Column("ID", TypeInfo.TYPE_INTEGER));
@@ -1597,8 +1597,8 @@ public class PageStore implements CacheWriter {//TODO: TIGER 理解存储大体�
         data.persistIndexes = true;
         data.create = false;
         data.session = pageStoreSession;
-        metaTable = new PageStoreTable(data);
-        metaIndex = (PageDataIndex) metaTable.getScanIndex(
+        metaTable = new PageStoreTable(data);//创建表
+        metaIndex = (PageDataIndex) metaTable.getScanIndex(//获取索引
                 pageStoreSession);
         metaObjects.clear();
         metaObjects.put(-1, metaIndex);

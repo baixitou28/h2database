@@ -39,7 +39,7 @@ import org.h2.value.ValueNull;
  * The transaction log is split into sections.
  * A checkpoint starts a new section.
  */
-public class PageLog {
+public class PageLog {//tiger log 日志
 
     /**
      * No operation.
@@ -300,7 +300,7 @@ public class PageLog {
                             DataUtils.convertToIOException(e);
                         }
                     }
-                    if (stage == RECOVERY_STAGE_UNDO) {
+                    if (stage == RECOVERY_STAGE_UNDO) {//tiger recover() 函数调用
                         if (!undo.get(pageId)) {
                             if (trace.isDebugEnabled()) {
                                 trace.debug("log undo {0}", pageId);

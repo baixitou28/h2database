@@ -15,7 +15,7 @@ import org.h2.value.ValueBigint;
 /**
  * Page Store implementation of a row.
  */
-public final class PageStoreRow {//tiger 定义了一个空的数组EMPTY_ARRAY和空的搜索数组EMPTY_SEARCH_ARRAY
+public final class PageStoreRow {//tiger page 列的实现：内部定义了一个空的数组EMPTY_ARRAY和空的搜索数组EMPTY_SEARCH_ARRAY
 
     /**
      * An empty array of Row objects.
@@ -30,7 +30,7 @@ public final class PageStoreRow {//tiger 定义了一个空的数组EMPTY_ARRAY�
     /**
      * The implementation of a removed row in an in-memory table.
      */
-    static final class RemovedRow extends Row {//重新定义一个构造函数，setValue，getValue
+    static final class RemovedRow extends Row {//定义一个RemovedRow 包含一个构造函数，setValue，getValue
 
         RemovedRow(long key) {
             setKey(key);

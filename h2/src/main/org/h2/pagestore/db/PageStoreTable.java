@@ -45,7 +45,7 @@ public class PageStoreTable extends RegularTable {//简单的页存储数据，�
     private int changesSinceAnalyze;
     private int nextAnalyze;
 
-    public PageStoreTable(CreateTableData data) {
+    public PageStoreTable(CreateTableData data) {//构造函数
         super(data);
         nextAnalyze = database.getSettings().analyzeAuto;
         if (data.persistData && database.isPersistent()) {//是否持久化
