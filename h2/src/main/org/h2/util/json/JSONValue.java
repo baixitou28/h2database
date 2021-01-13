@@ -8,7 +8,7 @@ package org.h2.util.json;
 /**
  * JSON value.
  */
-public abstract class JSONValue {
+public abstract class JSONValue {//tiger JSONValue
 
     JSONValue() {
     }

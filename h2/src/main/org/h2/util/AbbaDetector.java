@@ -15,7 +15,7 @@ import java.util.WeakHashMap;
 /**
  * Utility to detect AB-BA deadlocks.
  */
-public class AbbaDetector {
+public class AbbaDetector {//tiger deadlock
 
     private static final boolean TRACE = false;
 

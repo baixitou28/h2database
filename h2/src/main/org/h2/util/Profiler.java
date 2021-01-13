@@ -126,7 +126,7 @@ public class Profiler implements Runnable {
      */
     public static void main(String... args) {
         new Profiler().run(args);
-    }
+    }//tiger profile 可以测试一下//TIGER DEBUG 
 
     private void run(String... args) {
         if (args.length == 0) {

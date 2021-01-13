@@ -43,7 +43,7 @@ import org.h2.value.ValueNull;
  * This class represents the statement
  * SET
  */
-public class Set extends Prepared {
+public class Set extends Prepared {//TODO TIGER 未接触过的概念
 
     private final int type;
     private Expression expression;

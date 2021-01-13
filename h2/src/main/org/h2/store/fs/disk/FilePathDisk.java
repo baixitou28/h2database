@@ -406,8 +406,8 @@ public class FilePathDisk extends FilePath {
         long mem = rt.freeMemory();
         for (int i = 0; i < 16; i++) {
             rt.gc();
-            long now = rt.freeMemory();
-            rt.runFinalization();
+            long now = rt.freeMemory();//执行多次
+            rt.runFinalization();//TIGER LEARN 没用到过
             if (now == mem) {
                 break;
             }
@@ -416,7 +416,7 @@ public class FilePathDisk extends FilePath {
     }
 
     @Override
-    public FileChannel open(String mode) throws IOException {
+    public FileChannel open(String mode) throws IOException {//打开文件获取channel
         FileChannel f = FileChannel.open(Paths.get(name), FileUtils.modeToOptions(mode), FileUtils.NO_ATTRIBUTES);
         IOUtils.trace("open", name, f);
         return f;
@@ -428,7 +428,7 @@ public class FilePathDisk extends FilePath {
     }
 
     @Override
-    public FilePath createTempFile(String suffix, boolean inTempDir) throws IOException {
+    public FilePath createTempFile(String suffix, boolean inTempDir) throws IOException {//临时文件
         Path file = Paths.get(name + '.').toAbsolutePath();
         String prefix = file.getFileName().toString();
         if (inTempDir) {

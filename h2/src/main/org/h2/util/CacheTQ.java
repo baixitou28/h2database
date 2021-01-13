@@ -15,7 +15,7 @@ import java.util.ArrayList;
  * supposed to be more or less scan resistant, and it doesn't cache large rows
  * in the LRU cache.
  */
-public class CacheTQ implements Cache {
+public class CacheTQ implements Cache {//tiger cache CacheTQ根据使用频率来设计cache
 
     static final String TYPE_NAME = "TQ";
 

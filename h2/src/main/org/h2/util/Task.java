@@ -43,7 +43,7 @@ public abstract class Task implements Runnable {
         try {
             call();
         } catch (Exception e) {
-            this.ex = e;
+            this.ex = e;//TIGER learn 将异常放在这里，便于提取
         }
         finished = true;
     }
