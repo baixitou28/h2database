@@ -20,7 +20,7 @@ import org.h2.message.DbException;
 /**
  * Data type with parameters.
  */
-public class TypeInfo extends ExtTypeInfo implements Typed {
+public class TypeInfo extends ExtTypeInfo implements Typed {//tiger row 不同数据类型的类型、精度，是否可以往更高精度转换
 
     /**
      * UNKNOWN type with parameters.

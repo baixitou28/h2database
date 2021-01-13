@@ -18,9 +18,9 @@ import org.h2.util.ParserUtil;
 /**
  * Extended parameters of the ROW data type.
  */
-public final class ExtTypeInfoRow extends ExtTypeInfo {
+public final class ExtTypeInfoRow extends ExtTypeInfo {//tiger ExtTypeInfo   //tiger row  一行数据里面包含了多种数据类型
 
-    private final LinkedHashMap<String, TypeInfo> fields;
+    private final LinkedHashMap<String, TypeInfo> fields;//包含了一个map， 其中TypeInfo extends ExtTypeInfo implements Typed
 
     private int hash;
 

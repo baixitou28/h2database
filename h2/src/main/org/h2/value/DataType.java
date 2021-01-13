@@ -25,7 +25,7 @@ import org.h2.util.StringUtils;
  * This class contains meta data information about data types,
  * and can convert between Java objects and Values.
  */
-public class DataType {
+public class DataType {//tiger Value和java 对象的转换
 
     /**
      * The map of types.

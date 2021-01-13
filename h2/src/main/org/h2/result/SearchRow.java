@@ -15,7 +15,7 @@ import org.h2.value.ValueNull;
  * The base class for rows stored in a table, and for partial rows stored in the
  * index.
  */
-public abstract class SearchRow extends Value {
+public abstract class SearchRow extends Value {//tiger index 存储列的基类或index 中保持的部分列，
 
     /**
      * Index of a virtual "_ROWID_" column within a row or a table
@@ -113,13 +113,13 @@ public abstract class SearchRow extends Value {
     }
 
     @Override
-    public StringBuilder getSQL(StringBuilder builder, int sqlFlags) {
+    public StringBuilder getSQL(StringBuilder builder, int sqlFlags) {//优化语句的sql
         builder.append("ROW (");
         for (int index = 0, count = getColumnCount(); index < count; index++) {
             if (index != 0) {
-                builder.append(", ");
+                builder.append(", ");//不是第一个加逗号
             }
-            getValue(index).getSQL(builder, sqlFlags);
+            getValue(index).getSQL(builder, sqlFlags);//逐个加入列
         }
         return builder.append(')');
     }

@@ -16,7 +16,7 @@ import org.h2.util.MathUtils;
  * after reading. Areas that were never written to (for example after calling
  * setLength to enlarge the file) are not encrypted (contains 0 bytes).
  */
-public class SecureFileStore extends FileStore {
+public class SecureFileStore extends FileStore {//tiger 加密文件的处理
 
     private byte[] key;
     private final BlockCipher cipher;
@@ -26,7 +26,7 @@ public class SecureFileStore extends FileStore {
     private final byte[] bufferForInitVector;
     private final int keyIterations;
 
-    public SecureFileStore(DataHandler handler, String name, String mode,
+    public SecureFileStore(DataHandler handler, String name, String mode,//构造函数主要包含加密的信息
             String cipher, byte[] key, int keyIterations) {
         super(handler, name, mode);
         this.key = key;

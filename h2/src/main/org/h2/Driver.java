@@ -192,7 +192,7 @@ public class Driver implements java.sql.Driver, JdbcDriverBackwardsCompat {
         // ... but has failed to stop it.
         // This is very likely to create a memory leak.
         try {
-            thread.setContextClassLoader(Driver.class.getClassLoader());
+            thread.setContextClassLoader(Driver.class.getClassLoader());//tiger todo 用途还是不理解
         } catch (Throwable t) {
             // ignore
         }

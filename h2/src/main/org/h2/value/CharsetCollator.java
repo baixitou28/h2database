@@ -16,7 +16,7 @@ import org.h2.util.Bits;
 /**
  * The charset collator sorts strings according to the order in the given charset.
  */
-public class CharsetCollator extends Collator {
+public class CharsetCollator extends Collator {//TIGER CharsetCollator 字符集，字符的比较和转换
 
     /**
      * The comparator used to compare byte arrays.

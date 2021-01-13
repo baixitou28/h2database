@@ -140,7 +140,7 @@ public final class ValueUuid extends Value {
     @Override
     public int getMemory() {
         return 32;
-    }
+    }//固定长度
 
     @Override
     public int getValueType() {

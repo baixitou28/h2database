@@ -398,7 +398,7 @@ public abstract class ValueLob extends Value {
     @Override
     public int getMemory() {
         return 140;
-    }
+    }//tiger 固定长度，真实内容放在其他文件里
 
     /**
      * Returns the data handler.

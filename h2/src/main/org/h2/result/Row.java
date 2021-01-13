@@ -12,7 +12,7 @@ import org.h2.value.Value;
 /**
  * Represents a row in a table.
  */
-public abstract class Row extends SearchRow {
+public abstract class Row extends SearchRow {//TIGER ROW 抽象类
 
     /**
      * Creates a new row.
@@ -23,7 +23,7 @@ public abstract class Row extends SearchRow {
      */
     public static Row get(Value[] data, int memory) {
         return new DefaultRow(data, memory);
-    }
+    }//静态创建
 
     /**
      * Creates a new row with the specified key.
@@ -33,7 +33,7 @@ public abstract class Row extends SearchRow {
      * @param key the key
      * @return the allocated row
      */
-    public static Row get(Value[] data, int memory, long key) {
+    public static Row get(Value[] data, int memory, long key) {//静态创建
         Row r = new DefaultRow(data, memory);
         r.setKey(key);
         return r;

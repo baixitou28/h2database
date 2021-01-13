@@ -21,7 +21,7 @@ public class CaseInsensitiveConcurrentMap<V> extends ConcurrentHashMap<String, V
     @Override
     public V get(Object key) {
         return super.get(StringUtils.toUpperEnglish((String) key));
-    }
+    }//忽略大小写
 
     @Override
     public V put(String key, V value) {

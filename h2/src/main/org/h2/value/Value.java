@@ -42,7 +42,7 @@ import org.h2.util.geometry.GeoJsonUtils;
  * @author Noel Grandin
  * @author Nicolas Fortin, Atelier SIG, IRSTV FR CNRS 24888
  */
-public abstract class Value extends VersionedValue<Value> implements HasSQL, Typed {
+public abstract class Value extends VersionedValue<Value> implements HasSQL, Typed {//tiger Value 支持的数据类型的基类
 
     /**
      * The data type is unknown at this time.

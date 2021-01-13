@@ -10,7 +10,7 @@ import org.h2.util.HasSQL;
 /**
  * Extended parameters of a data type.
  */
-public abstract class ExtTypeInfo implements HasSQL {
+public abstract class ExtTypeInfo implements HasSQL {//tiger ExtTypeInfo 扩展的数据类型信息
 
     @Override
     public String toString() {

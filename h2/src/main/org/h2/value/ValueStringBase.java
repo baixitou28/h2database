@@ -177,7 +177,7 @@ abstract class ValueStringBase extends Value {
          * Empty string: 88 bytes
          * 1 to 4 UTF-16 chars: 96 bytes
          */
-        return value.length() * 2 + 94;
+        return value.length() * 2 + 94;//tiger row的长度计算//tiger learn 不是特别明白88,96，94
     }
 
     @Override
