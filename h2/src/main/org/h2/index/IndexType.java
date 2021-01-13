@@ -153,7 +153,7 @@ public class IndexType {//tiger 顾名思义 是索引类型，主要描述prima
      *
      * @return the SQL snippet
      */
-    public String getSQL() {
+    public String getSQL() {//TIGER index 优化的时候，转变为创建语句
         StringBuilder buff = new StringBuilder();
         if (primaryKey) {
             buff.append("PRIMARY KEY");

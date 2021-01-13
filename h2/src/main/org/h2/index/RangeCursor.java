@@ -16,10 +16,10 @@ import org.h2.value.ValueBigint;
  */
 class RangeCursor implements Cursor {
 
-    private boolean beforeFirst;
+    private boolean beforeFirst;//不知含义
     private long current;
     private Row currentRow;
-    private final long start, end, step;
+    private final long start, end, step;//这里有个步长，一般为1
 
     RangeCursor(long start, long end) {
         this(start, end, 1);

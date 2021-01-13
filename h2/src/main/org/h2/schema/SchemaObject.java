@@ -10,9 +10,9 @@ import org.h2.engine.DbObject;
 /**
  * Any database object that is stored in a schema.
  */
-public abstract class SchemaObject extends DbObject {
+public abstract class SchemaObject extends DbObject {//tiger 某数据库（schema）里的一个对象
 
-    private final Schema schema;
+    private final Schema schema;//某用户数据库
 
     /**
      * Initialize some attributes of this object.

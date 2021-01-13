@@ -83,7 +83,7 @@ public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机�
      *            not yet known
      * @param newIndexType the index type
      */
-    protected Index(Table newTable, int id, String name, IndexColumn[] newIndexColumns, IndexType newIndexType) {//TIGER 构造函数的重要元素
+    protected Index(Table newTable, int id, String name, IndexColumn[] newIndexColumns, IndexType newIndexType) {//TIGER 构造函数的重要元素:表，列，名称，类型
         super(newTable.getSchema(), id, name, Trace.INDEX);
         this.indexType = newIndexType;//类型
         this.table = newTable;//表
@@ -338,7 +338,7 @@ public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机�
      * @return 0 if both rows are equal, -1 if the first row is smaller,
      *         otherwise 1
      */
-    public final int compareRows(SearchRow rowData, SearchRow compare) {
+    public final int compareRows(SearchRow rowData, SearchRow compare) {//列对比
         if (rowData == compare) {
             return 0;
         }
@@ -358,7 +358,7 @@ public abstract class Index extends SchemaObject {//TODO: TIGER 理解index机�
         return 0;
     }
 
-    private int compareValues(Value a, Value b, int sortType) {
+    private int compareValues(Value a, Value b, int sortType) {//仅仅是比较值
         if (a == b) {
             return 0;
         }

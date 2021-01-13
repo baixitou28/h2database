@@ -27,7 +27,7 @@ public class LinkedCursor implements Cursor {//tiger 数据库链的游标
     private final ResultSet rs;
     private Row current;
 
-    LinkedCursor(TableLink tableLink, ResultSet rs, SessionLocal session,
+    LinkedCursor(TableLink tableLink, ResultSet rs, SessionLocal session,//看构造函数：
             String sql, PreparedStatement prep) {
         this.session = session;
         this.tableLink = tableLink;

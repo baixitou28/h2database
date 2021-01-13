@@ -36,12 +36,12 @@ import org.h2.util.Utils;
  * A schema as created by the SQL statement
  * CREATE SCHEMA
  */
-public class Schema extends DbObject {
+public class Schema extends DbObject {//tiger 一个数据库里面包含n个元素
 
-    private RightOwner owner;
-    private final boolean system;
-    private ArrayList<String> tableEngineParams;
-
+    private RightOwner owner;//用户
+    private final boolean system;//是否是系统表
+    private ArrayList<String> tableEngineParams;//参数
+//以下是包含的表，view，索引，序列，触发器，约束，用户函数，常数（没关注过）
     private final ConcurrentHashMap<String, Table> tablesAndViews;
     private final ConcurrentHashMap<String, Domain> domains;
     private final ConcurrentHashMap<String, TableSynonym> synonyms;
@@ -69,9 +69,9 @@ public class Schema extends DbObject {
      * @param system if this is a system schema (such a schema can not be
      *            dropped)
      */
-    public Schema(Database database, int id, String schemaName, RightOwner owner, boolean system) {
+    public Schema(Database database, int id, String schemaName, RightOwner owner, boolean system) {//构造函数：
         super(database, id, schemaName, Trace.SCHEMA);
-        tablesAndViews = database.newConcurrentStringMap();
+        tablesAndViews = database.newConcurrentStringMap();//以下都初始化，且都从datebase里面分配内存
         domains = database.newConcurrentStringMap();
         synonyms = database.newConcurrentStringMap();
         indexes = database.newConcurrentStringMap();

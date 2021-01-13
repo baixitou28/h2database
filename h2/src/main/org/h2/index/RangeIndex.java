@@ -35,29 +35,29 @@ public class RangeIndex extends VirtualTableIndex {
         long min = rangeTable.getMin(session);
         long max = rangeTable.getMax(session);
         long step = rangeTable.getStep(session);
-        if (first != null) {
+        if (first != null) {//如果有最小值
             try {
-                long v = first.getValue(0).getLong();
+                long v = first.getValue(0).getLong();//得到值
                 if (step > 0) {
                     if (v > min) {
-                        min += (v - min + step - 1) / step * step;
+                        min += (v - min + step - 1) / step * step;//如果比min要大，跳一个step
                     }
-                } else if (v > max) {
+                } else if (v > max) {//如果超过最大值，明显有问题
                     max = v;
                 }
             } catch (DbException e) {
                 // error when converting the value - ignore
             }
         }
-        if (last != null) {
+        if (last != null) {//如果有最大值
             try {
-                long v = last.getValue(0).getLong();
+                long v = last.getValue(0).getLong();//取值
                 if (step > 0) {
-                    if (v < max) {
+                    if (v < max) {//比最大值大，明显有问题
                         max = v;
                     }
-                } else if (v < min) {
-                    min -= (min - v - step - 1) / step * step;
+                } else if (v < min) {//比最小值小，明显有问题
+                    min -= (min - v - step - 1) / step * step;//比最小值小，则取min
                 }
             } catch (DbException e) {
                 // error when converting the value - ignore
@@ -88,7 +88,7 @@ public class RangeIndex extends VirtualTableIndex {
         long min = rangeTable.getMin(session);
         long max = rangeTable.getMax(session);
         long step = rangeTable.getStep(session);
-        return new SingleRowCursor((step > 0 ? min <= max : min >= max)
+        return new SingleRowCursor((step > 0 ? min <= max : min >= max)//tiger todo 没看明白
                 ? Row.get(new Value[]{ ValueBigint.get(first ^ min >= max ? min : max) }, 1) : null);
     }
 

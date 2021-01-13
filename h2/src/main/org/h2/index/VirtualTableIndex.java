@@ -14,7 +14,7 @@ import org.h2.table.VirtualTable;
 /**
  * An base class for indexes of virtual tables.
  */
-public abstract class VirtualTableIndex extends Index {
+public abstract class VirtualTableIndex extends Index {//tiger
 
     protected VirtualTableIndex(VirtualTable table, String name, IndexColumn[] columns) {
         super(table, 0, name, columns, IndexType.createNonUnique(true));

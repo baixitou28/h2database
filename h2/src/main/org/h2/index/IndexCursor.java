@@ -29,7 +29,7 @@ import org.h2.value.ValueNull;
  * @author Noel Grandin
  * @author Nicolas Fortin, Atelier SIG, IRSTV FR CNRS 24888
  */
-public class IndexCursor implements Cursor {
+public class IndexCursor implements Cursor {//tiger 支持in函数，否则in太多了
 
     private SessionLocal session;
     private Index index;

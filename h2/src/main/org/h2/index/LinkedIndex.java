@@ -37,7 +37,7 @@ public class LinkedIndex extends Index {//tiger 数据库链的索引
 
     private final int sqlFlags = QUOTE_ONLY_WHEN_REQUIRED;
 
-    public LinkedIndex(TableLink table, int id, IndexColumn[] columns,
+    public LinkedIndex(TableLink table, int id, IndexColumn[] columns,//构造函数，看需要数据库链和表名，还有就是index基类的成员
             IndexType indexType) {
         super(table, id, null, columns, indexType);
         link = table;
